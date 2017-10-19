@@ -8,6 +8,22 @@ from app import app
 def index():
     return render_template("front.html")
 
+@app.route('/help')
+def help():
+    return render_template("help.html")
+
+@app.route('/about')
+def about():
+    return render_template("about.html")
+
+@app.route('/results')
+def results():
+    return render_template("results.html")
+
+@app.route('/analyze')
+def analyze():
+    return render_template("analyze.html")
+
 @app.errorhandler(404)
 @app.errorhandler(401)
 @app.errorhandler(500)

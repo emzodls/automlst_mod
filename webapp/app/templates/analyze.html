@@ -1,0 +1,30 @@
+{% extends "main.html" %}
+{% block mainbody %}
+<div class="container" style="padding-top:40px;">
+    <a href="#" class="btn btn-primary">Open example output &raquo;</a>
+    <a href="#" class="btn btn-primary">Download example &raquo;</a>
+    <hr>
+    <h4>Some form</h4>
+    <form class="form-horizontal">
+    <div class="form-group">
+            <label class="control-label col-md-2" for="example">Enter something:</label>
+        <div class="col-md-10">
+            <input type="text" class="form-control" id="example">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-md-2">Options</label>
+        <div class="col-md-10">
+            <div class="checkbox">
+                <label><input type="checkbox" value="">Some option</label>
+            </div>
+            <div class="checkbox">
+                <label><input type="checkbox" value="">Another option</label>
+            </div>
+            <div class="checkbox" disabled>
+                <label><input type="checkbox" value="" checked disabled>This one's always checked</label>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
