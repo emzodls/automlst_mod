@@ -1,5 +1,5 @@
 
-import os
+import os, routines
 from flask import render_template, jsonify, request, redirect, abort, make_response, send_from_directory, flash
 from app import app
 
@@ -23,6 +23,15 @@ def results():
 @app.route('/analyze')
 def analyze():
     return render_template("analyze.html")
+
+@app.route('/upload', methods=['POST', 'GET'])
+def upload():
+    filename, asrun = routines.getinfile()
+    #    filename = routines.getNCBIgbk(request.form["ncbiacc1"])
+    return filename
+@app.route('/results/example/report') # why won't just example work?
+def example():
+    return render_template("example.html")
 
 @app.errorhandler(404)
 @app.errorhandler(401)

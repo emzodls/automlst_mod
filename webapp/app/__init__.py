@@ -20,6 +20,9 @@ from flask_mail import Mail
 
 app = Flask(__name__)
 
+parentdir = os.path.sep.join(os.path.realpath(__file__).split(os.path.sep)[:-2])
+app.config.from_pyfile(os.path.join(parentdir,"config","webapp.py"))
+print parentdir
 mail = Mail(app)
 
 from app import views

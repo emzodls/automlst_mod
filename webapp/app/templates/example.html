@@ -1,0 +1,28 @@
+{% extends "main.html" %}
+{% block mainbody %}
+<!-- why isn't it using the layout? Seems to look for it in results, so much for my fix. But otherwise everything else looks in the wrong place. -->
+<div class="container" style="padding-top:40px;">
+    <h2>Example job</h2> <!-- can be prettier probably -->
+    <h3 class="page-header">Status: Done</h3> <!-- hardcoding all the dynamic things, yay -->
+    <div class="progress">
+        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%">100% Complete</div>
+    </div>
+    <h3 class="page-header">Selector</h3>
+    <form>
+        <div class="form-group"> <!-- could be split -->
+            <label for="speciessel">Select species (closest 50 selected by default)</label>
+            <select multiple class="form-control" id="speciessel" size="40"> <!-- how big should it be? -->
+                <!-- limitation could be done with bootstrap-select? But would have to load that thing in main... which this isn't loading. Plus, can this display a large selector box? -->
+                <!-- what is it doing to the page scroll thing? -->
+                <option>stare at the wall</option>
+                <option>play with food </option>
+                <option>get confused by dust</option>
+                <option>Hunt by meowing loudly at 5am</option>
+                <option>Purr as loud as possible</option>
+                <option>knock everything off the table</option>
+            </select>
+        </div>
+        <button type="button" class="btn btn-primary" style="width:300px;">Do something with the selection &raquo;</button>
+    </form>
+</div>
+{% endblock %}
