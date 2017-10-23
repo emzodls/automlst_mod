@@ -40,7 +40,6 @@ def getinfile():
     ufile = False
     filename = ""
     # USe empty string for FALSE due to storage as string in redis
-    asrun = ""
 #    if 'asjobid' in request.form and request.form['asjobid']:
 #        if getASstatus(request.form['asjobid']):
 #            filename = getASgbk(request.form['asjobid'])
@@ -50,15 +49,13 @@ def getinfile():
 #            return False,""
     if 'ncbiacc1' in request.form and request.form['ncbiacc1']:
          filename = getNCBIgbk(request.form['ncbiacc1'])
-         asrun = True
          if not filename:
              return False,""
 #    elif 'asseqfile' in request.files and validatefile(request.files['asseqfile'].filename,True):
 #        ufile = request.files['asseqfile']
     elif 'seqfile1' in request.files and validatefile(request.files['seqfile1'].filename):
         ufile = request.files['seqfile1']
-        asrun = True
     if ufile:
         filename = os.path.join(tempfile.mkdtemp(dir=app.config['UPLOAD_FOLDER']), secure_filename(ufile.filename))
         ufile.save(filename)
-    return filename,asrun
+    return filename

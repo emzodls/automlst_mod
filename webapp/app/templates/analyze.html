@@ -4,29 +4,32 @@
     <a href="results/example/report" class="btn btn-primary" style="width:250px">Open example output &raquo;</a>
     <a href="#" class="btn btn-primary" style="width:250px">Download example &raquo;</a>
     <hr>
-    <h4>New Job</h4>
-    <form action="upload" method="post" enctype="multipart/form-data">
+    <h4>Sequences</h4>
+        <div class="form-group">
+            <label for="upfiles">Accession numbers and uploaded files</label>
+            <select multiple class="form-control" id="upfiles" size="10"></select>
+        </div>
+    <h4>Upload Genomes</h4>
+    <form action="startjob" method="post" enctype="multipart/form-data" name="sequpload" id="sequpload">
     <div class="form-group row">
             <label class="control-label col-md-2" for="ncbiacc1">NCBI Accession Number(s)</label>
-        <div class="col-md-10">
-            <input type="text" class="form-control" name="ncbiacc1" id="ncbiacc1" placeholder="Enter up to 5 NCBI accession numbers, separated by commas, once that works">
+        <div class="col-md-8">
+            <input type="text" class="form-control" name="ncbiacc1" id="ncbiacc1" placeholder="Enter a NCBI accession number">
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-primary" onclick="uploader()"><span class="glyphicon glyphicon-plus"></span> Add</button>
         </div>
     </div>
         <div class="form-group row">
             <label class="control-label col-md-2" for="seqfile1">Sequence</label>
-            <div class="col-md-10">
+            <div class="col-md-8">
                 <input type="file" class="form-control" id="seqfile1" name="seqfile1">
             </div>
+            <div class="col-md-2">
+            <button type="button" class="btn btn-primary" onclick="uploader()"><span class="glyphicon glyphicon-plus"></span> Add</button>
         </div>
-    <a data-toggle="collapse" href="#moreseq" aria-expanded="false" aria-controls="moreseq"><h4>Add more sequences, maybe? <span class="glyphicon glyphicon-plus"></span></h4></a>
-    <div class="collapse" id="moreseq">
-            <div class="form-group row">
-                <label class="control-label col-md-2" for="seqfile2">Sequence</label>
-                <div class="col-md-10">
-                    <input type="file" class="form-control" id="seqfile2" name="seqfile2">
-                </div>
-            </div>
-    </div>
+        </div>
+<!-- if file fails/ID not found, unhide warning -->
         <h4>General</h4>
     <div class="form-group row">
         <label class="col-md-2">Options</label>
@@ -42,6 +45,7 @@
             </div>
         </div>
     </div>
+
     <button type="submit" class="btn btn-primary" style="width:300px" id="submitjob">Submit Job &raquo;</button>
         </form>
 </div>
