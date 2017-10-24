@@ -47,13 +47,13 @@ def getinfile():
 #                return False,""
 #        else:
 #            return False,""
-    if 'ncbiacc1' in request.form and request.form['ncbiacc1']:
+    if 'ncbiacc1' in request.form and request.form['ncbiacc1'] and request.form.get("filesrc") == 'ncbi':
          filename = getNCBIgbk(request.form['ncbiacc1'])
          if not filename:
-             return False,""
+             return False
 #    elif 'asseqfile' in request.files and validatefile(request.files['asseqfile'].filename,True):
 #        ufile = request.files['asseqfile']
-    elif 'seqfile1' in request.files and validatefile(request.files['seqfile1'].filename):
+    elif 'seqfile1' in request.files and validatefile(request.files['seqfile1'].filename) and request.form.get("filesrc") == 'seqfile':
         ufile = request.files['seqfile1']
     if ufile:
         filename = os.path.join(tempfile.mkdtemp(dir=app.config['UPLOAD_FOLDER']), secure_filename(ufile.filename))

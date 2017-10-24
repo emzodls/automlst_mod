@@ -27,8 +27,13 @@ def analyze():
 @app.route('/upload', methods=['POST'])
 def upload():
     filename = routines.getinfile()
+    name = os.path.split(filename)[-1]
     #    filename = routines.getNCBIgbk(request.form["ncbiacc1"])
-    return json.dumps({"filename": filename})
+    return json.dumps({"filename": filename,"name": name})
+@app.route('/startjob')
+def startjob():
+    return render_template("startjob.html")
+
 @app.route('/results/example/report') # why won't just example work?
 def example():
     return render_template("example.html")

@@ -8,13 +8,30 @@ function hashCode(input) {
 	}
 	return hash;
 }
-function uploadSuccess(data,textStatus,xhr) {
-console.log(data,textStatus,xhr);
-return true; //populate list instead
+function maxSeqs() {
+if ($("#upfiles > option").length >= 3) {
+            $("#seqbtn").addClass("disabled");
+            $("#ncbibtn").addClass("disabled");
+            $("#seqwarn").removeClass("hidden");
+        } // remove classes otherwise!
 }
-function uploadError(xhr,ajaxOptions,thrownError) {
-console.log(xhr,ajaxOptions,thrownError); //unhide error message
-return true;
+function uploadSuccess(data,textStatus,xhr) { //communication success
+data = JSON.parse(data);
+console.log(data["filename"]);
+if (data["filename"] == false) {
+    $("#errorwarning").removeClass("hidden");
+    } else {
+    $("#upfiles").prepend("<option value='"+data["filename"]+"' class='"+hashCode(data["filename"])+"'>"+data["name"]+"</option>");
+    maxSeqs();
+    }
+}
+function uploadError(xhr,ajaxOptions,thrownError) { // communication error
+console.log(xhr,ajaxOptions,thrownError);
+//unhide error message
+$("#uploadwarning").removeClass("hidden");
+}
+function clearErrors(errorMessage) {
+$(errorMessage).addClass("hidden");
 }
 function uploader() {
 $.ajax({
@@ -29,8 +46,29 @@ $.ajax({
         contentType: false,
         processData: false,
         success: uploadSuccess,
-        error: uploadError
+        error: uploadError,
+        xhr: function() {
+            var myXhr = $.ajaxSettings.xhr();
+            if (myXhr.upload) {
+                // For handling the progress of the upload
+                myXhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        $('progress').attr({
+                            value: e.loaded,
+                            max: e.total,
+                        });
+                    }
+                } , false);
+            }
+            return myXhr;
+        }
 });
+}
+function uploadSequence(filesrc) {
+clearErrors('#uploadwarning');
+clearErrors('#errorwarning');
+$("#filesrc").val(filesrc);
+uploader();
 }
 function addtolist(id1,id2) {
     selectedValues=$(id1).val();
@@ -56,6 +94,14 @@ function removeAllFromList(id3) {
     removeFromList(selectedValues2[k]);
     }
 }
+function removeAllSeqs() {
+    selectedValues3=$("#upfiles").val();
+    for (l = 0; l < selectedValues3.length;l++) {
+    removeFromList(selectedValues3[l]);
+    }
+    maxSeqs();
+}
+
 
 function refreshView(id4,max) {
 var counter = 0;
