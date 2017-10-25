@@ -8,12 +8,17 @@ function hashCode(input) {
 	}
 	return hash;
 }
+// clear up variables!
 function maxSeqs() {
 if ($("#upfiles > option").length >= 3) {
             $("#seqbtn").addClass("disabled");
             $("#ncbibtn").addClass("disabled");
             $("#seqwarn").removeClass("hidden");
-        } // remove classes otherwise!
+        } else {
+            $("#seqbtn").removeClass("disabled");
+            $("#ncbibtn").removeClass("disabled");
+            $("#seqwarn").addClass("hidden");
+        }
 }
 function uploadSuccess(data,textStatus,xhr) { //communication success
 data = JSON.parse(data);
@@ -69,6 +74,8 @@ clearErrors('#uploadwarning');
 clearErrors('#errorwarning');
 $("#filesrc").val(filesrc);
 uploader();
+$("#uploadprog").val(0);
+console.log($("#uploadprog")); // -> doesn't clear properly!
 }
 function addtolist(id1,id2) {
     selectedValues=$(id1).val();

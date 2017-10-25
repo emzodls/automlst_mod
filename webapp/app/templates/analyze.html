@@ -14,7 +14,7 @@
                 <button type="button" class="btn btn-default" id="remfiles" style="margin-top:25px" onclick="removeAllSeqs()">Remove selected sequences</button>
             </div>
         </div>
-    <progress id="uploadprog" style="width:100%" value=0 class="progress"></progress>
+    <progress id="uploadprog" style="width:100%" value=0 class="progress-boots"></progress>
     <h4>Upload Genomes</h4>
     <form action="startjob" method="post" enctype="multipart/form-data" name="sequpload" id="sequpload">
     <div class="form-group row">
@@ -39,7 +39,7 @@
         <div class="alert alert-danger hidden" id="uploadwarning"><strong>Error:</strong> Upload failed</div>
         <div class="alert alert-danger hidden" id="errorwarning"><strong>Error:</strong> Invalid accession number or sequence file</div>
         <div class="alert alert-warning hidden" id="seqwarn"><strong>Maximum number of files and accession numbers reached.</strong></div>
-        <h4>General</h4>
+<h4>General</h4>
     <div class="form-group row">
         <label class="col-md-2">Options</label>
         <div class="col-md-10">
