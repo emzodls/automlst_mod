@@ -1,6 +1,7 @@
 {% extends "main.html" %}
 {% block mainbody %}
 <div class="container" style="padding-top:25px;">
+    <!-- add navigation (steps) -->
     <a href="results/example/report" class="btn btn-primary" style="width:250px">Open example output &raquo;</a>
     <a href="#" class="btn btn-primary" style="width:250px">Download example &raquo;</a>
     <hr>
@@ -36,10 +37,12 @@
         </div>
         </div>
 <!-- if file fails/ID not found, unhide warning -->
+        <div class="alert alert-success hidden" id="uploadsuccess">Upload successful</div>
         <div class="alert alert-danger hidden" id="uploadwarning"><strong>Error:</strong> Upload failed</div>
         <div class="alert alert-danger hidden" id="errorwarning"><strong>Error:</strong> Invalid accession number or sequence file</div>
         <div class="alert alert-warning hidden" id="seqwarn"><strong>Maximum number of files and accession numbers reached.</strong></div>
-<h4>General</h4>
+<!--
+        <h4>General</h4>
     <div class="form-group row">
         <label class="col-md-2">Options</label>
         <div class="col-md-10">
@@ -53,7 +56,7 @@
                 <label><input type="radio" name="optradio">Reference alignment</label>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <button type="submit" class="btn btn-primary" style="width:300px" id="submitjob">Submit Job &raquo;</button>
     <input type="hidden" id="filesrc" name="filesrc" value="">

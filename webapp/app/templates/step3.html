@@ -2,7 +2,7 @@
 {% block mainbody %}
 <div class="container" style="padding-top:40px;">
     <h2>{{ jobid }}</h2> <!-- can be prettier probably -->
-    <!-- CHANGE THE LINKS -->
+    <!-- CHANGE THE LINKS - just make them span rather than a-->
     <a href="{{ url_for('showstep',jobid=jobid,step='step1') }}" class="steps">Step 1 &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='step2') }}" class="steps">Step 2 &raquo;</a> <a href="#" class="steps">Step 3 <small>MLST gene selection</small> &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='report') }}" class="steps-disabled">Results</a>
     <hr>
     <div class="row">
@@ -23,7 +23,7 @@
     </div>
     <hr>
     <div class="progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" style="width:66%"></div>
+        <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" style="width:66%"></div>
     </div>
     <h3 class="page-header">Genes</h3>
     <form>

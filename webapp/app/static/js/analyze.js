@@ -1,5 +1,6 @@
 function hashCode(input) {
 	var hash = 0;
+	var j;
 	if (input.length == 0) return hash;
 	for (j = 0; j < input.length; j++) {
 		c = input.charCodeAt(j);
@@ -14,31 +15,43 @@ if ($("#upfiles > option").length >= 3) {
             $("#seqbtn").addClass("disabled");
             $("#ncbibtn").addClass("disabled");
             $("#seqwarn").removeClass("hidden");
+            return false;
         } else {
             $("#seqbtn").removeClass("disabled");
             $("#ncbibtn").removeClass("disabled");
             $("#seqwarn").addClass("hidden");
+            return true;
         }
 }
+function clearProgress() {
+if ($("#uploadprog").attr("value") == $("#uploadprog").attr("max")) {
+    $("#uploadprog").attr("value",0);
+}
+}
+
 function uploadSuccess(data,textStatus,xhr) { //communication success
-data = JSON.parse(data);
+var data = JSON.parse(data);
 console.log(data["filename"]);
 if (data["filename"] == false) {
     $("#errorwarning").removeClass("hidden");
     } else {
     $("#upfiles").prepend("<option value='"+data["filename"]+"' class='"+hashCode(data["filename"])+"'>"+data["name"]+"</option>");
     maxSeqs();
+    $("#uploadsuccess").removeClass("hidden");
     }
+    clearProgress();
 }
 function uploadError(xhr,ajaxOptions,thrownError) { // communication error
 console.log(xhr,ajaxOptions,thrownError);
 //unhide error message
 $("#uploadwarning").removeClass("hidden");
+clearProgress();
 }
 function clearErrors(errorMessage) {
 $(errorMessage).addClass("hidden");
 }
 function uploader() {
+if (maxSeqs()) {
 $.ajax({
         // Your server script to process the upload
         contentType: 'application/json',
@@ -69,16 +82,18 @@ $.ajax({
         }
 });
 }
+}
 function uploadSequence(filesrc) {
 clearErrors('#uploadwarning');
 clearErrors('#errorwarning');
+clearErrors('#uploadsuccess')
 $("#filesrc").val(filesrc);
 uploader();
-$("#uploadprog").val(0);
 console.log($("#uploadprog")); // -> doesn't clear properly!
 }
 function addtolist(id1,id2) {
-    selectedValues=$(id1).val();
+    var selectedValues=$(id1).val();
+    var i;
     for (i = 0; i < selectedValues.length;i++) {
         //console.log(selectedValues[i]);
         var x = selectedValues[i];
@@ -90,19 +105,21 @@ function addtolist(id1,id2) {
     //console.log(selectedValues);
 }
 function removeFromList(selectedValue) {
-    y = "."+hashCode(selectedValue);
+    var y = "."+hashCode(selectedValue);
     $("option").remove(y);
     //console.log(selectedValue,hashCode(selectedValue));
 }
 
 function removeAllFromList(id3) {
-    selectedValues2=$(id3).val();
+    var selectedValues2=$(id3).val();
+    var k;
     for (k = 0; k < selectedValues2.length;k++) {
     removeFromList(selectedValues2[k]);
     }
 }
 function removeAllSeqs() {
-    selectedValues3=$("#upfiles").val();
+    var selectedValues3=$("#upfiles").val();
+    var l;
     for (l = 0; l < selectedValues3.length;l++) {
     removeFromList(selectedValues3[l]);
     }
@@ -132,4 +149,37 @@ $(id5+" > option").each(function() {
     }
 });
 addtolist(id5,id6);
+}
+var dataObject = null;
+Smits.PhyloCanvas.Render.Parameters.Rectangular["paddingY"] = 40;
+function renderTree(dataObject,width,height) {
+$('#svgCanvas').empty();
+phylocanvas = new Smits.PhyloCanvas(
+				dataObject,
+				'svgCanvas',
+				width, height
+				);
+				console.log(phylocanvas);
+}
+function treeSuccess(data,textStatus,xhr) {
+dataObject = {
+				newick: data
+			};
+			renderTree(dataObject,1000,1000);
+}
+
+function treeError(xhr,ajaxOptions,thrownError) { // communication error
+console.log(xhr,ajaxOptions,thrownError);
+}
+function drawTree(jobid) {
+$.ajax({
+        // Your server script to process the upload
+        url: '/results/'+jobid+'/tree',
+        async: true,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: treeSuccess,
+        error: treeError});
+
 }
