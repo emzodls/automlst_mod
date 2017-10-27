@@ -372,7 +372,7 @@ a.steps {
     font-weight:500;
 }
 
-a.steps-disabled {
+.steps-disabled {
     font-size:24px;
     font-weight:500;
     color:grey;
@@ -383,12 +383,12 @@ a.steps-disabled {
     background-color: #3d3d8f;
 }
 /* reset appearance of working progress bar */
-progress.progress-boots[value] {
+progress.progress-boots[value], progress.bootstripe[value] {
 -webkit-appearance:none;
 appearance:none;
 }
 
-progress.progress-boots[value]::-webkit-progress-bar {
+progress.progress-boots[value]::-webkit-progress-bar,  progress.bootstripe[value]::-webkit-progress-bar {
 height: 20px;
   margin-bottom: 20px;
   overflow: hidden;
@@ -407,4 +407,23 @@ width: 0;
   background-color: #3d3d8f;
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
   transition: width .6s ease;
+}
+
+progress.bootstripe[value]::-webkit-progress-value {
+width: 0;
+  height: 100%;
+  font-size: 12px;
+  line-height: 20px;
+  color: #fff;
+  text-align: center;
+  background-color: #3d3d8f;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+  transition: width .6s ease;
+background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+          background-size: 40px 40px;
+}
+
+/* highlight user input in tree */
+.userseq {
+color:#ccccff !important;
 }

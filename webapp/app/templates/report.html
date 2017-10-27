@@ -21,8 +21,20 @@
     </div>
     <hr>
     <!-- Add tree here -->
-    <div id="svgCanvas"></div>
-    <button type="button" class="btn btn-primary" onclick="drawTree('{{ jobid }}')">Click</button>
+    <div class="row">
+    <div id="svgCanvas" class="col-md-10">
+            <img src="/static/images/Socotra_dragon_tree.jpeg" alt="Dracaena cinnabari" class="thumbnail" style="width:50%;margin:auto">
+        <div class="progress">
+            <div class="progress-bar progress-bar-striped active" aria-valuetext="Loading" style="width:100%"></div>
+        </div>
+        <p style="text-align:center"><b>Loading tree...</b></p>
+    </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-primary" aria-label="Increase tree height" data-toggle="tooltip" title="Increase tree height" onclick="resizeTree('up')"><span class="glyphicon glyphicon-plus"></span></button>
+            <span class="glyphicon glyphicon-resize-vertical" style="font-size:25px;vertical-align:middle"></span>
+            <button type="button" class="btn btn-primary" aria-label="Decrease tree height" data-toggle="tooltip" title="Decrease tree height" onclick="resizeTree('down')"><span class="glyphicon glyphicon-minus"></span></button>
+        </div>
+    <!-- <button type="button" class="btn btn-primary" onclick="drawTree('{{ jobid }}')" style="margin-top:20px">Click</button> -->
     <hr>
     <button type="button" class="btn btn-primary" style="width:200px" id="treedownl" name="treedownl"><span class="glyphicon glyphicon-download-alt"></span> Download tree</button>
     <button type="button" class="btn btn-primary" style="width:200px" id="aligndownl" name="aligndownl"><span class="glyphicon glyphicon-download-alt"></span> Download alignment</button>
@@ -32,5 +44,11 @@
     <hr>
     <button type="button" class="btn btn-primary" style="width:300px" id="resubmit" name="resubmit"><span class="glyphicon glyphicon-repeat"></span> Reanalyze from Step 2</button>
     <div class="alert alert-warning" style="margin-top:10px"><strong>Warning:</strong> Reanalyzing will clear your current results.</div>
+        <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
 </div>
+    <script>
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
 {% endblock %}

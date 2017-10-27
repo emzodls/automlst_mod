@@ -125,7 +125,13 @@ function removeAllSeqs() {
     }
     maxSeqs();
 }
-
+function selectToggle() {
+if (($('input[name="workflow"]:checked', '#sequpload').val()) == "2") {
+    $('#genusform').removeClass("hidden");
+    } else {
+    $('#genusform').addClass("hidden");
+    }
+}
 
 function refreshView(id4,max) {
 var counter = 0;
@@ -159,19 +165,40 @@ phylocanvas = new Smits.PhyloCanvas(
 				'svgCanvas',
 				width, height
 				);
-				console.log(phylocanvas);
+				var canvasHeight = parseInt($('svg').attr("height"));
+				$('svg').attr("height", canvasHeight + Math.round((2*(canvasHeight/100))));
+				$('tspan').each(function() {
+				if ($(this).html().substring(0,3) == "___") {
+				$(this).attr("fill","#0000ff");
+				}
+				});
 }
+function resizeTree(vertDir) {
+var canvasHeight = parseInt($('svg').attr("height"));
+if (vertDir == "up") {
+    renderTree(dataObject,1000,canvasHeight + 100);
+    } else if (vertDir == "down") {
+    renderTree(dataObject,1000,canvasHeight - 100);
+    }
+}
+
 function treeSuccess(data,textStatus,xhr) {
+if (data != "false") {
 dataObject = {
-				newick: data
+				newick: data,
+				fileSource: true
 			};
 			renderTree(dataObject,1000,1000);
+			clearInterval(timer);
+}
 }
 
 function treeError(xhr,ajaxOptions,thrownError) { // communication error
 console.log(xhr,ajaxOptions,thrownError);
 }
-function drawTree(jobid) {
+function drawTree() {
+var jobid = $('#jobinfo').val();
+console.log(jobid);
 $.ajax({
         // Your server script to process the upload
         url: '/results/'+jobid+'/tree',
@@ -183,3 +210,4 @@ $.ajax({
         error: treeError});
 
 }
+var timer = setInterval(drawTree, 3000);

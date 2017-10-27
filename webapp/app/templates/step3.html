@@ -2,8 +2,7 @@
 {% block mainbody %}
 <div class="container" style="padding-top:40px;">
     <h2>{{ jobid }}</h2> <!-- can be prettier probably -->
-    <!-- CHANGE THE LINKS - just make them span rather than a-->
-    <a href="{{ url_for('showstep',jobid=jobid,step='step1') }}" class="steps">Step 1 &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='step2') }}" class="steps">Step 2 &raquo;</a> <a href="#" class="steps">Step 3 <small>MLST gene selection</small> &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='report') }}" class="steps-disabled">Results</a>
+    <a href="/analyze" class="steps">Step 1 &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='step2') }}" class="steps">Step 2 &raquo;</a> <a href="#" class="steps">Step 3 <small>MLST gene selection</small> &raquo;</a> <span class="steps-disabled">Results</span>
     <hr>
     <div class="row">
         <div class="col-md-2">
