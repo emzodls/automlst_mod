@@ -60,6 +60,14 @@ def startjob():
     jobid = unicode(uuid.uuid4())
     return redirect('/results/'+jobid)
 # step 1! change rest of them...
+@app.route('/startjob2')
+def startjob2():
+    return render_template("startjob2.html")
+
+@app.route('/<jobid>/jobstatus')
+def status():
+    jobstatus = 42
+    return jobstatus
 
 @app.route('/results/example/report')
 def example():
