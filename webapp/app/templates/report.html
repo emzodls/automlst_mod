@@ -22,7 +22,7 @@
     <hr>
     <!-- Add tree here -->
     <div class="row">
-    <div id="svgCanvas" class="col-md-10">
+    <div id="svgCanvas" class="col-md-10" style="overflow:auto">
             <img src="/static/images/Socotra_dragon_tree.jpeg" alt="Dracaena cinnabari" class="thumbnail" style="width:50%;margin:auto">
         <div class="progress">
             <div class="progress-bar progress-bar-striped active" aria-valuetext="Loading" style="width:100%"></div>
@@ -41,14 +41,18 @@
     <button type="button" class="btn btn-primary" style="width:200px" id="mlstdownl" name="mlstdownl"><span class="glyphicon glyphicon-download-alt"></span> Download MLST list</button>
     <button type="button" class="btn btn-primary" style="width:200px" id="orgdownl" name="orgdownl"><span class="glyphicon glyphicon-download-alt"></span> Download organism list</button>
     <!-- button layout? -->
+        {% if workflow != 2 %}
     <hr>
     <button type="button" class="btn btn-primary" style="width:300px" id="resubmit" name="resubmit"><span class="glyphicon glyphicon-repeat"></span> Reanalyze from Step 2</button>
     <div class="alert alert-warning" style="margin-top:10px"><strong>Warning:</strong> Reanalyzing will clear your current results.</div>
+        {% endif %}
         <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
+        <input type="hidden" id="pageid" name="pageid" value="report">
 </div>
     <script>
 $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();
 });
 </script>
+    <script src="/static/js/report.js"></script>
 {% endblock %}

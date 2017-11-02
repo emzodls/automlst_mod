@@ -44,6 +44,13 @@ def getTree(jobid):
         return send_from_directory('/tmp','result3.tree',as_attachment=True)
     else:
         return "false"
+@app.route('/results2/<jobid>/<step>')
+@app.route('/results2/<jobid>/<step>/')
+def show2(jobid,step):
+    if step == "loading":
+        return render_template("startjob2.html", jobid=jobid)
+    elif step == "report":
+        return render_template("report.html",jobid=jobid,workflow=2)
 
 @app.route('/analyze')
 def analyze():
@@ -59,15 +66,16 @@ def upload():
 def startjob():
     jobid = unicode(uuid.uuid4())
     return redirect('/results/'+jobid)
-# step 1! change rest of them...
-@app.route('/startjob2')
+# possible to merge these with an if? But how? Would take value of the radio options.... somehow
+@app.route('/startjob2', methods=['POST'])
 def startjob2():
-    return render_template("startjob2.html")
+    jobid = unicode(uuid.uuid4())
+    return redirect('/results2/'+jobid+'/loading')
 
-@app.route('/<jobid>/jobstatus')
-def status():
-    jobstatus = 42
-    return jobstatus
+@app.route('/jobstatus/<jobid>')
+@app.route('/jobstatus/<jobid>/')
+def status(jobid):
+    return json.dumps({"status":42})
 
 @app.route('/results/example/report')
 def example():
