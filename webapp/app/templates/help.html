@@ -1,6 +1,7 @@
 {% extends "main.html" %}
 {% block mainbody %}
 <link href="/static/css/sidebar.css" rel="stylesheet">
+<div id="wrapper">
 <div id="sidebar-wrapper">
             <nav id="spy">
                 <ul class="sidebar-nav nav">
@@ -11,12 +12,12 @@
                     </li>
                     <li>
                         <a href="#work1" data-scroll>
-                            <span class="fa fa-anchor solo">Workflow 1</span>
+                            <span class="fa fa-anchor solo">Classical</span>
                         </a>
                     </li>
                     <li>
                         <a href="#work2" data-scroll>
-                            <span class="fa fa-anchor solo">Workflow 2</span>
+                            <span class="fa fa-anchor solo">Accelerated</span>
                         </a>
                     </li>
                     <li>
@@ -27,14 +28,15 @@
                 </ul>
             </nav>
         </div>
-<div class="page-content-wrapper">
+<div id="page-content-wrapper">
 <div class="page-content inset container-fluid">
+    <!-- pretty up screenshots - too blurry -->
     <div class="row">
         <div class="col-md-12">
     <h2 class="page-header" id="query">Submitting a Query</h2>
     </div>
         <div class="col-md-6">
-            <img src="/static/images/help/slide1recolor.jpg" alt="analyze screen" class="img-responsive" style="border:1px solid #cccccc;"> <!-- problem: doesn't actually scale to full container width! -->
+            <img src="/static/images/help/slide1recolor.jpg" alt="analyze screen" class="img-responsive" style="border:1px solid #cccccc;">
         </div>
         <div class="col-md-6">
             <ol>
@@ -51,7 +53,7 @@
             </ol>
         </div>
     </div>
-    <h2 class="page-header" id="work1">Workflow 1</h2>
+    <h2 class="page-header" id="work1">Classical workflow</h2>
     <h3>Step 1</h3>
     <div class="row">
     <div class="col-md-6">
@@ -103,7 +105,7 @@
             </ol>
         </div>
     </div>
-    <h2 class="page-header" id="work2">Workflow 2</h2>
+    <h2 class="page-header" id="work2">Accelerated workflow</h2>
     <div class="row">
         <div class="col-md-6">
             <img src="/static/images/help/workflow2annotated.jpg" alt="genus selection option" class="img-responsive" style="border:1px solid #cccccc;">
@@ -121,9 +123,10 @@
     <div class="col-md-6">
         <p>Some explanation of the tree. <br />
         User-submitted sequences are highlighted. <br />
-        <b>Note:</b> The "reanalyze from Step 2" option only exists in Workflow 1. Workflow 2 proceeds automatically
+        <b>Note:</b> The "reanalyze from Step 2" option only exists in the classical workflow. The accelerated workflow proceeds automatically
         after the initial sequences have been submitted.</p>
     </div>
+</div>
 </div>
 </div>
 {% endblock %}

@@ -427,3 +427,11 @@ background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transpare
 .userseq {
 color:#ccccff !important;
 }
+
+/* tabs for analyze page */
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+background-color:#151580;
+color:#ffffff
+}

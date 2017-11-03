@@ -9,11 +9,15 @@ phylocanvas = new Smits.PhyloCanvas(
 				);
 				var canvasHeight = parseInt($('svg').attr("height"));
 				$('svg').attr("height", canvasHeight + Math.round((2*(canvasHeight/100))));
-				$('tspan').each(function() {
-				if ($(this).html().substring(0,3) == "___") {
-				$(this).attr("fill","#0000ff");
+				console.log($($('tspan')[0])[0]);
+				$('tspan:contains(___)').attr("fill","#0000ff");
+/*				$('tspan').each(function(objindex,obj) {
+				console.log($(obj));
+				console.log(Object.keys($(obj)));
+				if ($(obj).html().substring(0,3) == "___") {
+				$(obj).attr("fill","#0000ff");
 				}
-				});
+				}); */
 }
 function resizeTree(vertDir) {
 var canvasHeight = parseInt($('svg').attr("height"));
