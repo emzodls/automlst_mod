@@ -1,16 +1,18 @@
 var dataObject = null;
 Smits.PhyloCanvas.Render.Parameters.Rectangular["paddingY"] = 40;
+Smits.PhyloCanvas.Render.Parameters.Rectangular["paddingX"] = 90;
 function renderTree(dataObject,width,height) {
 $('#svgCanvas').empty();
+$('#sizebtns').attr("style","display:block");
 phylocanvas = new Smits.PhyloCanvas(
 				dataObject,
 				'svgCanvas',
 				width, height
 				);
-				var canvasHeight = parseInt($('svg').attr("height"));
-				$('svg').attr("height", canvasHeight + Math.round((2*(canvasHeight/100))));
+				/* var canvasHeight = parseInt($('svg').attr("height"));
+				var canvasWidth = parseInt($('svg').attr("width")); */
 				console.log($($('tspan')[0])[0]);
-				$('tspan:contains(___)').attr("fill","#0000ff");
+				$('tspan:contains(###)').attr("fill","#0000ff");
 /*				$('tspan').each(function(objindex,obj) {
 				console.log($(obj));
 				console.log(Object.keys($(obj)));
@@ -19,13 +21,35 @@ phylocanvas = new Smits.PhyloCanvas(
 				}
 				}); */
 }
-function resizeTree(vertDir) {
+function repairSize() {
 var canvasHeight = parseInt($('svg').attr("height"));
-if (vertDir == "up") {
-    renderTree(dataObject,1000,canvasHeight + 100);
-    } else if (vertDir == "down") {
-    renderTree(dataObject,1000,canvasHeight - 100);
+$('text:has(tspan)').each(function(objindex, obj) {
+    var textHeight = parseInt($(this).attr("y"));
+    if (textHeight > canvasHeight) {
+        console.log(textHeight);
+        $('svg').attr("height",textHeight +10);
+        $('#svgCanvas').attr("height",textHeight + 10);
+        }
+});
+}
+
+function resizeTree(resizeDir) {
+var canvasHeight = parseInt($('svg').attr("height"));
+var canvasWidth = parseInt($('svg').attr("width"));
+if (resizeDir == "upV") {
+    renderTree(dataObject,canvasWidth,canvasHeight + 100);
+    /*$('#svgCanvas').attr("height", canvasHeight+100 + Math.round((2*((canvasHeight+100)/100))));
+    $('svg').attr("height", canvasHeight+100 + Math.round((2*((canvasHeight+100)/100))));*/
+    } else if (resizeDir == "downV") {
+    renderTree(dataObject,canvasWidth,canvasHeight - 100);
+    /*$('#svgCanvas').attr("height", canvasHeight - 100 + Math.round((2*((canvasHeight - 100)/100))));
+    $('svg').attr("height", canvasHeight - 100 + Math.round((2*((canvasHeight - 100)/100)))); */
+    } else if (resizeDir == "upH") {
+    renderTree(dataObject,canvasWidth + 100, canvasHeight);
+    } else if (resizeDir == "downH") {
+    renderTree(dataObject,canvasWidth - 100, canvasHeight);
     }
+    repairSize();
 }
 
 function treeSuccess(data,textStatus,xhr) {

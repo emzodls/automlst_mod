@@ -7,17 +7,17 @@
                 <ul class="sidebar-nav nav">
                     <li>
                         <a href="#query" data-scroll>
-                            <span class="fa fa-anchor solo">Submitting</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#work1" data-scroll>
-                            <span class="fa fa-anchor solo">Classical</span>
+                            <span class="fa fa-anchor solo">Workflows</span>
                         </a>
                     </li>
                     <li>
                         <a href="#work2" data-scroll>
-                            <span class="fa fa-anchor solo">Accelerated</span>
+                            <span class="fa fa-anchor solo" style="padding-left:15px">Accelerated</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#work1" data-scroll>
+                            <span class="fa fa-anchor solo" style="padding-left:15px">Classical</span>
                         </a>
                     </li>
                     <li>
@@ -33,34 +33,71 @@
     <!-- pretty up screenshots - too blurry -->
     <div class="row">
         <div class="col-md-12">
-    <h2 class="page-header" id="query">Submitting a Query</h2>
+    <h2 class="page-header" id="query">Selecting a workflow</h2>
     </div>
-        <div class="col-md-6">
-            <img src="/static/images/help/slide1recolor.jpg" alt="analyze screen" class="img-responsive" style="border:1px solid #cccccc;">
+        <div class="col-md-4">
+            <img src="/static/images/help/workflowselect.png" alt="workflow selection" class="img-responsive" style="border:1px solid #cccccc;">
         </div>
-        <div class="col-md-6">
+        <div class="col-md-8">
             <ol>
-                <li><h5>Enter sequences</h5>
+                <li><h5>Select workflow</h5>
                 <ol style="list-style-type:lower-alpha;">
-                    <li>Retrieve an NCBI sequence by its accession number. Probably some more explanatory text.</li>
-                    <li>Upload a sequence file. Acceptable formats are FASTA, Genbank (and EMBL?) files.</li>
-                    <li>Remove selected sequences from the list.</li>
+                    <li><b>Accelerated workflow</b>: User-submitted sequences are automatically added to a reference
+                        tree of the user's choice. This is the default setting.</li>
+                    <li><b>Classical workflow</b>: User is able to choose from which additional species to construct the
+                        tree in detail, and can choose which genes to use for the MLST.</li>
                 </ol></li>
-                <li> <h5>Choose workflow</h5> <ul>
-                    <li><b>Workflow 1</b>:</li>
-                    <li><b>Workflow 2</b>:</li>
-                </ul></li>
             </ol>
         </div>
     </div>
-    <h2 class="page-header" id="work1">Classical workflow</h2>
-    <h3>Step 1</h3>
+        <h3 class="page-header" id="work2">Accelerated workflow</h3>
     <div class="row">
-    <div class="col-md-6">
-        <img src="/static/images/help/step1annotated.jpg" alt="loading screen" class="img-responsive" style="border:1px solid #cccccc;">
+        <div class="col-md-8">
+            <img src="/static/images/help/accelerated.png" alt="submission screen for the accelerated workflow" class="img-responsive" style="border:1px solid #cccccc;">
+        </div>
+        <div class="col-md-4">
+            <ol start="2">
+                <li>Select the reference tree to which the uploaded sequences will be added. By default, autoMLST will
+                attempt to detect the closest genus on its own (?)</li>
+                <li>Submit the sequences to be added to the tree.
+                <ol style="list-style-type:lower-alpha;">
+                    <li>Retrieve an NCBI sequence by its accession number.</li>
+                    <li>Upload a sequence file. Acceptable formats are FASTA, Genbank (and EMBL?) files.</li>
+                    <li>Remove selected sequences from the list.</li>
+                </ol>
+                    <br />
+                    <strong>Note</strong>: a maximum of 50 sequences may be added to the tree.
+                </li>
+            </ol>
+        </div>
     </div>
-    <div class="col-md-6">
-        <ol>
+    <h3 class="page-header" id="work1">Classical workflow</h3>
+    <h4>Step 1 <small>Sequence submission</small></h4>
+    <div class="row">
+    <div class="col-md-8">
+        <img src="/static/images/help/classical.png" alt="submission screen for the classical workflow" class="img-responsive" style="border:1px solid #cccccc;">
+    </div>
+    <div class="col-md-4">
+        <ol start="2">
+            <li>Submit the sequences to construct the tree.
+             <ol style="list-style-type:lower-alpha;">
+                    <li>Retrieve an NCBI sequence by its accession number.</li>
+                    <li>Upload a sequence file. Acceptable formats are FASTA, Genbank (and EMBL?) files.</li>
+                    <li>Remove selected sequences from the list.</li>
+                </ol>
+                 <br />
+                    <strong>Note</strong>: a maximum of 50 sequences may be added to the tree.
+            </li>
+        </ol>
+    </div>
+    </div>
+<br />
+        <div class="row">
+        <div class="col-md-8">
+            <img src="/static/images/help/step1new2.png" alt="loading screen for the classical workflow" class="img-responsive" style="border:1px solid #cccccc;">
+        </div>
+        <div class="col-md-4">
+        <ol start="3">
             <li>Nearest organisms and genes to use for the MLST can either be selected manually or automatically.
             Manual selection enables the user to modify the list of organisms or genes autoMLST uses to construct the
             tree; automatic selection automatically proceeds with the 50 nearest organisms or 10 best genes as found
@@ -71,14 +108,15 @@
         </ol>
     </div>
         </div>
-    <h3>Step 2 <small>Species and outgroup selection</small></h3> <!-- do prettier layout! -->
+    <br />
+    <h4>Step 2 <small>Species and outgroup selection</small></h4> <!-- do prettier layout! -->
     <div class="row">
-        <div class="col-md-6">
-            <img src="/static/images/help/step2annotated1.jpg" alt="species selection screen" class="img-responsive" style="border:1px solid #cccccc;">
-            <img src="/static/images/help/step2annotated2.jpg" alt="outgroup selection screen" class="img-responsive" style="border:1px solid #cccccc;margin-top:5px;">
+        <div class="col-md-8">
+            <img src="/static/images/help/step2new.png" alt="species selection options of the species and outgroup selection screen" class="img-responsive" style="border:1px solid #cccccc;">
+            <img src="/static/images/help/step2outgroupsnew.png" alt="outgroup selection options of the species and outgroup selection screen" class="img-responsive" style="border:1px solid #cccccc;margin-top:5px;">
         </div>
-        <div class="col-md-6">
-            <ol start="2">
+        <div class="col-md-4">
+            <ol start="4">
                 <li>By default, autoMLST picks the 50 closest organisms it detects to continue. Users are able to add
                 organisms from the organism list to this selection or remove them. <br />
                 <b>Note:</b> A maximum of 50 organisms will be used for tree construction; additional species above this
@@ -90,41 +128,44 @@
             </ol>
         </div>
     </div>
-    <h3>Step 3 <small>MLST gene selection</small></h3>
+    <br />
+    <h4>Step 3 <small>MLST gene selection</small></h4>
     <div class="row">
-        <div class="col-md-6">
-            <img src="/static/images/help/step3annotated.jpg" alt="MLST gene selection screen" class="img-responsive" style="border:1px solid #cccccc;">
+        <div class="col-md-8">
+            <img src="/static/images/help/step3new.png" alt="MLST gene selection screen" class="img-responsive" style="border:1px solid #cccccc;">
         </div>
-        <div class="col-md-6">
-            <ol start="4">
+        <div class="col-md-4">
+            <ol start="6">
                 <li>autoMLST selects 10 genes for the MLST by default. Users are able to add or remove genes from this
                 selection. <br />
                 <b>Note:</b> A maximum of 10 genes will be used for the MLST; additional genes above this number will
                     not be used.</li>
-                <li>autoMLST can create either a concatenated alignment or a coalescent tree. (Short explanation!)</li>
-            </ol>
-        </div>
-    </div>
-    <h2 class="page-header" id="work2">Accelerated workflow</h2>
-    <div class="row">
-        <div class="col-md-6">
-            <img src="/static/images/help/workflow2annotated.jpg" alt="genus selection option" class="img-responsive" style="border:1px solid #cccccc;">
-        </div>
-        <div class="col-md-6">
-            <ol>
-                <li>Users can either proceed with autoMLST's selection for a genus or select their own.</li>
+                <li>autoMLST can create either a concatenated alignment or a coalescent tree. (Short explanation!)
+                <ul>
+                    <li><b>Concatenated alignment</b>:</li>
+                    <li><b>Coalescent tree</b>:</li>
+                </ul>
+                </li>
             </ol>
         </div>
     </div>
     <h2 class="page-header" id="results">Results</h2>
-    <div class="col-md-6">
-        <img src="/static/images/help/resultsannotated.jpg" alt="result screen" class="img-responsive" style="border:1px solid #cccccc;">
+    <div class="col-md-8">
+        <img src="/static/images/help/treeresult.png" alt="result screen" class="img-responsive" style="border:1px solid #cccccc;">
     </div>
-    <div class="col-md-6">
-        <p>Some explanation of the tree. <br />
-        User-submitted sequences are highlighted. <br />
-        <b>Note:</b> The "reanalyze from Step 2" option only exists in the classical workflow. The accelerated workflow proceeds automatically
-        after the initial sequences have been submitted.</p>
+    <div class="col-md-4">
+        <ol>
+            <li>Some explanation of the tree. <br />
+            User-submitted sequences are highlighted.</li>
+            <li>Resize the tree in steps of 100 pixels.</li>
+            <li>Download the tree (Newick or svg, or both?), the alignment from which it was constructed, the list of
+            genes used in the MLST, or the list of organisms used.</li>
+        </ol>
+        <p>In the classical workflow, it is possible to redo the analysis with different additional species and MLST
+            genes by selecting "reanalyze from Step 2". <strong>Note that this will clear the existing results for this
+                job.</strong></p>
+        <!-- <b>Note:</b> The "reanalyze from Step 2" option only exists in the classical workflow. The accelerated workflow proceeds automatically
+        after the initial sequences have been submitted.</p> -->
     </div>
 </div>
 </div>

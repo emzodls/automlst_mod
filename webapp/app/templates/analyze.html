@@ -2,15 +2,16 @@
 {% block mainbody %}
 <div class="container" style="padding-top:25px;">
     <ul class="nav nav-tabs">
-        <li class="active" id="fasttab"><a data-toggle="tab" href="#fastwork" onclick="$('#sequpload').attr('action','startjob2');">Accelerated workflow</a> </li> <!-- active class is lost after scrolling -->
-        <li id="mtab"><a data-toggle="tab" href="#manual" onclick="$('#sequpload').attr('action','startjob');">Classical workflow</a> </li>
+        <li class="active" id="fasttab"><a data-toggle="tab" href="#fastwork" onclick="$('#workflow').val('auto');">Accelerated workflow</a> </li> <!-- active class is lost after scrolling -->
+        <li id="mtab"><a data-toggle="tab" href="#manual" onclick="$('#workflow').val('classic');">Classical workflow</a> </li>
     </ul>
     <br />
 
-    <form action="startjob2" method="post" enctype="multipart/form-data" name="sequpload" id="sequpload"> <!-- switching tabs after uploading a file breaks page -->
+    <form action="startjob" method="post" enctype="multipart/form-data" name="sequpload" id="sequpload">
             <div class="tab-content">
             <div id="fastwork" class="tab-pane fade in active">
-                <p>Some descriptive text.</p>
+                <p><b>Accelerated Mode</b>: Automatically add your sequences to a precreated reference tree for a genus of your choice.</p>
+                <hr>
         <div class="form-group" id="genusform">
             <label for="genusselect">Select reference genus:</label>
             <select class="form-control" id="genusselect">
@@ -23,7 +24,8 @@
             <div id="manual" class="tab-pane fade">
                 <a href="/analyze" class="steps">Step 1 <small>Enter sequences</small> &raquo;</a> <span class="steps-disabled">Step 2 &raquo;</span> <span class="steps-disabled">Step 3 &raquo;</span> <span class="steps-disabled">Results</span>
                 <hr>
-                <p>Some descriptive text about how this works.</p>
+                <p><b>Classical Mode</b>: After uploading your sequences, choose from which species to construct the tree for them, and choose
+                the genes to use for the MLST.</p>
             </div>
 
         </div>
@@ -67,6 +69,7 @@
 
         <button type="submit" class="btn btn-primary" style="width:300px" id="submitjob">Submit Job &raquo;</button>
         <input type="hidden" id="filesrc" name="filesrc" value="">
+        <input type="hidden" id="workflow" name="workflow" value="auto">
     </form>
     <hr>
     <div style="margin-top:10px">
