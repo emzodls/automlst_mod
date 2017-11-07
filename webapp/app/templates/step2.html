@@ -25,19 +25,12 @@
         <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" style="width:33%"></div>
     </div>
     <h3 class="page-header">Species</h3>
-    <form>
+    <form action="orgin" method="post" enctype="multipart/form-data" name="species" id="species">
         <div class="row">
         <div class="form-group col-md-5">
             <h4>Species found</h4>
             <label for="speciessel">Select additional species (closest 50 selected by default)</label>
-            <select multiple class="form-control" id="speciessel" size="40" style="width:100%"> <!-- how big should it be? -->
-                <!-- what is it doing to the page scroll thing? -->
-                <option>stare at the wall</option>
-                <option>play with food </option>
-                <option>get confused by dust</option>
-                <option>Hunt by meowing loudly at 5am</option>
-                <option>Purr as loud as possible</option>
-                <option>knock everything off the table</option>
+            <select multiple class="form-control" id="speciessel" size="40" style="width:100%;overflow:auto;">
             </select>
         </div>
             <div class="col-md-2" style="padding-top:65px">
@@ -48,7 +41,7 @@
             <div class="form-group col-md-5">
                 <h4>Selected species</h4>
                 <label for="specieslist">Add species (maximum 50)</label>
-            <select multiple class="form-control" id="specieslist" size="40" style="width:100%">
+            <select multiple class="form-control" id="specieslist" name="specieslist" size="40" style="width:100%;overflow:auto;">
             </select>
             </div>
         </div>
@@ -58,12 +51,12 @@
             <h4>Outgroups</h4>
             <label for="outgrsel">Select outgroup</label>
             <select multiple class="form-control" id="outgrsel" size="7" style="width:100%">
-                <option>purrrrrr</option>
+                <!--<option>purrrrrr</option>
                 <option>man running from cops stops to pet cats, goes to jail.</option>
                 <option>stare at guinea pigs</option>
                 <option>hiss at cats </option>
                 <option>claw at curtains</option>
-                <option>refuse to leave cardboard box</option>
+                <option>refuse to leave cardboard box</option> -->
             </select>
         </div>
             <div class="col-md-2" style="padding-top:65px">
@@ -74,11 +67,24 @@
             <div class="form-group col-md-5">
                 <h4>Selected outgroups</h4>
                 <label for="outgrlist">Add outgroup (maximum 5)</label>
-            <select multiple class="form-control" id="outgrlist" size="7" style="width:100%">
+            <select multiple class="form-control" id="outgrlist" name="outgrlist" size="7" style="width:100%">
             </select>
             </div>
         </div>
-        <button type="button" class="btn btn-primary" style="width:300px;">Continue &raquo;</button>
+        <button type="button" class="btn btn-primary" style="width:300px;" onclick="selectAndSend('#species')">Continue &raquo;</button>
+        <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
     </form>
 </div>
+<!-- how big should speciessel be? -->
+                <!-- what is it doing to the page scroll thing?
+                <option>stare at the wall</option>
+                <option>play with food </option>
+                <option>get confused by dust</option>
+                <option>Hunt by meowing loudly at 5am</option>
+                <option>Purr as loud as possible</option>
+                <option>knock everything off the table</option>
+                <option>You call this cat food</option> -->
+ <script>
+        $('body').onload = getOrgs();
+    </script>
 {% endblock %}

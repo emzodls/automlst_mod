@@ -25,13 +25,13 @@
         <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" style="width:66%"></div>
     </div>
     <h3 class="page-header">Genes</h3>
-    <form>
+    <form action="genein" method="post" enctype="multipart/form-data" name="mlstgenes" id="mlstgenes">
         <div class="row">
         <div class="form-group col-md-5">
             <h4>Genes found</h4>
             <label for="mlstsel">Select MLST genes</label>
-            <select multiple class="form-control" id="mlstsel" size="15" style="width:100%"> <!-- do we need default for that? -->
-                <option>stare at the wall</option>
+            <select multiple class="form-control" id="mlstsel" size="15" style="width:100%;overflow:auto;"> <
+                <!-- <option>stare at the wall</option>
                 <option>play with food </option>
                 <option>get confused by dust</option>
                 <option>Hunt by meowing loudly at 5am</option>
@@ -41,7 +41,7 @@
                 <option>Meowing non stop for food</option>
                 <option>stares at human while pushing stuff off a table</option>
                 <option>flee in terror at cucumber discovered on floor</option>
-                <option>repeatedly scratch at fence</option>
+                <option>repeatedly scratch at fence</option> -->
             </select>
         </div>
             <div class="col-md-2" style="padding-top:65px">
@@ -52,7 +52,7 @@
             <div class="form-group col-md-5">
                 <h4>Selected species</h4>
                 <label for="mlstlist">Add genes (maximum 10)</label>
-            <select multiple class="form-control" id="mlstlist" size="15" style="width:100%">
+            <select multiple class="form-control" id="mlstlist" name="mlstlist" size="15" style="width:100%;overflow:auto;">
             </select>
             </div>
         </div>
@@ -61,14 +61,18 @@
         <label class="col-md-2">Options</label>
         <div class="col-md-10">
             <div class="radio">
-                <label><input type="radio" name="optradio">Concatenated alignment</label>
+                <label><input type="radio" name="optradio" value="concatenated" checked="checked">Concatenated alignment</label>
             </div>
             <div class="radio">
-                <label><input type="radio" name="optradio">Coalescent tree</label>
+                <label><input type="radio" name="optradio" value="coalescent">Coalescent tree</label>
             </div>
         </div>
     </div>
-        <button type="button" class="btn btn-primary" style="width:300px;">Continue &raquo;</button>
+        <button type="button" class="btn btn-primary" style="width:300px;" onclick="selectAndSend('#mlstgenes')">Continue &raquo;</button>
+        <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
     </form>
 </div>
+<script>
+    $('body').onload = getGenes();
+</script>
 {% endblock %}

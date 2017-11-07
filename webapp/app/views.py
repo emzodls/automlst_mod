@@ -82,12 +82,33 @@ def startjob():
     elif request.form.get("workflow") == "auto":
         return redirect('/results2/' + jobid + '/loading')
 
+@app.route('/results/<jobid>/step2/orgs')
+def getOrgs(jobid):
+    if os.path.exists('/Users/labuser/Downloads/mash_example2.json'):
+        return send_from_directory('/Users/labuser/Downloads', 'mash_example2.json')
 
+@app.route('/results/<jobid>/step2/orgin', methods=['POST'])
+def orgin(jobid):
+    species = request.form.getlist('specieslist')
+    outgroups = request.form.getlist('outgrlist')
+    return json.dumps({"species":species, "outgroups":outgroups})
+
+@app.route('/results/<jobid>/step3/genes')
+def getgenes(jobid):
+    if os.path.exists('/Users/labuser/Downloads/mlstlist_example.json'):
+        return send_from_directory('/Users/labuser/Downloads', 'mlstlist_example.json')
+
+@app.route('/results/<jobid>/step3/genein', methods=['POST'])
+def genein(jobid):
+    genes = request.form.getlist('mlstlist')
+    radioval = request.form.get('optradio')
+    return json.dumps({"genes":genes,"mode":radioval})
 
 @app.route('/jobstatus/<jobid>')
 @app.route('/jobstatus/<jobid>/')
 def status(jobid):
     return json.dumps({"status":42})
+
 
 @app.route('/results/example/report')
 def example():
