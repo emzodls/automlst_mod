@@ -40,16 +40,16 @@
 
     <!-- <button type="button" class="btn btn-primary" onclick="drawTree('{{ jobid }}')" style="margin-top:20px">Click</button> -->
     <hr>
-        <!-- <div class="btn-group">
-    <button type="button" class="btn btn-primary" style="width:200px" id="treedownl" name="treedownl" data-toggle="dropdown"><span class="glyphicon glyphicon-download-alt"></span> Download tree</button>
-            remember to add dropdown-toggle class and data-toggle=dropdown
+         <div class="btn-group">
+    <button type="button" class="btn btn-primary dropdown-toggle" style="width:200px" id="treedownl" name="treedownl" data-toggle="dropdown"><span class="glyphicon glyphicon-download-alt"></span> Download tree <span class="caret"></span></button>
         <ul class="dropdown-menu" role="menu">
             <li><a href="/results/{{ jobid }}/tree?format=newick">Download Newick file</a></li>
-            <li><a href="/results/{{ jobid }}/tree?format=nexml">Download NeXML file</a></li>
-            <li><a href="/results/{{ jobid }}/tree?format=phyloxml">Download PhyloXML file</a></li>
+            <!-- <li><a href="/results/{{ jobid }}/tree?format=nexml">Download NeXML file</a></li>
+            <li><a href="/results/{{ jobid }}/tree?format=phyloxml">Download PhyloXML file</a></li>-->
+            <li id="downlink"><a id="imgdownl" href="#" target="_blank">Download svg image</a></li>
         </ul>
-        </div>-->
-    <a href="/results/{{ jobid }}/tree?format=newick" class="btn btn-primary" role="button" style="width:200px" id="treedownl" name="treedownl"><span class="glyphicon glyphicon-download-alt"></span> Download tree</a>
+        </div>
+    <!-- <a href="/results/{{ jobid }}/tree?format=newick" class="btn btn-primary" role="button" style="width:200px" id="treedownl" name="treedownl"><span class="glyphicon glyphicon-download-alt"></span> Download tree</a> -->
     <button type="button" class="btn btn-primary" style="width:200px" id="aligndownl" name="aligndownl"><span class="glyphicon glyphicon-download-alt"></span> Download alignment</button>
     <button type="button" class="btn btn-primary" style="width:200px" id="mlstdownl" name="mlstdownl"><span class="glyphicon glyphicon-download-alt"></span> Download MLST list</button>
     <button type="button" class="btn btn-primary" style="width:200px" id="orgdownl" name="orgdownl"><span class="glyphicon glyphicon-download-alt"></span> Download organism list</button>

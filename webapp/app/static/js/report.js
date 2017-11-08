@@ -11,7 +11,6 @@ phylocanvas = new Smits.PhyloCanvas(
 				);
 				/* var canvasHeight = parseInt($('svg').attr("height"));
 				var canvasWidth = parseInt($('svg').attr("width")); */
-				console.log($($('tspan')[0])[0]);
 				$('tspan:contains(###)').attr("fill","#0000ff");
 /*				$('tspan').each(function(objindex,obj) {
 				console.log($(obj));
@@ -20,6 +19,12 @@ phylocanvas = new Smits.PhyloCanvas(
 				$(obj).attr("fill","#0000ff");
 				}
 				}); */
+                var treeSvg = $('#svgCanvas').html();
+                var fileNameToSave = "treetest3.svg";
+                treeSvg = '<?xml version="1.0" standalone="no"?>\r\n' + treeSvg;
+                var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(treeSvg);
+                $('#imgdownl').attr("href",url);
+                $('#imgdownl').attr("download", fileNameToSave);
 }
 function repairSize() {
 var canvasHeight = parseInt($('svg').attr("height"));
@@ -68,7 +73,7 @@ console.log(xhr,ajaxOptions,thrownError);
 }
 function drawTree() {
 var jobid = $('#jobinfo').val();
-console.log(jobid);
+//console.log(jobid);
 $.ajax({
         // Your server script to process the upload
         url: '/results/'+jobid+'/tree',

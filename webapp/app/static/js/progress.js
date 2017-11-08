@@ -1,5 +1,4 @@
 function progressSuccess(data,textStatus,xhr) {
-console.log(data);
 var data = JSON.parse(data);
 $('#workflow2stat').attr("style", "width:"+data["status"]+"%");
 $('#workflow2stat').attr("aria-valuenow",data["status"]);
@@ -12,7 +11,6 @@ console.log(xhr,ajaxOptions,thrownError);
 
 function getStatus() {
 var jobid = $('#jobinfo').val();
-console.log(jobid);
 $.ajax({
     url: '/jobstatus/'+jobid,
     async: true,

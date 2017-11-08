@@ -227,7 +227,7 @@ console.log(xhr,ajaxOptions,thrownError);
 }
 
 function geneSuccess(data,textStatus,xhr) {
-    var counter
+    var counter;
     for (counter=0; counter<data.length; counter++) {
         var geneInfo = data[counter];
         console.log(geneInfo);

@@ -48,6 +48,7 @@ def getTree(jobid):
     if os.path.exists(os.path.join(resultdir,resulttree+'.tree')):
         if format == 'newick':
             return send_from_directory(resultdir,resulttree+'.tree',as_attachment=True)
+
         # elif format == 'nexml':
         #     Phylo.convert(os.path.join(resultdir,resulttree+'.tree'),'newick', os.path.join(resultdir,resulttree+'_nexml.xml'),'nexml')
         #     return send_from_directory(resultdir,resulttree+'_nexml.xml',as_attachment=True)
@@ -63,6 +64,15 @@ def show2(jobid,step):
         return render_template("startjob2.html", jobid=jobid)
     elif step == "report":
         return render_template("report.html",jobid=jobid,workflow=2)
+
+@app.route('/results2/<jobid>/refs')
+def getrefs(jobid):
+    if os.path.exists('/Users/labuser/Downloads/genuslist_example2.json'):
+        return send_from_directory('/Users/labuser/Downloads','genuslist_example2.json')
+@app.route('/results2/selectgenus', methods=['POST'])
+def selectgenus():
+    return json.dumps({"status":1, "data":request.form.get('genusoptions')})
+
 
 @app.route('/analyze')
 def analyze():

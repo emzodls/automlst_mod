@@ -12,21 +12,56 @@
             <p style="margin-top:10px">{{ jobid }}</p>
         </div>
     </div>
-<!--    <div class="row">
-        <div class="col-md-2">
-            <h4>Status</h4>
-        </div>
-        <div class="col-md-10">
-            <p style="margin-top:10px"><b>Calculating closest organism (Step 1)</b></p>
-        </div>
-    </div> -->
     <hr>
-    <h4>Status</h4>
+    <div class="row">
+    <div class="col-md-2">
+        <h4>Status</h4>
+    </div>
+        <div class="col-md-10" id="currentstatus">
+        </div>
+        </div>
+    <br />
+    <div class="row">
+        <div class="col-md-2">
+            <b>Selected genus</b>
+        </div>
+        <div class="col-md-10" id="selectedgenus"></div>
+    </div>
+    <br />
       <div class="progress">
         <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%" id="workflow2stat"></div>
     </div>
+    <div id="genuswarn" class="hidden">
+        <hr>
+        <form method="post" id="multigenus" name="multigenus">
+        <div class="form-group">
+            <label for="genusoptions">Select reference genus:</label>
+            <select class="form-control" id="genusoptions" name="genusoptions">
+
+            </select>
+        </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="genustable">
+                    <thead>
+                    <tr>
+                        <th class="col-md-8">Uploaded genome</th>
+                        <th class="col-md-4">Detected genus</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
+            <button type="button" class="btn btn-primary" style="width:300px" onclick="selectGenus();">Continue &raquo;</button>
+          </form>
+    </div>
+    <div class="alert alert-warning hidden" id="genuswarning"><span class="glyphicon glyphicon-alert"></span> No matching genus detected.</div>
    <!-- <progress id="work2progress" value="{{ jobstatus }}" max="100" class="bootstripe" style="width:100%"></progress> -->
-<input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
 </div>
 <script src="/static/js/progress.js"></script>
+<script src="/static/js/accelerated.js"></script>
+<script>
+    $('body').onload = getRefGenus();
+</script>
 {% endblock %}
