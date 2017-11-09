@@ -1,10 +1,10 @@
 var genusKeys = false;
-console.log(genusList);
 function genusSuccess(data,textStatus,xhr) {
-    if (genusList != data["genuslist"]) {
     var genusList = data["genuslist"];
-    console.log(genusList);
-    var genusKeys = Object.keys(genusList);
+    if (String(genusKeys) != String(Object.keys(genusList))) {
+    genusKeys = Object.keys(genusList);
+    //need to clear the counter?
+    console.log(genusKeys.length);
     var genusVals = Object.values(genusList);
     var maxValue = Math.max.apply(null,genusVals);
     var queries = data["queryfiles"];
@@ -13,6 +13,7 @@ function genusSuccess(data,textStatus,xhr) {
     console.log(maxValue);
     if (genusKeys.length > 1) {
         $('#genuswarn').removeClass("hidden");
+        $('#genustable >tbody').empty();
         for (counter=0;counter<genusKeys.length;counter++) {
             $('#genusoptions').append("<option id='"+genusKeys[counter]+"' value='"+genusKeys[counter]+"'>"+genusKeys[counter]+": "+genusList[genusKeys[counter]]+" sequences </option>");
             if (genusList[genusKeys[counter]] == maxValue){
@@ -25,6 +26,8 @@ function genusSuccess(data,textStatus,xhr) {
         }
     } else if (genusKeys.length == 1) {
         $('#selectedgenus').text(genusKeys[0]);
+        $('#genuswarn').addClass("hidden");
+        clearInterval(timer3);
     } else {
         $('#genuswarning').removeClass("hidden");
     }
@@ -71,4 +74,4 @@ $.ajax({
         error: selectError});
 }
 
-//var timer3 = setInterval(getRefGenus, 1000);
+var timer3 = setInterval(getRefGenus, 1000);
