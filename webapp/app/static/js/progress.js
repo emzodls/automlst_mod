@@ -1,7 +1,8 @@
 function progressSuccess(data,textStatus,xhr) {
 var data = JSON.parse(data);
-$('#workflow2stat').attr("style", "width:"+data["status"]+"%");
-$('#workflow2stat').attr("aria-valuenow",data["status"]);
+$('#workflow2stat').attr("style", "width:"+data["progress"]+"%");
+$('#workflow2stat').attr("aria-valuenow",data["progress"]);
+$('#currentstatus').append('<p style="margin-top:10px">'+data["status"]+'</p>')
 clearInterval(timer2); //in final version, only if data["status"] == 100
 }
 

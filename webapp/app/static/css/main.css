@@ -166,7 +166,9 @@ body{
   background: -moz-linear-gradient(top, #3838AA, #151580); /* For Firefox 3.6 to 15 */
   background: linear-gradient(to top, #3838AA, #151580); /* Standard syntax */
 }
-
+.navbar-brand {
+    font-size:16px;
+}
 
 /*
  * Front
@@ -385,7 +387,10 @@ a.steps {
 /* reset appearance of working progress bar */
 progress.progress-boots[value], progress.bootstripe[value] {
 -webkit-appearance:none;
+-moz-appearance:none;
 appearance:none;
+border:none;
+height:20px;
 }
 
 progress.progress-boots[value]::-webkit-progress-bar,  progress.bootstripe[value]::-webkit-progress-bar {
@@ -395,6 +400,20 @@ height: 20px;
   background-color: #f5f5f5;
   border-radius: 4px;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+}
+
+progress.progress-boots[value]::-moz-progress-bar {
+height: 20px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 20px;
+  color: #fff;
+  text-align: center;
+  background-color: #3d3d8f;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+  transition: width .6s ease;
 }
 
 progress.progress-boots[value]::-webkit-progress-value {
@@ -407,6 +426,22 @@ width: 0;
   background-color: #3d3d8f;
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
   transition: width .6s ease;
+}
+
+progress.bootstripe[value]::-moz-progress-bar {
+height: 20px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  line-height: 20px;
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
+  background-color: #3d3d8f;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+  transition: width .6s ease;
+background-image: -moz-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+          background-size: 40px 40px;
 }
 
 progress.bootstripe[value]::-webkit-progress-value {
@@ -434,4 +469,10 @@ color:#ccccff !important;
 .nav-tabs > li.active > a:focus {
 background-color:#151580;
 color:#ffffff
+}
+
+@media screen and (max-width:768px){
+    #svgCanvas {
+        overflow:auto;
+    }
 }

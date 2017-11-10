@@ -87,9 +87,13 @@ def upload():
 @app.route('/startjob', methods=['POST'])
 def startjob():
     jobid = unicode(uuid.uuid4())
+    jobdict = {"jobid": jobid, "workflow": request.form.get("workflow"), "genomes": request.form.getlist('upfiles'),
+               "reference": request.form.get('genusselect','NA')}
     if request.form.get("workflow") == "classic":
+        print jobdict
         return redirect('/results/'+jobid)
     elif request.form.get("workflow") == "auto":
+        print jobdict
         return redirect('/results2/' + jobid + '/loading')
 
 @app.route('/results/<jobid>/step2/orgs')
@@ -117,7 +121,18 @@ def genein(jobid):
 @app.route('/jobstatus/<jobid>')
 @app.route('/jobstatus/<jobid>/')
 def status(jobid):
-    return json.dumps({"status":42})
+    jobstatus = ""
+    percent = 0
+    with open('/Users/labuser/Downloads/example.log','r') as infile:
+        for line in infile:
+            if 'JOB_STATUS' in line:
+                statlist = line.strip().split('::')
+                jobstatus = statlist[1]
+            elif 'JOB_PROGRESS' in line:
+                proglist = line.strip().split('::')
+                fraction = str(proglist[1]).split('/')
+                percent = 100 * (float(fraction[0])/float(fraction[1]))
+    return json.dumps({"progress":percent,"status":jobstatus}) # title, progress bar value
 
 
 @app.route('/results/example/report')

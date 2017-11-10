@@ -35,7 +35,7 @@ console.log(data["filename"]);
 if (data["filename"] == false) {
     $("#errorwarning").removeClass("hidden");
     } else {
-    $("#upfiles").prepend("<option value='"+data["filename"]+"' class='"+hashCode(data["filename"])+"'>"+data["name"]+"</option>");
+    $("#upfiles").prepend("<option value='"+data["filename"]+"' class='"+hashCode(data["filename"])+" picked'>"+data["name"]+"</option>");
     maxSeqs();
     $("#uploadsuccess").removeClass("hidden");
     }

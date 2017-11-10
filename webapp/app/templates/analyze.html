@@ -14,7 +14,7 @@
                 <hr>
         <div class="form-group" id="genusform">
             <label for="genusselect">Select reference genus:</label>
-            <select class="form-control" id="genusselect">
+            <select class="form-control" id="genusselect" name="genusselect">
                 <option>Auto</option>
                 <option>relentlessly pursues moth</option>
                 <option>missing until dinner time </option>
@@ -35,7 +35,7 @@
         <div class="form-group row">
             <div class="col-md-10">
             <label for="upfiles">Accession numbers and uploaded files</label>
-            <select multiple class="form-control" id="upfiles" size="10"></select>
+            <select multiple class="form-control" id="upfiles" name="upfiles" size="10"></select>
             </div>
             <div class="col-md-2">
                 <button type="button" class="btn btn-default" id="remfiles" style="margin-top:25px" onclick="removeAllSeqs()">Remove selected sequences</button>
@@ -67,7 +67,7 @@
         <div class="alert alert-danger hidden" id="errorwarning"><strong>Error:</strong> Invalid accession number or sequence file</div>
         <div class="alert alert-warning hidden" id="seqwarn"><strong>Maximum number of files and accession numbers reached.</strong></div>
 
-        <button type="submit" class="btn btn-primary" style="width:300px" id="submitjob">Submit Job &raquo;</button>
+        <button type="button" class="btn btn-primary" style="width:300px" id="submitjob" onclick="selectAndSend('#sequpload');">Submit Job &raquo;</button>
         <input type="hidden" id="filesrc" name="filesrc" value="">
         <input type="hidden" id="workflow" name="workflow" value="auto">
     </form>

@@ -2,7 +2,7 @@
 {% block mainbody %}
 <div class="container" style="padding-top:40px">
     <h2>{{ jobid }}</h2>
-    <a href="#" class="steps">Step 1 <small>Calculating closest organism</small> &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='step2') }}" class="steps-disabled">Step 2  &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='step3') }}" class="steps-disabled">Step 3 &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='report') }}" class="steps-disabled">Results</a>
+    <a href="#" class="steps">Step 1 <small>Calculating closest organism</small> &raquo;</a> <span class="steps-disabled">Step 2  &raquo;</span> <span class="steps-disabled">Step 3 &raquo;</span> <span class="steps-disabled">Results</span>
     <hr>
      <div class="row">
         <div class="col-md-2">
