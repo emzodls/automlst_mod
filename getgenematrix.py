@@ -14,9 +14,9 @@
 # License: You should have received a copy of the GNU General Public License v3 with ARTS
 # A copy of the GPLv3 can also be found at: <http://www.gnu.org/licenses/>.
 
-import argparse, numpy as np, sqlite3 as sql
+import argparse, json, numpy as np, sqlite3 as sql
 
-def getmat(db,pct=0.9,pct2=0.95,ev=0.001,bs=0,bh=True,rna=False):
+def getmat(db,pct=0.9,pct2=0.95,ev=0.001,bs=0,bh=True,rna=False,pfx="genematrix"):
     conn=sql.connect(db)
     cur=conn.cursor()
     tabletitle="HMMhits"
@@ -40,10 +40,14 @@ def getmat(db,pct=0.9,pct2=0.95,ev=0.001,bs=0,bh=True,rna=False):
         avgcount = np.mean(temp)
         stdcount = np.std(temp)
 
-        gmstr+="%s\t%d\t%.2f\t%.4f\t"%(k,norg,avgcount,stdcount)+"\t".join([str(c) for c in v])+"\n"
         if len([c for c in v if c==1]) >= thrsh:
+            gmstr+="%s\t%d\t%.2f\t%.4f\t"%(k,norg,avgcount,stdcount)+"\t".join([str(c) for c in v])+"\n"
             slist.append(k)
     conn.close()
+    #Write gene matrix to file:
+    with open(pfx+".txt","w") as gmfil, open(pfx+".json","w") as jsonfil:
+        gmfil.write(gmstr)
+        json.dump({"count":countdict,"orgs":orgs,"slist":slist},jsonfil,indent=3)
     return countdict,orgs,slist
 
 # Commandline Execution
@@ -55,8 +59,9 @@ if __name__ == '__main__':
     parser.add_argument("-p2", "--pct2", help="percent of orgs to consider as ubiquitous single copy gene (default: 0.95)", type=float, default=0.95)
     parser.add_argument("-e", "--evalue", help="Evalue threshold (default: 0.1)", type=float, default=0.001)
     parser.add_argument("-b", "--bitscore", help="Bitscore threshold (default: 0)", type=float, default=0)
+    parser.add_argument("-pfx", "--prefix", help="filename prefix to save .txt matrix and .json object", default="genematrix")
     # parser.add_argument("-s", "--savefil", help="Save file to python pickle file (default: disabled)", default="")
     parser.add_argument("-bh", "--besthit", help="Only write best hit hmm for each gene (only lowest hmm allowed per gene)", action='store_true')
     parser.add_argument("-r", "--rna", help="Look at RNA table", action='store_true')
     args = parser.parse_args()
-    result=getmat(args.input, args.pct, args.pct2, args.evalue, args.bitscore, args.besthit, args.rna, True)
+    result=getmat(args.input, args.pct, args.pct2, args.evalue, args.bitscore, args.besthit, args.rna, args.prefix)
