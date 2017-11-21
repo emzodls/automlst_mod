@@ -26,7 +26,7 @@ def writefasta(db,outfile,nuc=False,idprfx="",latest=False):
     cur = eng.connect()
     result = cur.execute('SELECT * FROM "Seqs"')
     if latest:
-        result = cur.execute('SELECT * FROM "Seqs" WHERE lastscan = (SELECT Max(lastscan) from "Seqs")')
+        result = cur.execute('SELECT * FROM "Seqs" WHERE lastscan >= (SELECT Max(lastscan) from "Seqs")')
     log.info("Writing sequences to disk...")
     with open(outfile,"w") as ofil:
         for r in result:
@@ -41,4 +41,4 @@ if __name__ == '__main__':
     parser.add_argument("-n","--nuc", help="Write DNA sequences instead of protein",action='store_true')
     parser.add_argument("-l","--latest", help="Only write latest sequences added to database",action='store_true')
     args = parser.parse_args()
-    writefasta(args.input,args.outfile,args.nuc)
+    writefasta(args.input,args.outfile,args.nuc,latest=args.latest)

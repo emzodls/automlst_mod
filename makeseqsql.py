@@ -20,7 +20,7 @@ from sqlalchemy import exc
 global log
 log = setlog.init(toconsole=True)
 
-def runlist(finput,ofil,transonly=False,orgname=False):
+def runlist(finput,ofil,transonly=False,orgname=False,inc=False):
     if type(finput) is list:
         flist=[x.strip() for x in finput if os.path.exists(x.strip())]
     elif type(finput) is file:
@@ -79,6 +79,12 @@ def runlist(finput,ofil,transonly=False,orgname=False):
                             )
             metadata.create_all(eng)
             # sqlcmd="CREATE TABLE Seqs (seqid INTEGER PRIMARY KEY, orgname text, gene text, description text, source text, loc_start int, loc_end int, loc_strand int, acc text, lastscan int, naseq text, aaseq text)"
+
+#Creating table copy:
+
+#             CREATE TABLE xxx.Seqs (seqid INTEGER PRIMARY KEY, orgname text, gene text, description text, source text, loc_start int, loc_end int, loc_strand int, acc text, lastscan int, naseq text, aaseq text)
+#             INSERT INTO xxx.Seqs (orgname, gene, description, source, loc_start, loc_end, loc_strand, acc, lastscan, naseq, aaseq) Select orgname, gene, description, source, loc_start, loc_end, loc_strand, acc, lastscan, naseq, aaseq from Seqs where orgname in (Select assembly_id from taxa.taxonomy where genus_name = 'xxx')
+
             # csr.execute(sqlcmd)
             log.info("Creating db...")
         except exc.OperationalError as e:
@@ -162,7 +168,17 @@ def runlist(finput,ofil,transonly=False,orgname=False):
             # if len(recs)>1:
             #     csr.executemany("INSERT INTO Seqs values (NULL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",recs)
             # for rec in recs:
-            csr.execute('INSERT INTO "Seqs" (orgname, gene, description, source, loc_start, loc_end, loc_strand, acc, lastscan, naseq, aaseq) values (%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s)'%{"x":sep},recs)
+            if inc:
+                # Explictly increment seqid values for insert
+                maxid = csr.execute('Select Max(seqid) from "Seqs"').fetchone()[0]
+                for i,r in enumerate(recs):
+                    maxid += 1
+                    recs[i] = [maxid] + r
+
+                csr.execute('INSERT INTO "Seqs" (seqid, orgname, gene, description, source, loc_start, loc_end, loc_strand, acc, lastscan, naseq, aaseq) values (%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s)'%{"x":sep},recs)
+            else:
+                #Assume auto-increment
+                csr.execute('INSERT INTO "Seqs" (orgname, gene, description, source, loc_start, loc_end, loc_strand, acc, lastscan, naseq, aaseq) values (%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s,%(x)s)'%{"x":sep},recs)
             log.info("added %d of %d files (%s  - %d reccords)" % (nr+1,numrecs,fname,len(recs)))
         try:
             log.info("Removing duplicates...")
@@ -185,5 +201,6 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--out", help="Output sqlite file (default: seqsql.db) or postgre sql db connection 'postgresql://user:pass@host:5432/dbname'", default="seqsql.db")
     parser.add_argument("-org", "--orgname", help="Organism name (default: filename)", default="")
     parser.add_argument("-t", "--trans", help="Only store translation of DNA for protein seqs (default: False)", action='store_true')
+    parser.add_argument("-i", "--inc", help="Explicitly increment the sequence id (necessary for table generated with 'CREATE ... AS' )", action='store_true')
     args = parser.parse_args()
-    runlist(args.input,args.out,args.trans,args.orgname)
+    runlist(args.input,args.out,args.trans,args.orgname,args.inc)
