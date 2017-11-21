@@ -15,9 +15,7 @@
         <div class="form-group" id="genusform">
             <label for="genusselect">Select reference genus:</label>
             <select class="form-control" id="genusselect" name="genusselect">
-                <option>Auto</option>
-                <option>relentlessly pursues moth</option>
-                <option>missing until dinner time </option>
+                <option value="auto">Auto</option>
             </select>
         </div>
             </div>
@@ -77,5 +75,5 @@
     <a href="#" class="btn btn-primary" style="width:220px">Download example &raquo;</a>
     </div>
 </div>
-
+<script>$('body').onload=refGenus();</script>
 {% endblock %}

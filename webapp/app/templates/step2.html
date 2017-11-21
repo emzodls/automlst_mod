@@ -34,9 +34,9 @@
             </select>
         </div>
             <div class="col-md-2" style="padding-top:65px">
-                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#speciessel','#specieslist'); refreshView('#specieslist',5)">Add to list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#specieslist'); refreshView('#specieslist',5)">Remove from list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#specieslist','#specieslist'); refreshView('#specieslist',5)">Move to top</button>
+                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#speciessel','#specieslist'); refreshView('#specieslist',50); idSearch()">Add to list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#specieslist'); refreshView('#specieslist',50); idSearch()">Remove from list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#specieslist','#specieslist'); refreshView('#specieslist',50); idSearch()">Move to top</button>
             </div>
             <div class="form-group col-md-5">
                 <h4>Selected species</h4>
@@ -45,6 +45,35 @@
             </select>
             </div>
         </div>
+        <hr>
+        <h4>Overview</h4>
+        <p>Show/hide columns:<br />
+        <a href="#" class="toggle-vis" data-column="2">Organism ID</a> - <a href="#" class="toggle-vis" data-column="4">Furthest organism</a> - <a href="#" class="toggle-vis" data-column="5">Maximum distance</a>
+            - <a href="#" class="toggle-vis" data-column="6">Minimum distance</a> - <a href="#" class="toggle-vis" data-column="7">Genus</a>
+             - <a href="#" class="toggle-vis" data-column="9">Family</a> - <a href="#" class="toggle-vis" data-column="11">Order</a>
+             - <a href="#" class="toggle-vis" data-column="13">Phylum</a>
+        </p>
+        <table class="table table-bordered table-hover" id="refinfo">
+           <thead>
+           <tr>
+               <th>Organism name</th>
+               <th>Strain</th>
+               <th>Organism ID</th>
+               <th>Mean distance from queries</th>
+               <th>Furthest organism</th>
+               <th>Maximum distance</th>
+               <th>Minimum distance</th>
+               <th>Genus</th>
+               <th>Genus ID</th>
+               <th>Family</th>
+               <th>Family ID</th>
+               <th>Order</th>
+               <th>Order ID</th>
+               <th>Phylum</th>
+               <th>Phylum ID</th>
+           </tr>
+           </thead>
+        </table>
         <h3 class="page-header">Outgroups</h3>
         <div class="row">
             <div class="form-group col-md-5">
@@ -87,4 +116,6 @@
  <script>
         $('body').onload = getOrgs();
     </script>
+<script src="/static/js/orgtables.js"></script>
+
 {% endblock %}

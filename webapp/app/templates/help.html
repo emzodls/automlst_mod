@@ -58,7 +58,7 @@
         <div class="col-md-4">
             <ol start="2">
                 <li>Select the reference tree to which the uploaded sequences will be added. By default, autoMLST will
-                attempt to detect the closest genus on its own (?)</li>
+                attempt to detect the closest genus on its own.</li>
                 <li>Submit the sequences to be added to the tree.
                 <ol style="list-style-type:lower-alpha;">
                     <li>Retrieve an NCBI sequence by its accession number.</li>
@@ -82,7 +82,7 @@
             <li>Submit the sequences to construct the tree.
              <ol style="list-style-type:lower-alpha;">
                     <li>Retrieve an NCBI sequence by its accession number.</li>
-                    <li>Upload a sequence file. Acceptable formats are FASTA, Genbank (and EMBL?) files.</li>
+                    <li>Upload a sequence file. Acceptable formats are FASTA, Genbank (and EMBL) files.</li>
                     <li>Remove selected sequences from the list.</li>
                 </ol>
                  <br />
@@ -112,19 +112,29 @@
     <h4>Step 2 <small>Species and outgroup selection</small></h4> <!-- do prettier layout! -->
     <div class="row">
         <div class="col-md-8">
-            <img src="/static/images/help/step2new.png" alt="species selection options of the species and outgroup selection screen" class="img-responsive" style="border:1px solid #cccccc;">
-            <img src="/static/images/help/step2outgroupsnew.png" alt="outgroup selection options of the species and outgroup selection screen" class="img-responsive" style="border:1px solid #cccccc;margin-top:5px;">
+            <img src="/static/images/help/step2table.png" alt="species selection options of the species and outgroup selection screen" class="img-responsive" style="border:1px solid #cccccc;">
+            <img src="/static/images/help/step2outgroups-11-21-2.png" alt="outgroup selection options of the species and outgroup selection screen" class="img-responsive" style="border:1px solid #cccccc;margin-top:5px;">
         </div>
         <div class="col-md-4">
             <ol start="4">
-                <li>By default, autoMLST picks the 50 closest organisms it detects to continue. Users are able to add
-                organisms from the organism list to this selection or remove them. <br />
+                <li>By default, autoMLST picks all user-submitted sequences and the closest organisms it detects to
+                    continue, to a total of 50. Users are able to add organisms from the organism list to this selection
+                    or remove them. <br />
                 <b>Note:</b> A maximum of 50 organisms will be used for tree construction; additional species above this
-                number will not be used.</li>
+                number will not be used. Sequences past this limit are highlighted in red.</li>
+                <li>Additional information on the selected species is displayed, sorted by the mean distance to the
+                    query sequences by default. Users can pick what information is displayed by choosing options to
+                show/hide columns.
+                <ol style="list-style-type:lower-alpha;">
+                    <li>By default, the table is filtered to only display information on the sequences the user selected.
+                    However, users may search the table for species, genera, families, orders or phyla by their name or
+                    NCBI taxonomy ID.</li>
+                </ol>
+                </li>
                 <li>By default, up to 5 species are used for outgroups. Users are able to add organisms from the
                 outgroup list to this selection or remove them. <br />
                 <b>Note:</b> A maximum of 5 outgroups will be used; additional species above this number will not be
-                used.</li>
+                used. Sequences past this limit are highlighted in red.</li>
             </ol>
         </div>
     </div>
@@ -132,14 +142,19 @@
     <h4>Step 3 <small>MLST gene selection</small></h4>
     <div class="row">
         <div class="col-md-8">
-            <img src="/static/images/help/step3new.png" alt="MLST gene selection screen" class="img-responsive" style="border:1px solid #cccccc;">
+            <img src="/static/images/help/step3-11-21.png" alt="MLST gene selection screen" class="img-responsive" style="border:1px solid #cccccc;">
         </div>
         <div class="col-md-4">
-            <ol start="6">
+            <ol start="7">
                 <li>autoMLST selects 10 genes for the MLST by default. Users are able to add or remove genes from this
                 selection. <br />
                 <b>Note:</b> A maximum of 10 genes will be used for the MLST; additional genes above this number will
                     not be used.</li>
+                <li>Not all potential MLST genes may be found in all selected species. In this case, a warning will be
+                displayed and the species limiting the number of MLST genes listed. <br />
+                Users then have the choice to proceed with the limited set of genes, remove the listed species and
+                    proceed with a full set of MLST genes, or return to Step 2 (via the navigation above or the "back"
+                    button of their browser) and alter their choice of organisms.</li>
                 <li>autoMLST can create either a concatenated alignment or a coalescent tree. (Short explanation!)
                 <ul>
                     <li><b>Concatenated alignment</b>:</li>

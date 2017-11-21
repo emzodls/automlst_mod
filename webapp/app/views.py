@@ -73,6 +73,10 @@ def getrefs(jobid):
 def selectgenus():
     return json.dumps({"status":1, "data":request.form.get('genusoptions')})
 
+@app.route('/results2/refgenus')
+def refgenus():
+    if os.path.exists('/Users/labuser/Downloads/acceleratedrefs.json'):
+        return send_from_directory('/Users/labuser/Downloads','acceleratedrefs.json')
 
 @app.route('/analyze')
 def analyze():
@@ -98,25 +102,38 @@ def startjob():
 
 @app.route('/results/<jobid>/step2/orgs')
 def getOrgs(jobid):
-    if os.path.exists('/Users/labuser/Downloads/mash_example2.json'):
-        return send_from_directory('/Users/labuser/Downloads', 'mash_example2.json')
+    if os.path.exists('/Users/labuser/Downloads/userlist.json'):
+        with open('/Users/labuser/Downloads/reflist.json','r') as reffile, open('/Users/labuser/Downloads/userlist.json','r') as userfile:
+            refdict = json.load(reffile)
+            userdict = json.load(userfile)
+            refdict.update(userdict)
+            return jsonify(refdict)
+    elif os.path.exists('/Users/labuser/Downloads/reflist.json'):
+        return send_from_directory('/Users/labuser/Downloads', 'reflist.json')
 
 @app.route('/results/<jobid>/step2/orgin', methods=['POST'])
 def orgin(jobid):
     species = request.form.getlist('specieslist')
     outgroups = request.form.getlist('outgrlist')
-    return json.dumps({"species":species, "outgroups":outgroups})
+    jobid = request.form.get('jobinfo')
+    with open('/Users/labuser/Downloads/userlist.json','w') as userfile:
+        json.dump({"selspecies":species, "seloutgroups":outgroups},userfile)
+    return redirect('/results/'+jobid+'/step3')
 
 @app.route('/results/<jobid>/step3/genes')
 def getgenes(jobid):
-    if os.path.exists('/Users/labuser/Downloads/mlstlist_example.json'):
-        return send_from_directory('/Users/labuser/Downloads', 'mlstlist_example.json')
+    if os.path.exists('/Users/labuser/Downloads/mlstlist_example2.json'):
+        return send_from_directory('/Users/labuser/Downloads', 'mlstlist_example2.json')
 
 @app.route('/results/<jobid>/step3/genein', methods=['POST'])
 def genein(jobid):
+    jobid = request.form.get('jobinfo')
     genes = request.form.getlist('mlstlist')
     radioval = request.form.get('optradio')
-    return json.dumps({"genes":genes,"mode":radioval})
+    rmorgs = request.form.get('removeorgs')
+    with open('/Users/labuser/Downloads/usergenes.json','w') as usergenes:
+        json.dump({"genes":genes,"mode":radioval,"remove":rmorgs},usergenes)
+    return redirect('/results/'+jobid+'/report')
 
 @app.route('/jobstatus/<jobid>')
 @app.route('/jobstatus/<jobid>/')

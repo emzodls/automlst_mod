@@ -91,6 +91,33 @@ $("#filesrc").val(filesrc);
 uploader();
 console.log($("#uploadprog")); // -> doesn't clear properly!
 }
+
+function genusSuccess(data,textStatus,xhr) {
+var counter;
+for (counter=0;counter<data.length;counter++) {
+    var genusInfo = data[counter];
+    $('#genusselect').append("<option id='"+genusInfo.genusid+"' value='"+genusInfo.genusid+"'>"+genusInfo.genusname+"</option>");
+}
+}
+
+function genusError(xhr,ajaxOptions,thrownError) { // communication error
+console.log(xhr,ajaxOptions,thrownError);
+}
+
+function refGenus() {
+$.ajax({
+    contentType: 'application/json',
+    url: '/results2/refgenus',
+    async: true,
+    cache: false,
+    contentType: false,
+    processData: false,
+    success: genusSuccess,
+    error: genusError
+
+});
+}
+
 function addtolist(id1,id2) {
 var optionList = [];
     $(id1+' > option:selected').each(function() {
@@ -170,6 +197,19 @@ $(id5+" > option").each(function() {
 });
 addtolist(id5,id6);
 }
+
+function loadSelected(id8,id9,idList) {
+$(id8+" >option").each(function() {
+    // iterate over idlist, set selected to true if matches?
+    for (organismId in idList) {
+        if ($(this).attr("id") == idList[organismId]) {
+        this.selected=true;
+        }
+    }
+});
+addtolist(id8,id9);
+}
+
 function selectAndSend(id7) {
 $(".picked").each(function() {
 this.selected=true;
@@ -189,23 +229,30 @@ var refOrgs = data["reforgs"];
 var outgroups = data["outgroups"];
 for (counter3 = 0; counter3<queryOrgs.length; counter3++) {
     var queryInfo = queryOrgs[counter3];
-    $('#speciessel').append("<option value='"+queryInfo.id+"' data-title='(U) "+ queryInfo.orgname + " (distance: "+ queryInfo.dist+")"+"' id='" + queryInfo.id +"'> (U) "+queryInfo.orgname+ " (distance: "+ queryInfo.dist+") </option>");
+    $('#speciessel').append("<option value='"+queryInfo.id+"' data-title='(U) "+ queryInfo.orgname + " (detected genus: "+ queryInfo.genusname +")"+"' id='" + queryInfo.id +"'> (U) "+queryInfo.orgname+ " (detected genus: "+ queryInfo.genusname+") </option>");
 }
 for (counter = 0; counter<refOrgs.length; counter++) {
     var orgInfo = refOrgs[counter];
     typestr = (orgInfo.typestrain) ? orgInfo.typestrain : "false";
     if (typestr == "true") {
-    $('#speciessel').append("<option value='"+orgInfo.id+"' data-title='(T) "+ orgInfo.orgname + " (distance: "+ orgInfo.dist+")"+"' id='" + orgInfo.id +"'>(T) "+orgInfo.orgname+ " (distance: "+ orgInfo.dist+") </option>");
+    $('#speciessel').append("<option value='"+orgInfo.id+"' data-title='(T) "+ orgInfo.orgname + " (mean distance: "+ parseFloat(orgInfo.dist).toFixed(3)+")"+"' id='" + orgInfo.id +"'>(T) "+orgInfo.orgname+ " (mean distance: "+ parseFloat(orgInfo.dist).toFixed(3)+") </option>");
     } else {
-    $('#speciessel').append("<option value='"+orgInfo.id+"' data-title='"+ orgInfo.orgname + " (distance: "+ orgInfo.dist+")"+"' id='" + orgInfo.id +"'>"+orgInfo.orgname+ " (distance: "+ orgInfo.dist+") </option>");
+    $('#speciessel').append("<option value='"+orgInfo.id+"' data-title='"+ orgInfo.orgname + " (mean distance: "+ parseFloat(orgInfo.dist).toFixed(3)+")"+"' id='" + orgInfo.id +"'>"+orgInfo.orgname+ " (mean distance: "+ parseFloat(orgInfo.dist).toFixed(3)+") </option>");
    }
    }
 for (counter2 = 0; counter2<outgroups.length; counter2++) {
     var outgrInfo = outgroups[counter2];
-    $('#outgrsel').append("<option value='"+outgrInfo.id+"' data-title='"+ outgrInfo.orgname + " (distance: "+ outgrInfo.dist+")"+"' id='" + outgrInfo.id +"'>"+outgrInfo.orgname+ " (distance: "+ outgrInfo.dist+") </option>");
+    $('#outgrsel').append("<option value='"+outgrInfo.id+"' data-title='"+ outgrInfo.orgname + " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+")"+"' id='" + outgrInfo.id +"'>"+outgrInfo.orgname+ " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+") </option>");
 }
-loadDefaults('#speciessel','#specieslist',5);
-loadDefaults('#outgrsel','#outgrlist',5);
+if (data["selspecies"] && data["seloutgroups"]) {
+    var selectedSpecies = data["selspecies"];
+    var selectedOutgroups = data["seloutgroups"];
+    loadSelected('#speciessel','#specieslist',selectedSpecies);
+    loadSelected('#outgrsel','#outgrlist',selectedOutgroups);
+} else {
+    loadDefaults('#speciessel','#specieslist',50);
+    loadDefaults('#outgrsel','#outgrlist',50);
+}
 }
 
 function getOrgs() {
@@ -228,12 +275,27 @@ console.log(xhr,ajaxOptions,thrownError);
 
 function geneSuccess(data,textStatus,xhr) {
     var counter;
-    for (counter=0; counter<data.length; counter++) {
-        var geneInfo = data[counter];
+    var mlstGenes = data["genes"];
+    var selectedGenes = data["selected"];
+    var deletedOrgs = data["deletedorgs"];
+    for (counter=0; counter<mlstGenes.length; counter++) {
+        var geneInfo = mlstGenes[counter];
         console.log(geneInfo);
         $('#mlstsel').append("<option id='" + geneInfo.acc + "' data-title='"+ geneInfo.name +": "+geneInfo.desc+"' value='"+geneInfo.acc+"'>" + geneInfo.name +": "+geneInfo.desc+"</option>");
         }
-    loadDefaults('#mlstsel','#mlstlist',10);
+     if (data["selected"]) {
+        loadSelected('#mlstsel','#mlstlist',selectedGenes);
+     } else {
+        loadDefaults('#mlstsel','#mlstlist',100);
+    }
+    if (data["deletedorgs"]) {
+        var counter2;
+        for (counter2=0;counter2<deletedOrgs.length;counter2++){
+            var delInfo = deletedOrgs[counter2];
+            $('#todelete').append("<li>"+delInfo.orgname+"</li>");
+        }
+        $('#deletewarning').removeClass("hidden");
+    }
 }
 
 function getGenes() {

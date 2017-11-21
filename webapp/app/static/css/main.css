@@ -471,6 +471,20 @@ background-color:#151580;
 color:#ffffff
 }
 
+/* pagination for tables */
+.pagination>.active>a,.pagination>.active>a:focus,.pagination>.active>a:hover{
+    background-color:#151580;
+    border-color:#151580
+}
+
+.pagination>li>a {
+    color:#151580
+}
+
+.pagination>li>a:hover, .pagination>li>a:focus {
+    color:#3d3d8f
+}
+
 @media screen and (max-width:768px){
     #svgCanvas {
         overflow:auto;

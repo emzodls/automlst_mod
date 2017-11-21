@@ -50,10 +50,21 @@
                 <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#mlstlist','#mlstlist'); refreshView('#mlstlist',10)">Move to top</button>
             </div>
             <div class="form-group col-md-5">
-                <h4>Selected species</h4>
-                <label for="mlstlist">Add genes (maximum 10)</label>
+                <h4>Selected genes</h4>
+                <label for="mlstlist">Add genes (maximum 100)</label>
             <select multiple class="form-control" id="mlstlist" name="mlstlist" size="15" style="width:100%;overflow:auto;">
             </select>
+            </div>
+        </div>
+        <div class="hidden" id="deletewarning">
+            <div class="alert alert-warning">
+                <p><b>Note:</b> only a limited subset of MLST genes are present in all organisms. Full MLST set can be used by removing:</p>
+                <ul id="todelete">
+
+                </ul>
+            </div>
+            <div class="checkbox">
+                <label><input type="checkbox" id="removeorgs" name="removeorgs" value="checked">Remove suggested organisms and proceed with full set</label>
             </div>
         </div>
         <h4>General</h4>
