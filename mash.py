@@ -51,7 +51,7 @@ def parse(mashresult,taxdb="",maxdist=0.5,TStol=0.05):
                 typestrain = True if lookup["ts_category"] else False
                 recs[qorg].append([refid,lookup["organism_name"],dist,pval,lookup["genus_taxid"],lookup["genus_name"],
                                 lookup["family_id"],lookup["family_name"],lookup["order_id"],lookup["order_name"],
-                                lookup["phylum_id"],lookup["phylum_name"],lookup["taxid"],refseq,typestrain])
+                                lookup["phylum_id"],lookup["phylum_name"],lookup["taxid"],lookup.get("strain","N/A"),refseq,typestrain])
         for qorg in recs:
             # Typestrain genome distances are allowed to be +(tolerance) larger for prioritization
             recs[qorg] = sorted(recs[qorg], key=lambda row: row[2]-TStol if row[-1] else row[2])
@@ -99,8 +99,8 @@ def getrefrecs(recs,top=list()):
         for row in rec:
             if row[0] not in refrecs:
                 refrecs[row[0]] = {"orgname":row[1],"id":row[0],"genusname":row[5],"genusid":row[4], "familyid":row[6],
-                                "familyname":row[7],"orderid":row[8],"ordername":row[9],"phylid":row[10],"phylname":row[11], "taxid":row[-3],
-                                "refseq":row[-2],"typestrain":row[-1],"dlist":[],"plist":[]}
+                                "familyname":row[7],"orderid":row[8],"ordername":row[9],"phylid":row[10],"phylname":row[11], "taxid":row[12],
+                                "strain":row[13],"refseq":row[-2],"typestrain":row[-1],"dlist":[],"plist":[]}
             refrecs[row[0]]["dlist"].append(row[2])
             refrecs[row[0]]["plist"].append(row[3])
     #Get median distances and pvalues
