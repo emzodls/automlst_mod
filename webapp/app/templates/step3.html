@@ -52,7 +52,7 @@
             <div class="form-group col-md-5">
                 <h4>Selected genes</h4>
                 <label for="mlstlist">Add genes (maximum 100)</label>
-            <select multiple class="form-control" id="mlstlist" name="mlstlist" size="15" style="width:100%;overflow:auto;">
+            <select multiple class="form-control selectablein" id="mlstlist" name="mlstlist" size="15" style="width:100%;overflow:auto;">
             </select>
             </div>
         </div>
@@ -67,6 +67,7 @@
                 <label><input type="checkbox" id="removeorgs" name="removeorgs" value="checked">Remove suggested organisms and proceed with full set</label>
             </div>
         </div>
+        <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> No MLST genes selected. Please select MLST genes before submitting.</div>
         <h4>General</h4>
     <div class="form-group row">
         <label class="col-md-2">Options</label>
@@ -83,7 +84,9 @@
         <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
     </form>
 </div>
+<script src="/static/js/step3.js"></script>
 <script>
     $('body').onload = getGenes();
 </script>
+
 {% endblock %}

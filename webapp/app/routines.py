@@ -1,8 +1,20 @@
-import os, tempfile
-from flask import render_template, jsonify, request, redirect, abort, make_response, send_from_directory, flash
+import os, tempfile, models
+from flask import render_template, jsonify, request, redirect, abort, make_response, send_from_directory, flash, g
+from redis import Redis
+from redis import ConnectionError as redisConnectError
 from app import app
 from werkzeug.utils import secure_filename
 from Bio import Entrez
+
+def getdb():
+    rddb = getattr(g,"_redisdb",False)
+    if not rddb:
+        rddb = g._redisdb = Redis.from_url('redis://localhost:6379/0')
+    try:
+        rddb.ping()
+    except redisConnectError:
+        rddb = False
+    return rddb
 
 def validatefile(fname, asfil=False):
     validgbkext = ['gbk','genbank','gbff','gb','embl']
@@ -59,3 +71,12 @@ def getinfile():
         filename = os.path.join(tempfile.mkdtemp(dir=app.config['UPLOAD_FOLDER']), secure_filename(ufile.filename))
         ufile.save(filename)
     return filename
+
+def addjob(**kwargs):
+    rddb = getdb()
+    automlstjob = models.automlstjob(**kwargs)
+    if rddb:
+        rddb.hmset("automlstjob:%s"%automlstjob.id, automlstjob.getdict())
+        rddb.lpush("AMLSTSQ",automlstjob.id)
+        # make a results directory?
+    return automlstjob

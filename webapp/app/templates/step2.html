@@ -41,7 +41,7 @@
             <div class="form-group col-md-5">
                 <h4>Selected species</h4>
                 <label for="specieslist">Add species (maximum 50)</label>
-            <select multiple class="form-control" id="specieslist" name="specieslist" size="40" style="width:100%;overflow:auto;">
+            <select multiple class="form-control selectablein" id="specieslist" name="specieslist" size="40" style="width:100%;overflow:auto;">
             </select>
             </div>
         </div>
@@ -96,10 +96,11 @@
             <div class="form-group col-md-5">
                 <h4>Selected outgroups</h4>
                 <label for="outgrlist">Add outgroup (maximum 5)</label>
-            <select multiple class="form-control" id="outgrlist" name="outgrlist" size="7" style="width:100%">
+            <select multiple class="form-control selectablein2" id="outgrlist" name="outgrlist" size="7" style="width:100%">
             </select>
             </div>
         </div>
+        <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> No species or outgroups selected. Please select species or outgroups before submitting.</div>
         <button type="button" class="btn btn-primary" style="width:300px;" onclick="selectAndSend('#species')">Continue &raquo;</button>
         <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
     </form>
@@ -113,7 +114,8 @@
                 <option>Purr as loud as possible</option>
                 <option>knock everything off the table</option>
                 <option>You call this cat food</option> -->
- <script>
+<script src="/static/js/step2.js"></script>
+<script>
         $('body').onload = getOrgs();
     </script>
 <script src="/static/js/orgtables.js"></script>

@@ -33,7 +33,7 @@
         <div class="form-group row">
             <div class="col-md-10">
             <label for="upfiles">Accession numbers and uploaded files</label>
-            <select multiple class="form-control" id="upfiles" name="upfiles" size="10"></select>
+            <select multiple class="form-control selectablein" id="upfiles" name="upfiles" size="10"></select>
             </div>
             <div class="col-md-2">
                 <button type="button" class="btn btn-default" id="remfiles" style="margin-top:25px" onclick="removeAllSeqs()">Remove selected sequences</button>
@@ -64,6 +64,7 @@
         <div class="alert alert-danger hidden" id="uploadwarning"><strong>Error:</strong> Upload failed</div>
         <div class="alert alert-danger hidden" id="errorwarning"><strong>Error:</strong> Invalid accession number or sequence file</div>
         <div class="alert alert-warning hidden" id="seqwarn"><strong>Maximum number of files and accession numbers reached.</strong></div>
+        <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> No sequences uploaded. Please upload sequences before submitting.</div>
 
         <button type="button" class="btn btn-primary" style="width:300px" id="submitjob" onclick="selectAndSend('#sequpload');">Submit Job &raquo;</button>
         <input type="hidden" id="filesrc" name="filesrc" value="">
@@ -75,5 +76,8 @@
     <a href="#" class="btn btn-primary" style="width:220px">Download example &raquo;</a>
     </div>
 </div>
+
+<script src="/static/js/analysispage.js"></script>
 <script>$('body').onload=refGenus();</script>
+
 {% endblock %}

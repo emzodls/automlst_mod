@@ -91,13 +91,17 @@ def upload():
 @app.route('/startjob', methods=['POST'])
 def startjob():
     jobid = unicode(uuid.uuid4())
-    jobdict = {"jobid": jobid, "workflow": request.form.get("workflow"), "genomes": request.form.getlist('upfiles'),
-               "reference": request.form.get('genusselect','NA')}
+    #jobdict = {"jobid": jobid, "workflow": request.form.get("workflow"), "genomes": request.form.getlist('upfiles'),
+    #          "reference": request.form.get('genusselect','NA')}
     if request.form.get("workflow") == "classic":
-        print jobdict
+        print jobid
+        automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'))
         return redirect('/results/'+jobid)
     elif request.form.get("workflow") == "auto":
-        print jobdict
+        print jobid
+        automlstjob = routines.addjob(id=jobid, workflow=request.form.get("workflow"),
+                                      genomes=request.form.getlist('upfiles'),
+                                      reference=request.form.get('genusselect', 'NA'))
         return redirect('/results2/' + jobid + '/loading')
 
 @app.route('/results/<jobid>/step2/orgs')
