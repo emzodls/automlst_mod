@@ -1,33 +1,40 @@
-$(document).ready(function() {
-    $('#refinfo').DataTable();
-} );
 var jobid = $('#jobinfo').val();
+$(document).ready(function() {
 refInfo = $('#refinfo').DataTable({
     ajax: {
         contentType: 'application/json',
         url: '/results/'+jobid+'/step2/orgs',
         dataSrc: 'reforgs'
     },
+
     columns: [
-        {data: 'orgname'},
+        {data: 'orgname',
+        responsivePriority: 1},
         {data: 'strain',
-        defaultContent: 'N/A'},
-        {data : 'taxid'},
+        defaultContent: 'N/A',
+        responsivePriority: 4},
+        {data : 'taxid',
+        visible: false},
         {data: 'dist',
+        responsivePriority: 2,
         render: function(data,type,row,meta){
         return parseFloat(data).toFixed(3);}},
-        {data: 'maxorg'},
+        {data: 'maxorg',
+        visible:false},
         {data: 'maxdist',
         visible: false},
         {data: 'mindist',
         visible: false},
-        {data : 'genusname'},
+        {data : 'genusname',
+        responsivePriority:3},
         {data: 'genusid',
         visible: false},
-        {data: 'familyname'},
+        {data: 'familyname',
+        visible: false},
         {data: 'familyid',
         visible: false},
-        {data: 'ordername'},
+        {data: 'ordername',
+        visible: false},
         {data: 'orderid',
         visible: false},
         {data: 'phylname'},
@@ -37,6 +44,11 @@ refInfo = $('#refinfo').DataTable({
         visible: false}
     ],
     order: [[3, 'asc']],
+    responsive: {
+        details: {
+        display: $.fn.dataTable.Responsive.display.childRow
+                }
+    },
     aLengthMenu: [
         [10, 25, 50, 100, 200, -1],
         [10, 25, 50, 100, 200, "All"]
@@ -47,6 +59,7 @@ refInfo = $('#refinfo').DataTable({
     }
 
 });
+} );
 
 function idSearch() {
 var idList = "";

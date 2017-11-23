@@ -5,18 +5,20 @@ function genusSuccess(data,textStatus,xhr) {
     genusKeys = Object.keys(genusList);
     //need to clear the counter?
     console.log(genusKeys.length);
-    var genusVals = Object.values(genusList);
-    var maxValue = Math.max.apply(null,genusVals);
+    /*var genusVals = Object.values(genusList);
+    var maxValue = Math.max.apply(null,genusVals); */
     var queries = data["queryfiles"];
+    var maxGenus = data["maxgenus"];
+    console.log(maxGenus);
     var counter;
     var counter2;
-    console.log(maxValue);
     if (genusKeys.length > 1) {
         $('#genuswarn').removeClass("hidden");
         $('#genustable >tbody').empty();
         for (counter=0;counter<genusKeys.length;counter++) {
             $('#genusoptions').append("<option id='"+genusKeys[counter]+"' value='"+genusKeys[counter]+"'>"+genusKeys[counter]+": "+genusList[genusKeys[counter]]+" sequences </option>");
-            if (genusList[genusKeys[counter]] == maxValue){
+            if (genusKeys[counter] == maxGenus) {
+                console.log(genusKeys[counter]);
                 $('#'+genusKeys[counter]).attr("selected","selected");
             }
         }

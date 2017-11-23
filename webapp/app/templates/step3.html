@@ -2,7 +2,7 @@
 {% block mainbody %}
 <div class="container" style="padding-top:40px;">
     <h2>{{ jobid }}</h2> <!-- can be prettier probably -->
-    <a href="/analyze" class="steps">Step 1 &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='step2') }}" class="steps">Step 2 &raquo;</a> <a href="#" class="steps">Step 3 <small>MLST gene selection</small> &raquo;</a> <span class="steps-disabled">Results</span>
+    <span class="sr-only">Workflow progress: </span><a href="/analyze" class="steps">Step 1 &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='step2') }}" class="steps">Step 2 &raquo;</a> <a href="#" class="steps">Step 3 <small>MLST gene selection</small> &raquo;</a> <span class="steps-disabled">Results</span>
     <hr>
     <div class="row">
         <div class="col-md-2">
@@ -45,9 +45,9 @@
             </select>
         </div>
             <div class="col-md-2" style="padding-top:65px">
-                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#mlstsel','#mlstlist'); refreshView('#mlstlist',10)">Add to list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#mlstlist'); refreshView('#mlstlist',10)">Remove from list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#mlstlist','#mlstlist'); refreshView('#mlstlist',10)">Move to top</button>
+                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#mlstsel','#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit')">Add to list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit')">Remove from list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#mlstlist','#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit')">Move to top</button>
             </div>
             <div class="form-group col-md-5">
                 <h4>Selected genes</h4>
@@ -68,6 +68,19 @@
             </div>
         </div>
         <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> No MLST genes selected. Please select MLST genes before submitting.</div>
+        <div class="alert alert-danger hidden" id="mlstlimit"><strong>Too many MLST genes selected.</strong> Only the first 100 selected genes will be used.</div>
+        <hr>
+        <h4>Overview</h4>
+        <table class="table table-bordered table-hover" cellspacing="0" id="geneinfo" width="100%">
+           <thead>
+           <tr>
+                <th>Name</th>
+               <th>Accession number</th>
+               <th>Function</th>
+               <th>Description</th>
+           </tr>
+           </thead>
+        </table>
         <h4>General</h4>
     <div class="form-group row">
         <label class="col-md-2">Options</label>
@@ -85,6 +98,7 @@
     </form>
 </div>
 <script src="/static/js/step3.js"></script>
+<script src="/static/js/genetables.js"></script>
 <script>
     $('body').onload = getGenes();
 </script>

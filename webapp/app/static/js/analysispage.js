@@ -128,3 +128,9 @@ return "validated";
 } else {
 return "notvalidated";}
 }
+
+$(document).on("keydown","input:not(button)", function(e) {
+    if (e.keyCode == 13) {
+        e.preventDefault();
+    }
+});

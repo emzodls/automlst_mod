@@ -54,17 +54,19 @@ function removeAllFromList(id3) {
 }
 
 
-function refreshView(id4,max) {
+function refreshView(id4,max,warnbox) {
 var counter = 0;
 $(id4+" > option").each(function() {
      counter++;
     if (counter > max) {
         $(this).addClass("bg-danger text-danger");
         $(this).removeClass("picked");
+        $(warnbox).removeClass("hidden");
         console.log(this);
      } else {
         $(this).addClass("picked");
         $(this).removeClass("bg-danger text-danger");
+        $(warnbox).addClass("hidden");
      }
 });
 }

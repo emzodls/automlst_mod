@@ -31,7 +31,7 @@
             <button type="button" class="btn btn-primary" aria-label="Decrease tree width" data-toggle="tooltip" data-placement="bottom" title="Decrease tree width" onclick="resizeTree('downH')"><span class="glyphicon glyphicon-minus"></span></button>
         </div>
     <div id="svgCanvas">
-            <img src="/static/images/Socotra_dragon_tree.jpeg" alt="Dracaena cinnabari" class="thumbnail" style="width:50%;margin:auto">
+            <img src="/static/images/Socotra_dragon_tree.jpeg" alt="loading screen" class="thumbnail" style="width:50%;margin:auto">
         <div class="progress">
             <div class="progress-bar progress-bar-striped active" aria-valuetext="Loading" style="width:100%"></div>
         </div>
@@ -56,7 +56,7 @@
     <!-- button layout? -->
         {% if workflow != 2 %}
     <hr>
-    <button type="button" class="btn btn-primary" style="width:300px" id="resubmit" name="resubmit"><span class="glyphicon glyphicon-repeat"></span> Reanalyze from Step 2</button>
+    <a href="/results/{{ jobid }}/step2" role="button" class="btn btn-primary" style="width:300px" id="resubmit" name="resubmit"><span class="glyphicon glyphicon-repeat"></span> Reanalyze from Step 2</a>
     <div class="alert alert-warning" style="margin-top:10px"><strong>Warning:</strong> Reanalyzing will clear your current results.</div>
         {% endif %}
         <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">

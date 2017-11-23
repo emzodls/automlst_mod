@@ -14,10 +14,10 @@ h1,h2,h3,h4{
     color:#151580;
 }
 
-/* Custom default button */
+/* Custom default button
 .btn:focus, .btn:active:focus, .btn.active:focus {
     outline: 0 none;
-}
+}*/
 
 .btn-primary {
   color: #fff;
@@ -29,12 +29,25 @@ h1,h2,h3,h4{
   background: -moz-linear-gradient(bottom right, #3838AA, #151580); /* For Firefox 3.6 to 15 */
   background: linear-gradient(to bottom right, #3838AA, #151580); /* Standard syntax */
 }
-.btn-primary:focus,
+/*.btn-primary:focus,
 .btn-primary.focus {
   color: #fff;
   background-color: #151580;
   border-color: #1B1B1B;
+} */
+/* alternative styling for focus - better indication of focus when using keyboard navigation? */
+.btn-primary:focus,
+.btn-primary.focus{
+  color: #fff;
+  background-color: #6060D7;
+  border-color: #1B1B1B;
+  background: #6060D7; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(left top, #6060D7, #151580); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(bottom right, #6060D7, #151580); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(bottom right, #6060D7, #151580); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to bottom right, #6060D7, #151580); /* Standard syntax */
 }
+
 .btn-primary:hover {
   color: #fff;
   background-color: #6060D7;
@@ -483,6 +496,19 @@ color:#ffffff
 
 .pagination>li>a:hover, .pagination>li>a:focus {
     color:#3d3d8f
+}
+
+/* table child row button */
+table.dataTable.dtr-inline.collapsed>tbody>tr[role="row"]>td:first-child:before, table.dataTable.dtr-inline.collapsed>tbody>tr[role="row"]>th:first-child:before {
+    background-color:#151580 !important;
+}
+
+/*more contrast for warning text*/
+.alert-danger, .text-danger {
+color:#6C2726;
+}
+.alert-warning {
+color:#994d00;
 }
 
 @media screen and (max-width:768px){

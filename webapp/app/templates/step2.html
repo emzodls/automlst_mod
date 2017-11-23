@@ -2,7 +2,7 @@
 {% block mainbody %}
 <div class="container" style="padding-top:40px;">
     <h2>{{ jobid }}</h2> <!-- can be prettier probably -->
-    <a href="/analyze" class="steps">Step 1 &raquo;</a> <a href="#" class="steps">Step 2 <small>Species and outgroup selection</small> &raquo;</a> <span class="steps-disabled">Step 3 &raquo;</span> <span class="steps-disabled">Results</span>
+    <span class="sr-only">Workflow progress: </span><a href="/analyze" class="steps">Step 1 &raquo;</a> <a href="#" class="steps">Step 2 <small>Species and outgroup selection</small> &raquo;</a> <span class="steps-disabled">Step 3 &raquo;</span> <span class="steps-disabled">Results</span>
     <hr>
     <div class="row">
         <div class="col-md-2">
@@ -34,9 +34,9 @@
             </select>
         </div>
             <div class="col-md-2" style="padding-top:65px">
-                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#speciessel','#specieslist'); refreshView('#specieslist',50); idSearch()">Add to list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#specieslist'); refreshView('#specieslist',50); idSearch()">Remove from list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#specieslist','#specieslist'); refreshView('#specieslist',50); idSearch()">Move to top</button>
+                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#speciessel','#specieslist'); refreshView('#specieslist',50,'#seqlimit'); idSearch()">Add to list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#specieslist'); refreshView('#specieslist',50,'#seqlimit'); idSearch()">Remove from list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#specieslist','#specieslist'); refreshView('#specieslist',50,'#seqlimit'); idSearch()">Move to top</button>
             </div>
             <div class="form-group col-md-5">
                 <h4>Selected species</h4>
@@ -45,15 +45,16 @@
             </select>
             </div>
         </div>
+        <div class="alert alert-danger hidden" id="seqlimit"><strong>Too many species selected.</strong> Only the first 50 selected species will be used.</div>
         <hr>
         <h4>Overview</h4>
-        <p>Show/hide columns:<br />
-        <a href="#" class="toggle-vis" data-column="2">Organism ID</a> - <a href="#" class="toggle-vis" data-column="4">Furthest organism</a> - <a href="#" class="toggle-vis" data-column="5">Maximum distance</a>
+        <p>Show/hide additional information:<br />
+        <a href="#" class="toggle-vis" data-column="1">Strain </a> - <a href="#" class="toggle-vis" data-column="2">Organism ID</a> - <a href="#" class="toggle-vis" data-column="4">Furthest organism</a> - <a href="#" class="toggle-vis" data-column="5">Maximum distance</a>
             - <a href="#" class="toggle-vis" data-column="6">Minimum distance</a> - <a href="#" class="toggle-vis" data-column="7">Genus</a>
              - <a href="#" class="toggle-vis" data-column="9">Family</a> - <a href="#" class="toggle-vis" data-column="11">Order</a>
              - <a href="#" class="toggle-vis" data-column="13">Phylum</a>
         </p>
-        <table class="table table-bordered table-hover" id="refinfo">
+        <table class="table table-bordered table-hover" cellspacing="0" id="refinfo" width="100%">
            <thead>
            <tr>
                <th>Organism name</th>
@@ -89,9 +90,9 @@
             </select>
         </div>
             <div class="col-md-2" style="padding-top:65px">
-                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#outgrsel','#outgrlist'); refreshView('#outgrlist',5)">Add to list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#outgrlist'); refreshView('#outgrlist',5)">Remove from list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#outgrlist','#outgrlist'); refreshView('#outgrlist',5)">Move to top</button>
+                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#outgrsel','#outgrlist'); refreshView('#outgrlist',5,'#outgrlimit')">Add to list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#outgrlist'); refreshView('#outgrlist',5,'#outgrlimit')">Remove from list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#outgrlist','#outgrlist'); refreshView('#outgrlist',5,'#outgrlimit')">Move to top</button>
             </div>
             <div class="form-group col-md-5">
                 <h4>Selected outgroups</h4>
@@ -101,6 +102,7 @@
             </div>
         </div>
         <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> No species or outgroups selected. Please select species or outgroups before submitting.</div>
+        <div class="alert alert-danger hidden" id="outgrlimit"><strong>Too many outgroups selected.</strong> Only the first 5 selected outgroups will be used.</div>
         <button type="button" class="btn btn-primary" style="width:300px;" onclick="selectAndSend('#species')">Continue &raquo;</button>
         <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
     </form>
