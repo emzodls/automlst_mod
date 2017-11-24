@@ -66,7 +66,7 @@ var idList = "";
 $('#specieslist .picked').each(function(){
     idList += ("|"+($(this).attr("id")));
 });
-console.log(idList);
+//console.log(idList);
 var searchTerm = idList.slice(1);
 refInfo.search(searchTerm, true,false).draw();
 }

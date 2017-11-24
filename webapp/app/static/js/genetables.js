@@ -38,7 +38,7 @@ var idList = "";
 $('#mlstlist .picked').each(function(){
     idList += ("|"+($(this).attr("id")));
 });
-console.log(idList);
+//console.log(idList);
 var searchTerm = idList.slice(1);
 mlstInfo.search(searchTerm, true,false).draw();
 }

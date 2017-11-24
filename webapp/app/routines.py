@@ -36,7 +36,7 @@ def getNCBIgbk(acc):
             if "." in acc:
                 acc = acc[:acc.index(".")]
             Entrez.email = "artsuser@ziemertlab.com"
-            handle = Entrez.efetch(db="nucleotide", rettype="gb", id=acc, retmode="text")
+            handle = Entrez.efetch(db="nucleotide", rettype="gbwithparts", id=acc, retmode="text")
             filename = os.path.join(tempfile.mkdtemp(dir=app.config['UPLOAD_FOLDER']), secure_filename(acc+".gbk"))
             with open(filename,"w") as outfile:
                 outfile.write(handle.read())

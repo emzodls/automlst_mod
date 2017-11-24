@@ -2,7 +2,7 @@
 {% block mainbody %}
 <div class="container" style="padding-top:40px;">
     <h2>{{ jobid }}</h2> <!-- can be prettier probably -->
-    <span class="sr-only">Workflow progress: </span><a href="/analyze" class="steps">Step 1 &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='step2') }}" class="steps">Step 2 &raquo;</a> <a href="#" class="steps">Step 3 <small>MLST gene selection</small> &raquo;</a> <span class="steps-disabled">Results</span>
+    <span class="sr-only">Workflow progress: The previous steps were </span><a href="/analyze" class="steps">Step 1 &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='step2') }}" class="steps">Step 2 &raquo;</a> <span class="sr-only">The current step is </span><a href="#" class="steps">Step 3 <small>MLST gene selection</small> &raquo;</a> <span class="sr-only">The next step is</span> <span class="steps-disabled">Results</span>
     <hr>
     <div class="row">
         <div class="col-md-2">
@@ -82,7 +82,7 @@
            </thead>
         </table>
         <h4>General</h4>
-    <div class="form-group row">
+    <div class="form-group row"> <!-- fix formating -->
         <label class="col-md-2">Options</label>
         <div class="col-md-10">
             <div class="radio">

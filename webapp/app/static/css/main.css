@@ -390,7 +390,7 @@ a.steps {
 .steps-disabled {
     font-size:24px;
     font-weight:500;
-    color:grey;
+    color:#595959;
     pointer-events:none;
 }
 
@@ -509,6 +509,17 @@ color:#6C2726;
 }
 .alert-warning {
 color:#994d00;
+}
+
+small, .small, h1 small, h1 .small, h2 small, h2 .small, h3 small, h3 .small, h4 small, h4.small {
+color: #595959;
+}
+
+a>small {
+color: #151580;
+}
+.pagination>.disabled>a {
+color: #595959;
 }
 
 @media screen and (max-width:768px){

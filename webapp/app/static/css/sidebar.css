@@ -69,6 +69,9 @@
 .sidebar-nav li a:focus {
   text-decoration: none;
 }
+.sidebar-nav li a:focus:not(:hover){
+color:#151580;
+}
 
 .sidebar-nav > .sidebar-brand {
   height: 65px;

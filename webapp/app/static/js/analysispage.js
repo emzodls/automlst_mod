@@ -20,9 +20,16 @@ if ($("#uploadprog").attr("value") == $("#uploadprog").attr("max")) {
 function uploadSuccess(data,textStatus,xhr) { //communication success
 var data = JSON.parse(data);
 console.log(data["filename"]);
+$("#seqbtn").removeClass("disabled");
+$("#ncbibtn").removeClass("disabled");
+$("#ncbiload").addClass("hidden");
 if (data["filename"] == false) {
     $("#errorwarning").removeClass("hidden");
     } else {
+       if ($("#filesrc").val() == 'ncbi') {
+        $("#uploadprog").attr("value",100);
+        console.log($("#uploadprog").attr("value"));
+        }
     $("#upfiles").prepend("<option value='"+data["filename"]+"' class='"+hashCode(data["filename"])+" picked'>"+data["name"]+"</option>");
     maxSeqs();
     $("#uploadsuccess").removeClass("hidden");
@@ -30,17 +37,23 @@ if (data["filename"] == false) {
     clearProgress();
 }
 function uploadError(xhr,ajaxOptions,thrownError) { // communication error
-console.log(xhr,ajaxOptions,thrownError);
+console.log(thrownError);
+$("#seqbtn").removeClass("disabled");
+$("#ncbibtn").removeClass("disabled");
 //unhide error message
 $("#uploadwarning").removeClass("hidden");
+$("#ncbiload").addClass("hidden");
 clearProgress();
+$("#uploadprog").attr("value",0);
 }
 function clearErrors(errorMessage) {
 $(errorMessage).addClass("hidden");
 }
-function uploader() {
+function uploader(filesrc) {
 if (maxSeqs()) {
-$.ajax({
+$("#seqbtn").addClass("disabled");
+$("#ncbibtn").addClass("disabled");
+var uploadForm = {
         // Your server script to process the upload
         contentType: 'application/json',
         url: '/upload',
@@ -52,8 +65,31 @@ $.ajax({
         contentType: false,
         processData: false,
         success: uploadSuccess,
-        error: uploadError,
-        xhr: function() {
+        error: uploadError
+        /*xhr: function() {
+            var myXhr = $.ajaxSettings.xhr();
+            if (myXhr.upload) {
+                // For handling the progress of the upload
+                myXhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        $('progress').attr({
+                            value: e.loaded,
+                            max: e.total,
+                        });
+                    }
+                } , false);
+            }
+            return myXhr;
+        }*/
+};
+if (filesrc == 'ncbi') {
+    $('#ncbiload').removeClass("hidden");
+    $('progress').attr({
+    value: 50,
+    max: 100
+    });
+} else {
+uploadForm.xhr = function() {
             var myXhr = $.ajaxSettings.xhr();
             if (myXhr.upload) {
                 // For handling the progress of the upload
@@ -68,16 +104,33 @@ $.ajax({
             }
             return myXhr;
         }
-});
+}
+$.ajax(uploadForm);
 }
 }
+
+function validateAcc() {
+var userAcc = $("#ncbiacc1").val();
+if (userAcc && (userAcc.search(" ") == -1)) { //check if userAcc is alphanumeric
+    return true;
+    } else {
+    return false;
+    }
+}
+
 function uploadSequence(filesrc) {
 clearErrors('#uploadwarning');
 clearErrors('#errorwarning');
-clearErrors('#uploadsuccess')
+clearErrors('#uploadsuccess');
+clearErrors('#accwarning');
 $("#filesrc").val(filesrc);
-uploader();
+console.log($("#ncbiacc1").val());
+if (filesrc == 'ncbi' && !(validateAcc())) {
+    $("#accwarning").removeClass("hidden");
+} else {
+uploader(filesrc);
 console.log($("#uploadprog")); // -> doesn't clear properly!
+}
 }
 
 function genusSuccess(data,textStatus,xhr) {

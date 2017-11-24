@@ -20,7 +20,7 @@
         </div>
             </div>
             <div id="manual" class="tab-pane fade">
-                <span class="sr-only">Workflow progress: </span><a href="/analyze" class="steps">Step 1 <small>Enter sequences</small> &raquo;</a> <span class="steps-disabled">Step 2 &raquo;</span> <span class="steps-disabled">Step 3 &raquo;</span> <span class="steps-disabled">Results</span>
+                <span class="sr-only">Workflow progress: The current step is</span><a href="/analyze" class="steps">Step 1 <small>Enter sequences</small> &raquo;</a> <span class="sr-only">The next steps in this workflow are </span><span class="steps-disabled">Step 2 &raquo;</span> <span class="steps-disabled">Step 3 &raquo;</span> <span class="steps-disabled">Results</span>
                 <hr>
                 <p><b>Classical Mode</b>: After uploading your sequences, choose from which species to construct the tree for them, and choose
                 the genes to use for the MLST.</p>
@@ -40,6 +40,7 @@
             </div>
         </div>
     <progress id="uploadprog" style="width:100%" value=0 class="bootstripe"></progress>
+        <div id="ncbiload" class="hidden"><b>Downloading file from NCBI...</b></div>
     <h4>Upload Genomes</h4>
     <div class="form-group row">
             <label class="control-label col-md-2" for="ncbiacc1">NCBI Accession Number(s)</label>
@@ -63,6 +64,7 @@
         <div class="alert alert-success hidden" id="uploadsuccess">Upload successful</div>
         <div class="alert alert-danger hidden" id="uploadwarning"><strong>Error:</strong> Upload failed</div>
         <div class="alert alert-danger hidden" id="errorwarning"><strong>Error:</strong> Invalid accession number or sequence file</div>
+        <div class="alert alert-danger hidden" id="accwarning"><strong>Error:</strong> Invalid accession number. Accession numbers may only contain alphanumeric characters (A-Z, 0-9) and underscores.</div>
         <div class="alert alert-warning hidden" id="seqwarn"><strong>Maximum number of files and accession numbers reached.</strong></div>
         <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> No sequences uploaded. Please upload sequences before submitting.</div>
 
