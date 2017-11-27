@@ -11,7 +11,8 @@ phylocanvas = new Smits.PhyloCanvas(
 				);
 				/* var canvasHeight = parseInt($('svg').attr("height"));
 				var canvasWidth = parseInt($('svg').attr("width")); */
-				$('tspan:contains(###)').attr("fill","#0000ff");
+				$('tspan:contains([U])').attr("fill","#0000ff");
+				$('tspan:contains([T])').attr("fill","#1f7a1f");
 /*				$('tspan').each(function(objindex,obj) {
 				console.log($(obj));
 				console.log(Object.keys($(obj)));

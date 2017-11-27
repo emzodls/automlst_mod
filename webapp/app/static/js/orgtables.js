@@ -64,13 +64,13 @@ refInfo = $('#refinfo').DataTable({
 function idSearch() {
 var idList = "";
 $('#specieslist .picked').each(function(){
-    idList += ("|"+($(this).attr("id")));
+    idList += ("|"+($(this).val()));
 });
 //console.log(idList);
 var searchTerm = idList.slice(1);
 refInfo.search(searchTerm, true,false).draw();
 }
-
+//WHY IS THIS BROKEN NOW - link gets clicked even though it shouldn't
 $('a.toggle-vis').on( 'click', function (e) {
         e.preventDefault();
         // Get the column API object

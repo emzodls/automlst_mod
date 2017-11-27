@@ -163,7 +163,7 @@ function removeAllSeqs() {
     var selectedValues3=$("#upfiles").val();
     var l;
     for (l = 0; l < selectedValues3.length;l++) {
-    removeFromList(selectedValues3[l]);
+    removeFromList('#upfiles', selectedValues3[l]);
     }
     maxSeqs();
 }

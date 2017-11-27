@@ -59,12 +59,12 @@ var counter, counter2, commonTaxId;
 var selectedList = [];
 var allGroup = {};
 var groupList = ["genus","family","order","phyl"];
-var refOrgs = jsonOrgs["reforgs"];
+var refOrgs = jsonOrgs["reforgs"]; //how to handle if only query orgs remaining?
  for (var group in groupList) {
                 var groupId = groupList[group]+"id";
                 var groupName = groupList[group]+"name";
                 $("#specieslist > .picked").each(function(){
-                    var currId = $(this).attr("id");
+                    var currId = $(this).val();
                     for (counter=0; counter<refOrgs.length; counter++) {
                         var refInfo = refOrgs[counter];
                             if (currId == refInfo.id) {
@@ -89,8 +89,115 @@ var refOrgs = jsonOrgs["reforgs"];
 }
 
 
-function validateForm() {
+function outgroupPick() {
+var commonTax = commonGroup();
+var allOutgroups = jsonOrgs["outgroups"]; // change?
+var groupId = commonTax[0]+"id";
+var counter;
+$('#outgrsel > option').each(function() {
+    var currId = $(this).attr("id");
+    for (counter=0; counter<allOutgroups.length; counter++) {
+        var outgrInfo = allOutgroups[counter];
+        if (currId == outgrInfo.id) {
+            if (outgrInfo[groupId] == commonTax[1]) {
+                console.log(outgrInfo[groupId]);
+                $(this).attr("disabled", true);
+                this.selected = false;
+                removeFromList('#outgrlist', $(this).val());
+            } else {
+                $(this).removeAttr("disabled");
+            }
+        }
+    }
+});
+if (!($('#outgrsel > option:not([disabled])').length)) {
+    $('#nooutgroups').removeClass("hidden");
+} else {
+    $('#nooutgroups').addClass("hidden");
+}
+}
+
+
+function outgroupError(xhr,ajaxOptions,thrownError) { // communication error
+console.log(xhr,ajaxOptions,thrownError);
+}
+
+function outgroupSuccess(data,textStatus,xhr) {
+//console.log(data);
+var counter;
+for (counter=0; counter<data.length;counter++) {
+    var outgrInfo = data[counter];
+    $('#outgrsel > option').remove('#'+outgrInfo.id);
+    $('#outgrsel').prepend("<option value='"+outgrInfo.id+"' data-title='"+ outgrInfo.orgname + " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+")"+"' id='" + outgrInfo.id +"'>"+outgrInfo.orgname+ " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+") </option>");
+}
+if (!($('#outgrsel > option:not([disabled])').length)) {
+    $('#nooutgroups').removeClass("hidden");
+} else {
+    $('#nooutgroups').addClass("hidden");
+}
+}
+
+function outgroupLoad() {
+var jobid = $('#jobinfo').val();
+var commonTax = commonGroup();
+//console.log(commonTax);
+$.ajax({
+        // Your server script to process the upload
+        contentType: 'application/json',
+        url: '/results/'+jobid+'/step2/outgroups?group='+commonTax[0]+'&id='+commonTax[1],
+        async: true,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: outgroupSuccess,
+        error: outgroupError});
+}
+function moreSeqsError(xhr,ajaxOptions,thrownError) { // communication error
+console.log(xhr,ajaxOptions,thrownError);
+}
+
+function moreSeqsSuccess(data,textStatus,xhr) {
+var counter;
+var refOrgs=data["reforgs"];
+for (counter=0; counter<refOrgs.length;counter++) {
+    var orgInfo = refOrgs[counter];
+    typestr = (orgInfo.typestrain) ? orgInfo.typestrain : "false";
+    if (typestr == true) {
+    $('#speciessel').append("<option value='"+orgInfo.id+"' data-title='(T) "+ orgInfo.orgname + " (mean distance: "+ parseFloat(orgInfo.dist).toFixed(3)+")"+"' id='" + orgInfo.id +"'>(T) "+orgInfo.orgname+ " (mean distance: "+ parseFloat(orgInfo.dist).toFixed(3)+") </option>");
+    } else {
+    $('#speciessel').append("<option value='"+orgInfo.id+"' data-title='"+ orgInfo.orgname + " (mean distance: "+ parseFloat(orgInfo.dist).toFixed(3)+")"+"' id='" + orgInfo.id +"'>"+orgInfo.orgname+ " (mean distance: "+ parseFloat(orgInfo.dist).toFixed(3)+") </option>");
+   }
+    }
+    refInfo.rows.add(data["reforgs"]).draw();
+}
+
+
+function loadMore() {
+var jobid = $('#jobinfo').val();
+var loadedSeqs = $('#speciessel > option').length - jsonOrgs["queryorgs"].length;
+console.log(loadedSeqs);
+$.ajax({
+        // Your server script to process the upload
+        contentType: 'application/json',
+        url: '/results/'+jobid+'/step2/orgs?start='+loadedSeqs,
+        async: true,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: moreSeqsSuccess,
+        error: moreSeqsError});
+}
+
+
+/*function validateForm() {
 if ($('.selectablein').has('option').length>0 && $('.selectablein2').has('option').length>0) {
+return "validated";
+} else {
+return "notvalidated";}
+} */
+
+function validateForm() {
+if ($('.selectablein >option').length>4 && $('.selectablein2 > option').length>0) {
 return "validated";
 } else {
 return "notvalidated";}

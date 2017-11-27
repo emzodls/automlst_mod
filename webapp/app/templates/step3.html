@@ -2,7 +2,7 @@
 {% block mainbody %}
 <div class="container" style="padding-top:40px;">
     <h2>{{ jobid }}</h2> <!-- can be prettier probably -->
-    <span class="sr-only">Workflow progress: The previous steps were </span><a href="/analyze" class="steps">Step 1 &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='step2') }}" class="steps">Step 2 &raquo;</a> <span class="sr-only">The current step is </span><a href="#" class="steps">Step 3 <small>MLST gene selection</small> &raquo;</a> <span class="sr-only">The next step is</span> <span class="steps-disabled">Results</span>
+    <span class="sr-only">Workflow progress: The previous steps were </span><a href="/analyze" class="steps">Step 1 &raquo;</a> <a href="{{ url_for('showstep',jobid=jobid,step='step2') }}" class="steps">Step 2 &raquo;</a> <span class="sr-only">The current step is </span><a href="#" class="steps">Step 3 <small>MLST gene selection</small> &raquo;</a> <span class="sr-only">The next step is </span> <span class="steps-disabled">Results</span>
     <hr>
     <div class="row">
         <div class="col-md-2">
@@ -45,9 +45,10 @@
             </select>
         </div>
             <div class="col-md-2" style="padding-top:65px">
-                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#mlstsel','#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit')">Add to list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit')">Remove from list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#mlstlist','#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit')">Move to top</button>
+                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#mlstsel','#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit');idSearch();">Add to list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit');idSearch();">Remove from list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#mlstlist','#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit');idSearch();">Move to top</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="resetSels('#mlstsel','#mlstlist',10); refreshView('#mlstlist',10,'#mlstlimit');idSearch();">Reset to default</button>
             </div>
             <div class="form-group col-md-5">
                 <h4>Selected genes</h4>

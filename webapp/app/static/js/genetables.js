@@ -36,7 +36,7 @@ mlstInfo = $('#geneinfo').DataTable({
 function idSearch() {
 var idList = "";
 $('#mlstlist .picked').each(function(){
-    idList += ("|"+($(this).attr("id")));
+    idList += ("|"+($(this).val()));
 });
 //console.log(idList);
 var searchTerm = idList.slice(1);

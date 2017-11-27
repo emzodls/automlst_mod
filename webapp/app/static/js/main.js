@@ -17,9 +17,9 @@ function hashCode(input) {
 function addtolist(id1,id2) {
 var optionList = [];
     $(id1+' > option:selected').each(function() {
-    var speciesOption = "<option id='"+$(this).attr("id")+"' value='"+$(this).val()+"' class='"+hashCode($(this).val())+" picked' data-title='"+$(this).data("title")+"'>"+$(this).data("title")+"</option>";
+    var speciesOption = "<option value='"+$(this).val()+"' class='"+hashCode($(this).val())+" picked' data-title='"+$(this).data("title")+"'>"+$(this).data("title")+"</option>";
     optionList.unshift(speciesOption);
-    removeFromList($(this).val()); //removes any item that already has this class from the list it'll get added to -> problem on step 2 if same species in outgroups and regular species
+    removeFromList(id2, $(this).val()); //removes any item that already has this class from the list it'll get added to -> problem on step 2 if same species in outgroups and regular species
     });
     var i;
     for (i = 0; i < optionList.length; i++) {
@@ -39,9 +39,9 @@ var optionList = [];
     $(id2).prepend(selectedValues);
     //console.log(selectedValues); */
 }
-function removeFromList(selectedValue) {
+function removeFromList(id10, selectedValue) {
     var y = "."+hashCode(selectedValue);
-    $("option").remove(y);
+    $(id10+" > option").remove(y);
     //console.log(selectedValue,hashCode(selectedValue));
 }
 
@@ -49,7 +49,7 @@ function removeAllFromList(id3) {
     var selectedValues2=$(id3).val();
     var k;
     for (k = 0; k < selectedValues2.length;k++) {
-    removeFromList(selectedValues2[k]);
+    removeFromList(id3, selectedValues2[k]);
     }
 }
 
@@ -95,6 +95,14 @@ $(id8+" >option").each(function() {
 });
 addtolist(id8,id9);
 }
+
+function resetSels(id11,id12,max3) {
+    $(id11+'> option:selected').each(function() {
+    this.selected = false;
+    });
+    $(id12).empty();
+    loadDefaults(id11,id12,max3);
+    }
 
 function selectAndSend(id7) {
 var validation = validateForm();
