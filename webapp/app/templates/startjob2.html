@@ -17,7 +17,8 @@
     <div class="col-md-2">
         <h4>Status</h4>
     </div>
-        <div class="col-md-10" id="currentstatus">
+        <div class="col-md-10">
+            <p id="currentstatus" style="margin-top:10px"></p>
         </div>
         </div>
     <br />
@@ -54,9 +55,12 @@
                 </table>
             </div>
             <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
+            <div class="alert alert-danger hidden" id="communicateerror"><strong>Error: </strong>Failed to set genus. Check your internet connection and try again.</div>
+            <div class="alert alert-danger hidden" id="statuserror"><strong>Error: </strong>Failed to set genus. Please try again later.</div>
             <button type="button" class="btn btn-primary" style="width:300px" onclick="selectGenus();">Continue &raquo;</button>
           </form>
     </div>
+    <a href="/results2/{{ jobid }}/report" class="btn btn-primary hidden" role="button" id="viewreport">View report &raquo;</a>
     <div class="alert alert-warning hidden" id="genuswarning"><span class="glyphicon glyphicon-alert"></span> No matching genus detected.</div>
    <!-- <progress id="work2progress" value="{{ jobstatus }}" max="100" class="bootstripe" style="width:100%"></progress> -->
 </div>

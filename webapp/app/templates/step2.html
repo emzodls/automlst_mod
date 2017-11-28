@@ -4,7 +4,7 @@
 <script>
         $('body').onload = getOrgs();
     </script>
-<script src="/static/js/orgtables.js"></script>
+
 <div class="container" style="padding-top:40px;">
     <h2>{{ jobid }}</h2> <!-- can be prettier probably -->
     <span class="sr-only">Workflow progress: The previous step was </span><a href="/analyze" class="steps">Step 1 &raquo;</a> <span class="sr-only">The current step is </span><a href="#" class="steps">Step 2 <small>Species and outgroup selection</small> &raquo;</a> <span class="sr-only">The next steps are </span><span class="steps-disabled">Step 3 &raquo;</span> <span class="steps-disabled">Results</span>
@@ -84,6 +84,15 @@
         </table>
 
         <h3 class="page-header">Outgroups</h3>
+        <p>Outgroups are automatically screened after ingroup selection. Please review outgroup choices before continuing.</p>
+        <div class="row">
+            <div class="col-md-2">
+                <h4>Common group</h4>
+            </div>
+            <div class="col-md-10">
+                <p style="margin-top:10px" id="commgroup"></p>
+            </div>
+        </div>
         <div class="row">
             <div class="form-group col-md-5">
             <h4>Outgroups</h4>
@@ -130,5 +139,5 @@
                 <option>knock everything off the table</option>
                 <option>You call this cat food</option> -->
 
-
+<script src="/static/js/orgtables.js"></script> <!-- why does toggle-vis only work with the script at the end of the page? -->
 {% endblock %}

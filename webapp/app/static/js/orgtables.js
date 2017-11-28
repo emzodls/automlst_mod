@@ -70,7 +70,7 @@ $('#specieslist .picked').each(function(){
 var searchTerm = idList.slice(1);
 refInfo.search(searchTerm, true,false).draw();
 }
-//WHY IS THIS BROKEN NOW - link gets clicked even though it shouldn't
+
 $('a.toggle-vis').on( 'click', function (e) {
         e.preventDefault();
         // Get the column API object

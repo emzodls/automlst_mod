@@ -2,6 +2,68 @@ function orgError(xhr,ajaxOptions,thrownError) { // communication error
 console.log(xhr,ajaxOptions,thrownError);
 }
 var jsonOrgs = false;
+function commonGroup() {
+var counter, counter2, commonTaxId;
+var selectedList = [];
+var allGroup = {};
+var groupList = ["genus","family","order","phyl"];
+var refOrgs = $.extend(jsonOrgs["reforgs"], jsonOrgs["queryorgs"]); //how to handle if only query orgs remaining?
+ for (var group in groupList) {
+                var groupId = groupList[group]+"id";
+                var groupName = groupList[group]+"name";
+                $("#specieslist > .picked").each(function(){
+                    var currId = $(this).val();
+                    for (counter=0; counter<refOrgs.length; counter++) {
+                        var refInfo = refOrgs[counter];
+                            if (currId == refInfo.id) {
+                                selectedList.push(refInfo);
+                                var currGroup = refInfo[groupId];
+                                var currName = refInfo[groupName];
+                                if (currGroup != "N/A" && currName != "N/A") {
+                                allGroup[currGroup] = currName;
+                                //console.log(allGroup);
+                                }
+                                }
+                        }
+                });
+                if (Object.keys(allGroup).length == 1) {
+                commonTaxId = Object.keys(allGroup);
+                var commonInfo = [groupList[group], commonTaxId[0], allGroup[commonTaxId[0]]];
+                //console.log(commonInfo);
+                return commonInfo;
+                }
+                allGroup = {};
+}
+}
+function outgroupPick() {
+var commonTax = commonGroup();
+var allOutgroups = jsonOrgs["outgroups"]; // change?
+var groupId = commonTax[0]+"id";
+var counter;
+$('#outgrsel > option').each(function() {
+    var currId = $(this).attr("id");
+    for (counter=0; counter<allOutgroups.length; counter++) {
+        var outgrInfo = allOutgroups[counter];
+        if (currId == outgrInfo.id) {
+            if (outgrInfo[groupId] == commonTax[1]) {
+                console.log(outgrInfo[groupId]);
+                $(this).attr("disabled", true);
+                this.selected = false;
+                removeFromList('#outgrlist', $(this).val());
+            } else {
+                $(this).removeAttr("disabled");
+            }
+        }
+    }
+});
+$('#commgroup').text(commonTax[2]);
+if (!($('#outgrsel > option:not([disabled])').length)) {
+    $('#nooutgroups').removeClass("hidden");
+} else {
+    $('#nooutgroups').addClass("hidden");
+}
+}
+
 function orgSuccess(data,textStatus,xhr) {
 var counter;
 var counter2;
@@ -31,9 +93,11 @@ if (data["selspecies"] && data["seloutgroups"]) {
     var selectedSpecies = data["selspecies"];
     var selectedOutgroups = data["seloutgroups"];
     loadSelected('#speciessel','#specieslist',selectedSpecies);
+    outgroupPick();
     loadSelected('#outgrsel','#outgrlist',selectedOutgroups);
 } else {
     loadDefaults('#speciessel','#specieslist',50);
+    outgroupPick();
     loadDefaults('#outgrsel','#outgrlist',5);
 }
 }
@@ -54,68 +118,10 @@ $.ajax({
 }
 
 
-function commonGroup() {
-var counter, counter2, commonTaxId;
-var selectedList = [];
-var allGroup = {};
-var groupList = ["genus","family","order","phyl"];
-var refOrgs = jsonOrgs["reforgs"]; //how to handle if only query orgs remaining?
- for (var group in groupList) {
-                var groupId = groupList[group]+"id";
-                var groupName = groupList[group]+"name";
-                $("#specieslist > .picked").each(function(){
-                    var currId = $(this).val();
-                    for (counter=0; counter<refOrgs.length; counter++) {
-                        var refInfo = refOrgs[counter];
-                            if (currId == refInfo.id) {
-                                selectedList.push(refInfo);
-                                var currGroup = refInfo[groupId];
-                                var currName = refInfo[groupName];
-                                if (currGroup != "N/A" && currName != "N/A") {
-                                allGroup[currGroup] = currName;
-                                //console.log(allGroup);
-                                }
-                                }
-                        }
-                });
-                if (Object.keys(allGroup).length == 1) {
-                commonTaxId = Object.keys(allGroup);
-                var commonInfo = [groupList[group], commonTaxId[0], allGroup[commonTaxId[0]]];
-                //console.log(commonInfo);
-                return commonInfo;
-                }
-                allGroup = {};
-}
-}
 
 
-function outgroupPick() {
-var commonTax = commonGroup();
-var allOutgroups = jsonOrgs["outgroups"]; // change?
-var groupId = commonTax[0]+"id";
-var counter;
-$('#outgrsel > option').each(function() {
-    var currId = $(this).attr("id");
-    for (counter=0; counter<allOutgroups.length; counter++) {
-        var outgrInfo = allOutgroups[counter];
-        if (currId == outgrInfo.id) {
-            if (outgrInfo[groupId] == commonTax[1]) {
-                console.log(outgrInfo[groupId]);
-                $(this).attr("disabled", true);
-                this.selected = false;
-                removeFromList('#outgrlist', $(this).val());
-            } else {
-                $(this).removeAttr("disabled");
-            }
-        }
-    }
-});
-if (!($('#outgrsel > option:not([disabled])').length)) {
-    $('#nooutgroups').removeClass("hidden");
-} else {
-    $('#nooutgroups').addClass("hidden");
-}
-}
+
+
 
 
 function outgroupError(xhr,ajaxOptions,thrownError) { // communication error

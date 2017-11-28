@@ -27,9 +27,8 @@ function genusSuccess(data,textStatus,xhr) {
             $('#genustable >tbody').append("<tr><td>"+currentSeq.file+"</td><td>"+currentSeq.genus+"</td></tr>");
         }
     } else if (genusKeys.length == 1) {
-        $('#selectedgenus').text(genusKeys[0]);
+        $('#selectedgenus').text(maxGenus);
         $('#genuswarn').addClass("hidden");
-        clearInterval(timer3);
     } else {
         $('#genuswarning').removeClass("hidden");
     }
@@ -55,12 +54,19 @@ $.ajax({
 }
 function selectError(xhr,ajaxOptions,thrownError) { // communication error
 console.log(xhr,ajaxOptions,thrownError);
+$('#communicateerror').removeClass("hidden");
 }
 function selectSuccess(data,textStatus,xhr){
-console.log(data);
+var data = JSON.parse(data);
+if (parseInt(data["status"]) != 1) {
+    $('#statuserror').removeClass("hidden");
+} else {
+$('#selectedgenus').text(genusKeys[0]);
+        $('#genuswarn').addClass("hidden");
 }
-
+}
 function selectGenus() {
+$('#communicateerror').addClass("hidden");
 $.ajax({
         // Your server script to process the upload
         contentType: 'application/json',
@@ -75,5 +81,3 @@ $.ajax({
         success: selectSuccess,
         error: selectError});
 }
-
-var timer3 = setInterval(getRefGenus, 1000);

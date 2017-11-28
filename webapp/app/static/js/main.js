@@ -72,7 +72,7 @@ $(id4+" > option").each(function() {
 }
 function loadDefaults(id5,id6,max2) {
 var counter = 0;
-$(id5+" > option").each(function() {
+$(id5+" > option:not([disabled])").each(function() {
     counter++;
     if (counter <= max2) {
         this.selected=true;
@@ -85,7 +85,7 @@ addtolist(id5,id6);
 }
 
 function loadSelected(id8,id9,idList) {
-$(id8+" >option").each(function() {
+$(id8+" >option:not([disabled])").each(function() {
     // iterate over idlist, set selected to true if matches?
     for (organismId in idList) {
         if ($(this).attr("id") == idList[organismId]) {

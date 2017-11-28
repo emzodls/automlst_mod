@@ -80,3 +80,8 @@ def addjob(**kwargs):
         rddb.lpush("AMLSTSQ",automlstjob.id)
         # make a results directory?
     return automlstjob
+def updatejob(jobid,newref):
+    rddb = getdb()
+    if rddb:
+        redisid = "automlstjob:"+jobid
+        rddb.hset(redisid,"reference",newref)

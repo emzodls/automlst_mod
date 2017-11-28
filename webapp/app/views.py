@@ -71,7 +71,17 @@ def getrefs(jobid):
         return send_from_directory(app.config['RESULTS_FOLDER'],'genuslist_example2.json')
 @app.route('/results2/selectgenus', methods=['POST'])
 def selectgenus():
-    return json.dumps({"status":1, "data":request.form.get('genusoptions')})
+    jobid = request.form.get("jobinfo")
+    newref = request.form.get("genusoptions")
+    routines.updatejob(jobid,newref)
+    genusdict={}
+    with open(os.path.join(app.config['RESULTS_FOLDER'],'genuslist_example2.json'),'r') as genusfile:
+        genusdict = json.load(genusfile)
+        genusdict["genuslist"] = {newref:genusdict["genuslist"][newref]}
+        genusdict["maxgenus"] = newref
+    with open(os.path.join(app.config['RESULTS_FOLDER'],'genuslist_example2.json'),'w') as fileout:
+        json.dump(genusdict,fileout,indent=2)
+    return json.dumps({"status":1})
 
 @app.route('/results2/refgenus')
 def refgenus():
@@ -181,7 +191,7 @@ def status(jobid):
                 proglist = line.strip().split('::')
                 fraction = str(proglist[1]).split('/')
                 percent = 100 * (float(fraction[0])/float(fraction[1]))
-    return json.dumps({"progress":percent,"status":jobstatus}) # title, progress bar value
+    return json.dumps({"progress":percent,"status":jobstatus,"mash":"finished"}) # title, progress bar value
 
 
 @app.route('/results/example/report')

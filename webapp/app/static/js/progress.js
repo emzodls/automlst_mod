@@ -2,8 +2,14 @@ function progressSuccess(data,textStatus,xhr) {
 var data = JSON.parse(data);
 $('#workflow2stat').attr("style", "width:"+data["progress"]+"%");
 $('#workflow2stat').attr("aria-valuenow",data["progress"]);
-$('#currentstatus').append('<p style="margin-top:10px">'+data["status"]+'</p>')
-clearInterval(timer2); //in final version, only if data["status"] == 100
+$('#currentstatus').text(data["status"]);
+if (data["mash"] == "finished") {
+    getRefGenus();
+}
+if (data["progress"] == 100) {
+    $('#viewreport').removeClass("hidden");
+    clearInterval(timer2);
+}
 }
 
 function progressError(xhr,ajaxOptions,thrownError) {
@@ -21,5 +27,5 @@ $.ajax({
         success: progressSuccess,
         error: progressError});
 }
-
-var timer2 = setInterval(getStatus, 5000);
+$('body').onload = getStatus();
+var timer2 = setInterval(getStatus, 10000);
