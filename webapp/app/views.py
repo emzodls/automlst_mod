@@ -122,11 +122,14 @@ def getOrgs(jobid):
     if os.path.exists('/Users/labuser/Downloads/userlist.json'):
         with open('/Users/labuser/Downloads/reflist_full.json','r') as reffile, open('/Users/labuser/Downloads/userlist.json','r') as userfile:
             refdict = json.load(reffile)
+            userdict = json.load(userfile)
+            tempdict = [ref for ref in refdict["reforgs"] if ref["id"] in userdict["selspecies"] and not ref in refdict["reforgs"][0:(orgstart+500)]]
             refdict["reforgs"] = refdict["reforgs"][orgstart:(orgstart + 500)]
             refdict["outgroups"] = [rec for rec in refdict["outgroups"] if
                                     str(rec["phylid"]) != "N/A" and str(rec["familyid"]) != "N/A" and str(
                                         rec["orderid"]) != "N/A" and str(rec["genusid"]) != "N/A"]
-            userdict = json.load(userfile)
+
+            refdict["reforgs"].extend(tempdict)
             refdict.update(userdict)
             return jsonify(refdict)
     elif os.path.exists('/Users/labuser/Downloads/reflist_full.json'):
@@ -150,8 +153,15 @@ def orgin(jobid):
 def outgrs(jobid):
     ingroups=[]
     commongr = request.args.get('group', False)
-    commonid = request.args.get('id', False)
-    ingroups.append(str(commonid))
+    multigroups = request.args.get('multiple', False)
+    print multigroups
+    if multigroups:
+        commonid = (request.args.get('id',False)).split(',')
+        ingroups = commonid
+        print ingroups
+    else:
+        commonid = request.args.get('id', False)
+        ingroups.append(str(commonid))
     outgrlimit = request.args.get('limit',1000)
     startindex = request.args.get('start',0)
     if commongr and commonid:
@@ -159,7 +169,7 @@ def outgrs(jobid):
             outdict = json.load(outrefs)
             refrec = outdict['reforgs']
             newlist = [rec for rec in refrec if str(rec[commongr+"id"]) not in ingroups and str(rec[commongr+"id"]) != "N/A"]
-            return jsonify(newlist)
+            return jsonify(newlist[0:500])
     return send_from_directory(app.config['RESULTS_FOLDER'],'outgroups.json')
 
 @app.route('/results/<jobid>/step3/genes')
