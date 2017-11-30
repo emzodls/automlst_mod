@@ -11,6 +11,7 @@ def mashdist(listfile,reffile,outputfile,cpu=1):
         cmd = cmd[:2] + ["-p",str(cpu)] + cmd[2:]
     with open(outputfile,"w") as ofil:
         try:
+            log.info("MASH dist: Running all input genomes")
             subprocess.call(cmd, stdout=ofil)
             log.debug("MASH dist: finished %s"%outputfile)
             return True
@@ -21,14 +22,15 @@ def mashdist(listfile,reffile,outputfile,cpu=1):
 def writefilelist(indir,outdir):
     try:
         flist = glob.glob(os.path.join(os.path.realpath(indir),"*.fa"))
-        tf = tempfile.NamedTemporaryFile(prefix="queryflist_",suffix=".txt",dir=os.path.realpath(outdir),delete=False)
-        tf.write("\n".join(flist))
-        tf.close()
-        log.info("List of files generated %s"%tf.name)
-        return tf.name
+        if len(flist):
+            tf = tempfile.NamedTemporaryFile(prefix="queryflist_",suffix=".txt",dir=os.path.realpath(outdir),delete=False)
+            tf.write("\n".join(flist))
+            tf.close()
+            log.info("List of files generated %s"%tf.name)
+            return tf.name
     except IOError:
         log.error("Failed to generate file list")
-        return False
+    return False
 
 def parse(mashresult,taxdb="",maxdist=0.5,TStol=0.05):
     if not taxdb or not os.path.exists(taxdb):
@@ -70,13 +72,15 @@ def getlineage(recs):
 
 def getcommongroup(lineage):
     groups = ["genus","family","order","phyl"]
+    allids = {}
     allgroup = {}
+    common = [False,allgroup.keys(),allgroup.values()]
     for group in groups:
         allgroup = {rec[group+"id"]:rec[group+"name"] for org,rec in lineage.items()}
-        if len(allgroup.keys())==1:
+        if len(allgroup.keys())==1 and not common[0]:
             common = [group,allgroup.keys()[0],allgroup.values()[0]]
-            return common
-    return [False,allgroup.keys(),allgroup.values()]
+        allids[group] = allgroup.keys()
+    return common, allids
 
 def getoutgrouporgs(common,refrecs):
     group = "phyl" #default to phyl scope
@@ -118,6 +122,14 @@ def getrefrecs(recs,top=list()):
             refrecs[id]["top"] = 1
     return refrecs, orglist
 
+def getalloutgroups(allids,refrecs, glimit=1000):
+    #get top 'glimit' orgs outside of each group scope
+    oglist = []
+    for group,allset in allids.items():
+        temp = [rec for rec in refrecs if rec[group+"id"] not in allset]
+        oglist.extend(temp[:glimit])
+    return oglist
+
 # sorted(refrecs.values(), key=lambda row: row["dist"])
 
 # Get ids of reference genomes that are closest to each species, preference weighted for typestrains.
@@ -136,13 +148,18 @@ def getnearestrefs(recs,NOlimit=25):
     toprefids = list(toprefids)
     return toprefids[:NOlimit]
 
-def getdistances(indir,outdir,reffile="",cpu=1,limit=50,outputfile="",TStol=0.05,NOlimit=25,OGlimit=5,maxdist=0.5):
+def getdistances(indir,outdir,reffile="",cpu=1,limit=50,outputfile="",TStol=0.05,NOlimit=25,OGlimit=100,maxdist=0.5):
     status = False
+    print indir
+    print outdir
     if not reffile or not os.path.exists(reffile):
         reffile = os.path.join(os.path.dirname(os.path.realpath(__file__)),"refseq.msh")
         log.info("Loading default refseq MASH database")
     if not outputfile:
         listfile = writefilelist(os.path.realpath(indir),os.path.realpath(outdir))
+        if not listfile:
+            log.error("No Sequences found.")
+            return False
         outputfile = os.path.join(os.path.realpath(outdir),"mash_distances.txt")
         status = mashdist(listfile,reffile,outputfile,cpu)
     elif os.path.exists(os.path.realpath(outputfile)):
@@ -159,11 +176,11 @@ def getdistances(indir,outdir,reffile="",cpu=1,limit=50,outputfile="",TStol=0.05
 
         #Get query organism lineage by closest hit lineage
         orgrecs = getlineage(recs)
-        commonrank = getcommongroup(orgrecs)
-        OGorgs = getoutgrouporgs(commonrank,refrecs)
+        commonrank, allids = getcommongroup(orgrecs)
+        OGorgs = getalloutgroups(allids,refrecs,glimit=OGlimit)
 
         with open(os.path.join(outdir,"reflist.json"),"w") as fil:
-            json.dump({"reforgs":refrecs[:limit],"queryorgs":orgrecs.values(),"orglist":orglist,"commonrank":commonrank,"outgroups":OGorgs[:OGlimit]},fil,indent=2)
+            json.dump({"reforgs":refrecs[:limit],"queryorgs":orgrecs.values(),"orglist":orglist,"commonrank":commonrank,"outgroups":OGorgs},fil,indent=2)
     return False
 
 # Commandline Execution
@@ -174,7 +191,7 @@ if __name__ == '__main__':
     parser.add_argument("-c", "--cpu", help="Turn on Multi processing set # Cpus (default: maxcpus)", type=int, default=cpu_count())
     parser.add_argument("-l", "--limit", help="limit of number of genomes to prioritize in total (default 500)", type=int, default=500)
     parser.add_argument("-nl", "--nearestlimit", help="limit of number of nearest organisms relative to each node (default 25)", type=int, default=25)
-    parser.add_argument("-ogl", "--outgrouplimit", help="limit of number of outgroups (default: 50)", type=int, default=50)
+    parser.add_argument("-ogl", "--outgrouplimit", help="limit of number of outgroups per group scope (default: 100 for each genus,family,order,phyl)", type=int, default=100)
     parser.add_argument("-ts", "--typestrain", help="MASH distance tolerance for typestrains, gives extra priority to typestrains by subtracting tolerance from distance measure (default 0.05)", type=float, default=0.05)
     parser.add_argument("-r", "--reffile", help="Reference sketch file (default: refseq.msh)",default="")
     parser.add_argument("-m", "--mashfile", help="Use precomuted mash output file and skip MASH (default: none)",default="")

@@ -29,9 +29,11 @@ def copydb(finput,sourcedb,ofil):
             obj = json.load(ifil)
             flist = obj["selspecies"]
             flist.extend(obj["seloutgroups"])
+            #Filter out query orgs
+            flist = [x for x in flist if "query" not in x.lower()]
     elif os.path.exists(finput):
         with open(finput,"r") as ifil:
-            flist=[x.strip() for x in ifil if os.path.exists(x.strip())]
+            flist=[x.strip() for x in ifil]
     elif "," in finput:
         flist=[x for x in finput.split(",") if os.path.exists(x)]
     else:
@@ -48,8 +50,8 @@ def copydb(finput,sourcedb,ofil):
             conn.execute(query,flist)
             log.info("DONE. Copying HMM hits...")
             #Copy all corresponding HMM and RNA hits
-            conn.execute("CREATE TABLE selorgs.HMMHits AS SELECT * FROM HMMHits WHERE seqid IN (SELECT seqid form selorgs.Seqs)")
-            conn.execute("CREATE TABLE selorgs.RNAHits AS SELECT * FROM RNAHits WHERE seqid IN (SELECT seqid form selorgs.Seqs)")
+            conn.execute("CREATE TABLE selorgs.HMMHits AS SELECT * FROM HMMHits WHERE seqid IN (SELECT seqid FROM selorgs.Seqs)")
+            conn.execute("CREATE TABLE selorgs.RNAHits AS SELECT * FROM RNAHits WHERE seqid IN (SELECT seqid FROM selorgs.Seqs)")
             log.info("DONE. Comiting and saving db....")
             conn.commit()
             conn.close()
@@ -65,7 +67,7 @@ def copydb(finput,sourcedb,ofil):
 # Commandline Execution
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Combine fasta files into single sql db.""")
-    parser.add_argument("input", nargs="?", help="Input filelist", default=sys.stdin)
+    parser.add_argument("input", nargs="?", help="Input list of organisms (list, Json, or plain txt)", default=sys.stdin)
     parser.add_argument("-db", "--database", help="Source database to copy from", default="refseq.db")
     parser.add_argument("-o", "--out", help="Output database", default="sql_copy.db")
     args = parser.parse_args()

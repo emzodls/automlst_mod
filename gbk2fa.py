@@ -9,6 +9,16 @@ import setlog
 global log
 log=setlog.init(toconsole=True)
 
+# def addremotecontigs(reclist):
+#     """If Contig records exists try to download from NCBI and add to records"""
+#     newlist = []
+#     for rec in reclist:
+#         if 'contig' in rec.annotations:
+#             log.info("Genbank file contains supercontig references attempting to download")
+#
+#         else:
+#             newlist.append(rec)
+
 def getheader(seq_record,recnum,userecnum=False):
     """Get record header information"""
     if len(seq_record.id) and not userecnum:
@@ -125,7 +135,7 @@ def convertgenes(filename, outdir="./", genes=False,f="",rename=False,usetrans=F
 
 def runall(finput="./", outdir="./", genes=False, cpu=1, features="",rename=False,filelist=False,usetrans=False,plasmid=False):
     """Run list of gbk files, use multiprocessing if applicible"""
-    ext = (".gbk", ".gb", ".gbf", ".genbank", ".gpff")
+    ext = (".gbk", ".gb", ".gbf", ".gbff", ".genbank", ".gpff")
     if filelist:
         temp = [line.strip() for line in sys.stdin]
         if len(temp)>0:
