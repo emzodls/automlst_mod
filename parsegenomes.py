@@ -81,6 +81,7 @@ def parseall(indir,outdir):
         outfile = os.path.join(outdir,os.path.splitext(os.path.split(fname)[-1])[0])
         shutil.copy(fname,outfile+".fa") #Normalize input by using orf multi-gene fasta as whole geneome fasta
         shutil.copy(fname,outfile+".fna")
+    return True
 
 # Commandline Execution
 if __name__ == '__main__':

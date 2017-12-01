@@ -41,8 +41,8 @@ def copydb(finput,sourcedb,ofil):
         return False
     numrecs=len(flist)
     if numrecs and os.path.exists(sourcedb):
+        conn = sql.connect(sourcedb)
         try:
-            conn = sql.connect(sourcedb)
             conn.execute("ATTACH DATABASE '%s' as selorgs"%os.path.realpath(ofil))
             # Copy all Sequence records with matching ids
             log.info("Copying sequence records form %s organisms: [%s]"%(numrecs,','.join(flist)))
@@ -52,7 +52,13 @@ def copydb(finput,sourcedb,ofil):
             #Copy all corresponding HMM and RNA hits
             conn.execute("CREATE TABLE selorgs.HMMHits AS SELECT * FROM HMMHits WHERE seqid IN (SELECT seqid FROM selorgs.Seqs)")
             conn.execute("CREATE TABLE selorgs.RNAHits AS SELECT * FROM RNAHits WHERE seqid IN (SELECT seqid FROM selorgs.Seqs)")
-            log.info("DONE. Comiting and saving db....")
+
+            #Make fast indexing
+            log.info("DONE. Creating index...")
+            query = "CREATE UNIQUE INDEX selorgs.seqidx ON Seqs (seqid)"
+            conn.execute(query)
+
+            log.info("DONE. Commiting and saving db....")
             conn.commit()
             conn.close()
         except conn.OperationalError as e:

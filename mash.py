@@ -5,18 +5,18 @@ from multiprocessing import cpu_count
 
 log = setlog.init(toconsole=True)
 
-def mashdist(listfile,reffile,outputfile,cpu=1):
-    cmd = ["mash","dist",reffile,"-l", listfile]
+def mashdist(listfile,reffile,outputfile,cpu=1,maxdist=1.0):
+    cmd = ["mash","dist",reffile,"-l", listfile,"-d",maxdist]
     if(cpu > 1):
         cmd = cmd[:2] + ["-p",str(cpu)] + cmd[2:]
     with open(outputfile,"w") as ofil:
         try:
-            log.info("MASH dist: Running all input genomes")
+            log.info("MASH_STATUS:: Running all input genomes")
             subprocess.call(cmd, stdout=ofil)
-            log.debug("MASH dist: finished %s"%outputfile)
+            log.debug("MASH_STATUS:: finished %s"%outputfile)
             return True
         except subprocess.CalledProcessError as e:
-            log.error("MASH dist: error, could not process %s - %s"%(listfile,e))
+            log.error("MASH_STATUS:: error, could not process %s - %s"%(listfile,e))
             return False
 
 def writefilelist(indir,outdir):
@@ -161,7 +161,7 @@ def getdistances(indir,outdir,reffile="",cpu=1,limit=50,outputfile="",TStol=0.05
             log.error("No Sequences found.")
             return False
         outputfile = os.path.join(os.path.realpath(outdir),"mash_distances.txt")
-        status = mashdist(listfile,reffile,outputfile,cpu)
+        status = mashdist(listfile,reffile,outputfile,cpu,maxdist)
     elif os.path.exists(os.path.realpath(outputfile)):
         outputfile = os.path.realpath(outputfile)
         log.info("Using precomputed mash file: %s"%outputfile)
@@ -180,7 +180,10 @@ def getdistances(indir,outdir,reffile="",cpu=1,limit=50,outputfile="",TStol=0.05
         OGorgs = getalloutgroups(allids,refrecs,glimit=OGlimit)
 
         with open(os.path.join(outdir,"reflist.json"),"w") as fil:
-            json.dump({"reforgs":refrecs[:limit],"queryorgs":orgrecs.values(),"orglist":orglist,"commonrank":commonrank,"outgroups":OGorgs},fil,indent=2)
+            result = {"reforgs":refrecs[:limit],"queryorgs":orgrecs.values(),"orglist":orglist,"commonrank":commonrank,"outgroups":OGorgs}
+            json.dump(result,fil,indent=2)
+            log.info("Mash distances stored in reflist.json")
+            return {"reforgs":refrecs[:limit],"queryorgs":orgrecs.values(),"orglist":orglist,"commonrank":commonrank,"outgroups":OGorgs}
     return False
 
 # Commandline Execution

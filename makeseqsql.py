@@ -188,6 +188,12 @@ def runlist(finput,ofil,transonly=False,orgname=False,inc=False):
                 csr.execute('DELETE FROM "Seqs" WHERE seqid NOT IN (SELECT min(t.seqid) FROM "Seqs" t GROUP BY orgname,gene,description,loc_start,loc_end,loc_strand)')
         except exc.OperationalError as e:
             log.error("failed sql operation: %s"%e)
+
+        try:
+            log.info("Rebuilding index if present...")
+            csr.execute("REINDEX Seqs.seqidx")
+        except exc.OperationalError:
+            log.info("No index present")
         csr.close()
         return True
     else:
