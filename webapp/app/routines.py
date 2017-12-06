@@ -1,4 +1,4 @@
-import os, tempfile, models
+import os, tempfile, models, json
 from flask import render_template, jsonify, request, redirect, abort, make_response, send_from_directory, flash, g
 from redis import Redis
 from redis import ConnectionError as redisConnectError
@@ -85,3 +85,34 @@ def updatejob(jobid,newref):
     if rddb:
         redisid = "automlstjob:"+jobid
         rddb.hset(redisid,"reference",newref)
+
+def getjobstatus(jobid):
+    jobstatus = ""
+    mashstatus = ""
+    checkpoint = ""
+    percent = 0
+    workflow = 0
+    paramdict = {}
+    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'example.log'), 'r') as infile:
+        for line in infile:
+            if 'JOB_STATUS' in line:
+                statlist = line.strip().split('::')
+                jobstatus = statlist[1]
+            elif 'JOB_PROGRESS' in line:
+                proglist = line.strip().split('::')
+                fraction = str(proglist[1]).split('/')
+                percent = 100 * (float(fraction[0]) / float(fraction[1]))
+            elif 'MASH_STATUS' in line:
+                mashlist = line.strip().split('::')
+                mashstatus = mashlist[1]
+            elif 'JOB_CHECKPOINT' in line:
+                checklist = line.strip().split('::')
+                checkpoint = checklist[1]
+            elif 'WORKFLOW' in line:
+                workflowline = line.strip().split('::')
+                workflow= workflowline[1]
+            elif 'JOB_PARAMS' in line:
+                paramlist = line.strip().split('::')
+                paramdict = json.loads(paramlist[1])
+    jobstatdict = {"progress": percent,"status":jobstatus, "mash":mashstatus, "checkpoint": checkpoint, "workflow": workflow, "params":paramdict}
+    return jobstatdict

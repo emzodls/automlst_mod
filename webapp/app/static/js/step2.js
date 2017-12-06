@@ -1,6 +1,83 @@
 function orgError(xhr,ajaxOptions,thrownError) { // communication error
 console.log(xhr,ajaxOptions,thrownError);
 }
+
+function speciesSearch() {
+    var searchval = $('#speciessearch').val().toLowerCase();
+    $('#speciessel > option').each(function() {
+        var test = ($(this).text().toLowerCase().indexOf(searchval) > -1);
+        $(this).toggle(test);
+        if (test && searchval.length) {
+            $(this).css("color","#0000ff");
+        } else {
+            $(this).css("color","");
+        }
+    });
+}
+
+function outgrSearch() {
+    var searchval = $('#outgroupsearch').val().toLowerCase();
+    $('#outgrsel > option').each(function() {
+        var test = ($(this).text().toLowerCase().indexOf(searchval) > -1);
+        $(this).toggle(test);
+        if (test && searchval.length) {
+            $(this).css("color","#0000ff");
+        } else {
+            $(this).css("color","");
+        }
+        if (test && searchval.length && $(this).is(':disabled')) {
+            $(this).toggle(false);
+            $(this).css("color","");
+        }
+    });
+}
+var speciesTimer = 1000;
+var speciesStarted = false;
+
+function speciesQueue() {
+    //console.log('SQ running');
+    if (speciesTimer <= 0) {
+        speciesSearch();
+        speciesStarted = false;
+    } else {
+        speciesTimer -= 100;
+        setTimeout(speciesQueue, 100);
+    }
+}
+$(document).ready(function() {
+$('#speciessearch').on("keyup", function() {
+    //console.log('Search running');
+    speciesTimer = 1000;
+    if (speciesStarted == false) {
+        speciesQueue();
+        speciesStarted = true;
+    }
+});
+});
+
+var outgrTimer = 1000;
+var outgrStarted = false;
+
+function outgrQueue() {
+    if (outgrTimer <= 0) {
+        outgrSearch();
+        outgrStarted = false;
+    } else {
+        outgrTimer -= 100;
+        setTimeout(outgrQueue, 100);
+    }
+}
+$(document).ready(function() {
+$('#outgroupsearch').on("keyup", function() {
+    outgrTimer = 1000;
+    if (outgrStarted == false) {
+        outgrQueue();
+        outgrStarted = true;
+    }
+});
+});
+
+
 var jsonOrgs = false;
 function commonGroup() {
 var counter, counter2, commonTaxId;
@@ -87,6 +164,7 @@ if (!($('#outgrsel > option:not([disabled])').length)) {
     $('#nooutgroups').addClass("hidden");
 }
 refreshView('#outgrlist',5,'#outgrlimit');
+outgrSearch();
 } else if (typeof commonTax[1] == "object") {
     //var allOutgroups = jsonOrgs["outgroups"]; // change?
     var groupId = commonTax[0]+"id";
@@ -129,6 +207,7 @@ if (!($('#outgrsel > option:not([disabled])').length)) {
     $('#nooutgroups').addClass("hidden");
 }
 refreshView('#outgrlist',5,'#outgrlimit');
+outgrSearch();
 } else {
     $('#nooutgroups').removeClass("hidden");
     $('#outgrsel > option').each(function() {
@@ -137,6 +216,7 @@ refreshView('#outgrlist',5,'#outgrlimit');
     removeFromList('#outgrlist', $(this).val());
     $('#commgroup').text("No common group found");
     });
+    outgrSearch();
 }
 }
 
@@ -209,7 +289,7 @@ function outgroupSuccess(data,textStatus,xhr) {
 var counter;
 for (counter=0; counter<data.length;counter++) {
     var outgrInfo = data[counter];
-    $('#outgrsel > option').remove('#'+outgrInfo.id);
+    $('#outgrsel > option').remove('#'+outgrInfo.id); //fix ordering?
     $('#outgrsel').prepend("<option value='"+outgrInfo.id+"' data-title='"+ outgrInfo.orgname + " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+")"+"' id='" + outgrInfo.id +"' data-genusid='"+outgrInfo.genusid+"' data-genusname='"+outgrInfo.genusname+"' data-familyid='"+outgrInfo.familyid+"' data-familyname='"+outgrInfo.familyname+"' data-orderid='"+outgrInfo.orderid + "' data-ordername='"+outgrInfo.ordername+"' data-phylid='"+outgrInfo.phylid+"' data-phylname='"+outgrInfo.phylname+"'>"+outgrInfo.orgname+ " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+") </option>");
 }
 if (!($('#outgrsel > option:not([disabled])').length)) {
@@ -217,12 +297,15 @@ if (!($('#outgrsel > option:not([disabled])').length)) {
 } else {
     $('#nooutgroups').addClass("hidden");
 }
+$('#outgroupsearch').val("");
+outgrSearch();
 }
 
 function outgroupLoad() {
 var jobid = $('#jobinfo').val();
 var commonTax = commonGroup();
-//console.log(commonTax);
+//add check for if no options in outgrsel?
+if (!($('#outgrsel > option:not([disabled])').length)) {
 if (typeof commonTax[1] == "string") {
 $.ajax({
         // Your server script to process the upload
@@ -247,6 +330,7 @@ $.ajax({
         error: outgroupError});
 }
 }
+}
 
 function moreSeqsError(xhr,ajaxOptions,thrownError) { // communication error
 console.log(xhr,ajaxOptions,thrownError);
@@ -266,6 +350,8 @@ for (counter=0; counter<refOrgs.length;counter++) {
    }
     }
     refInfo.rows.add(data["reforgs"]).draw();
+    $('#speciessearch').val("");
+    speciesSearch();
 }
 
 
@@ -293,7 +379,10 @@ return "validated";
 return "notvalidated";}
 } */
 //
-$(document).ready(function() {
+
+
+
+/*$(document).ready(function() {
     $('#speciessearch').on("keyup", function() {
         var searchval = $(this).val().toLowerCase();
         $('#speciessel > option').each(function() {
@@ -321,7 +410,7 @@ $(document).ready(function() {
         }
         });
     });
-});
+}); */
 
 function validateForm() {
 if ($('.selectablein >option').length>4 && $('.selectablein2 > option').length>0) {

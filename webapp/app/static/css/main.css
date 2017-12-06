@@ -380,6 +380,48 @@ tr.shown td.details-control {
 .footer img{
     margin: 5px;
 }
+/* heading styles for better heading hierarchy with same look */
+.frontjt h1.h2alike {
+    color: #FFFFFF;
+    font-size: 30px;
+    font-weight: 500;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    line-height: 1.1;
+    text-shadow: 2px 2px #111;
+}
+
+.h3alike {
+    color:#151580;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.h3alike .small {
+    font-weight: normal;
+    line-height: 1;
+    color: #777;
+    font-size: 65%;
+}
+
+.h4alike {
+    color:#151580;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.h4alike .small {
+    font-weight: normal;
+    line-height: 1;
+    color: #777;
+    font-size: 75%;
+}
 
 /* Links for analyze pages */
 a.steps {
@@ -469,6 +511,59 @@ width: 0;
   transition: width .6s ease;
 background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
           background-size: 40px 40px;
+}
+
+progress.bootstripe-active[value]::-webkit-progress-value {
+-webkit-animation: progress-bar-stripes 2s linear infinite;
+       -o-animation: progress-bar-stripes 2s linear infinite;
+          animation: progress-bar-stripes 2s linear infinite;
+}
+
+@-webkit-keyframes progress-bar-stripes {
+  from {
+    background-position: 40px 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+@-o-keyframes progress-bar-stripes {
+  from {
+    background-position: 40px 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+@keyframes progress-bar-stripes {
+  from {
+    background-position: 40px 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+/* loader */
+.loader {
+    border: 3px solid #bfbfbf;
+    border-top: 3px solid #3d3d8f;
+    border-radius:50%;
+    width:15px;
+    height:15px;
+    animation: spin 2s linear infinite;
+    -webkit-animation: spin 2s linear infinite;
+    display: inline-block;
+}
+
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% {transform: rotate(0deg); }
+  100% {transform: rotate(360deg); }
 }
 
 /* highlight user input in tree */

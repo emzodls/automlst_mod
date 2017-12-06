@@ -6,7 +6,7 @@
     <hr>
     <div class="row">
         <div class="col-md-2">
-            <h4>Job ID</h4>
+            <h3 class="h4alike">Job ID</h3>
         </div>
         <div class="col-md-10">
             <p style="margin-top:10px">{{ jobid }}</p> <!-- tweak margin? -->
@@ -14,7 +14,7 @@
     </div>
     <div class="row">
         <div class="col-md-2">
-            <h4>Status</h4>
+            <h3 class="h4alke">Status</h3>
         </div>
         <div class="col-md-10">
             <p style="margin-top:10px"><b>MLST gene selection (Step 3)</b></p>
@@ -84,8 +84,8 @@
         </table>
         <h4>General</h4>
     <div class="form-group row"> <!-- fix formating -->
-        <label class="col-md-2">Options</label>
-        <div class="col-md-10">
+        <label class="col-md-2" for="treeoptions">Options</label>
+        <div class="col-md-10" id="treeoptions">
             <div class="radio">
                 <label><input type="radio" name="optradio" value="concatenated" checked="checked">Concatenated alignment</label>
             </div>

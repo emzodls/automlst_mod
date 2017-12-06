@@ -23,6 +23,7 @@ console.log(data["filename"]);
 $("#seqbtn").removeClass("disabled");
 $("#ncbibtn").removeClass("disabled");
 $("#ncbiload").addClass("hidden");
+$('progress').removeClass("hidden");
 if (data["filename"] == false) {
     $("#errorwarning").removeClass("hidden");
     } else {
@@ -84,6 +85,7 @@ var uploadForm = {
 };
 if (filesrc == 'ncbi') {
     $('#ncbiload').removeClass("hidden");
+    $('progress').addClass("hidden");
     $('progress').attr({
     value: 50,
     max: 100
@@ -111,11 +113,31 @@ $.ajax(uploadForm);
 
 function validateAcc() {
 var userAcc = $("#ncbiacc1").val();
-if (userAcc && (userAcc.search(" ") == -1)) { //check if userAcc is alphanumeric
+var allowedChars = /[A-Z0-9_]+$/i;
+console.log(allowedChars.test(userAcc));
+if (userAcc && (userAcc.search(" ") == -1) && allowedChars.test(userAcc)) { //check if userAcc is alphanumeric
+    console.log('TESTING');
     return true;
     } else {
     return false;
     }
+}
+
+function checkDuplicateAcc() {
+var userAcc = $('#ncbiacc1').val().trim();
+var duplicateFound;
+$('#upfiles>option').each(function() {
+    var plainName = $(this).text().split(".");
+    var fileName = plainName[0];
+    if (userAcc && userAcc.toUpperCase() == fileName.toUpperCase()) {
+        duplicateFound=true;
+    }
+});
+if (duplicateFound == true) {
+    return false;
+} else {
+    return true;
+}
 }
 
 function uploadSequence(filesrc) {
@@ -123,11 +145,15 @@ clearErrors('#uploadwarning');
 clearErrors('#errorwarning');
 clearErrors('#uploadsuccess');
 clearErrors('#accwarning');
+clearErrors('#duplicatewarning');
 $("#filesrc").val(filesrc);
 console.log($("#ncbiacc1").val());
 if (filesrc == 'ncbi' && !(validateAcc())) {
     $("#accwarning").removeClass("hidden");
-} else {
+} else if (filesrc == 'ncbi' && !(checkDuplicateAcc())) {
+    $('#duplicatewarning').removeClass("hidden");
+}
+else {
 uploader(filesrc);
 console.log($("#uploadprog")); // -> doesn't clear properly!
 }

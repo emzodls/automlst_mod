@@ -11,7 +11,7 @@
     <hr>
     <div class="row">
         <div class="col-md-2">
-            <h4>Job ID</h4>
+            <h3 class="h4alike">Job ID</h3>
         </div>
         <div class="col-md-10">
             <p style="margin-top:10px">{{ jobid }}</p> <!-- tweak margin? -->
@@ -19,7 +19,7 @@
     </div>
     <div class="row">
         <div class="col-md-2">
-            <h4>Status</h4>
+            <h3 class="h4alike">Status</h3>
         </div>
         <div class="col-md-10">
             <p style="margin-top:10px"><b>Species and outgroup selection (Step 2)</b></p>
@@ -38,7 +38,7 @@
             <select multiple class="form-control" id="speciessel" size="40" style="width:100%;overflow:auto;">
             </select>
             <button type="button" class="btn btn-primary" style="margin-top:10px;margin-bottom:10px" onclick="loadMore();">Load more organisms</button>
-            <input class="form-control" id="speciessearch" type="text" placeholder="Search species">
+            <input class="form-control" id="speciessearch" type="text" placeholder="Search species" aria-label="Search species">
         </div>
             <div class="col-md-2" style="padding-top:65px">
                 <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#speciessel','#specieslist'); refreshView('#specieslist',50,'#seqlimit'); idSearch(); outgroupPick()">Add to list</button>
@@ -106,7 +106,7 @@
                 <option>claw at curtains</option>
                 <option>refuse to leave cardboard box</option> -->
             </select>
-                <input class="form-control" id="outgroupsearch" style="margin-top:10px" type="text" placeholder="Search outgroup">
+                <input class="form-control" id="outgroupsearch" style="margin-top:10px" type="text" placeholder="Search outgroup" aria-label="Search outgroups">
         </div>
             <div class="col-md-2" style="padding-top:65px">
                 <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#outgrsel','#outgrlist'); refreshView('#outgrlist',5,'#outgrlimit')">Add to list</button>

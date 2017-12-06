@@ -2,17 +2,20 @@
 {% block mainbody %}
 <div class="container" style="padding-top:40px;">
         <div class="container">
+            <form id="jobresults" name="jobresults" action="/results/getreport" method="post" enctype="multipart/form-data">
     <div class="form-group row">
       <div class="col-sm-2">
           <h4>View Job</h4>
       </div>
         <div class="col-sm-6">
-        <input type="text" class="form-control" id="jobid" placeholder="aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee">
+        <input type="text" class="form-control" id="jobid" name="jobid" placeholder="aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee">
       </div>
         <div class="col-sm-2">
-        <a href="#" class="btn btn-primary" id="viewbtn">View report &raquo;</a>
+        <button type="submit" class="btn btn-primary" id="viewbtn">View report &raquo;</button>
       </div>
+
     </div>
+                </form>
         </div>
 </div>
 {% endblock %}

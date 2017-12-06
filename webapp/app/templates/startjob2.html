@@ -30,7 +30,7 @@
     </div>
     <br />
       <div class="progress">
-        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%" id="workflow2stat"></div>
+        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%" id="workflow2stat"></div> <!-- change when at 100% -->
     </div>
     <div id="genuswarn" class="hidden">
         <hr>
@@ -55,12 +55,14 @@
                 </table>
             </div>
             <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
+            <input type="hidden" id="workinfo" name="workinfo" value="2">
+            <input type="hidden" id="laststep" name="laststep" value="NONE">
             <div class="alert alert-danger hidden" id="communicateerror"><strong>Error: </strong>Failed to set genus. Check your internet connection and try again.</div>
             <div class="alert alert-danger hidden" id="statuserror"><strong>Error: </strong>Failed to set genus. Please try again later.</div>
             <button type="button" class="btn btn-primary" style="width:300px" onclick="selectGenus();">Continue &raquo;</button>
           </form>
     </div>
-    <a href="/results2/{{ jobid }}/report" class="btn btn-primary hidden" role="button" id="viewreport">View report &raquo;</a>
+    <a href="/results/{{ jobid }}/report" class="btn btn-primary hidden" role="button" id="viewreport" style="width:300px">View report &raquo;</a>
     <div class="alert alert-warning hidden" id="genuswarning"><span class="glyphicon glyphicon-alert"></span> No matching genus detected.</div>
    <!-- <progress id="work2progress" value="{{ jobstatus }}" max="100" class="bootstripe" style="width:100%"></progress> -->
 </div>

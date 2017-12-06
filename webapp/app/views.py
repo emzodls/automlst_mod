@@ -21,22 +21,39 @@ def about():
 def results():
     return render_template("results.html")
 
+@app.route('/results/getreport', methods=['POST'])
+def getreport():
+    jobid = request.form.get("jobid")
+    return redirect("/results/"+jobid+"/loading")
+
 @app.route('/results/<jobid>')
 @app.route('/results/<jobid>/')
 def showresults(jobid):
     return render_template("startjob.html",jobid=jobid)
 
-@app.route('/results/<jobid>/<step>')
-@app.route('/results/<jobid>/<step>/')
+@app.route('/results/<jobid>/<step>', methods=['GET'])
+@app.route('/results/<jobid>/<step>/', methods = ['GET'])
 def showstep(jobid,step):
+    jobinfo = routines.getjobstatus(jobid)
+    paramdict = jobinfo.get("params")
+    laststep = request.args.get('laststep','NONE')
     if step == "loading":
-        return render_template("startjob.html",jobid=jobid)
+        if jobinfo["workflow"] == "1":
+            if laststep == "step2" or laststep == "step3":
+                return render_template("startjob.html", jobid=jobid, laststep=laststep)
+            else:
+                return render_template("startjob.html", jobid=jobid)
+        else:
+            return render_template("startjob2.html", jobid=jobid)
     elif step == "step2":
         return render_template("step2.html",jobid=jobid)
     elif step == "step3":
         return render_template("step3.html",jobid=jobid)
     elif step == "report":
-        return render_template("report.html",jobid=jobid)
+        if jobinfo["workflow"] == "1":
+            return render_template("report.html",jobid=jobid)
+        else:
+            return render_template("report.html",jobid=jobid,workflow=2)
 
 @app.route('/results/<jobid>/tree', methods=['GET'])
 def getTree(jobid):
@@ -57,13 +74,13 @@ def getTree(jobid):
         #     return send_from_directory(resultdir, resulttree + '_phyloxml.xml', as_attachment=True)
     else:
         return "false"
-@app.route('/results2/<jobid>/<step>')
-@app.route('/results2/<jobid>/<step>/')
-def show2(jobid,step):
-    if step == "loading":
-        return render_template("startjob2.html", jobid=jobid)
-    elif step == "report":
-        return render_template("report.html",jobid=jobid,workflow=2)
+#@app.route('/results2/<jobid>/<step>')
+#@app.route('/results2/<jobid>/<step>/')
+#def show2(jobid,step):
+#    if step == "loading":
+#        return render_template("startjob2.html", jobid=jobid)
+#    elif step == "report":
+#        return render_template("report.html",jobid=jobid,workflow=2)
 
 @app.route('/results2/<jobid>/refs')
 def getrefs(jobid):
@@ -87,6 +104,8 @@ def selectgenus():
 def refgenus():
     if os.path.exists('/Users/labuser/Downloads/acceleratedrefs.json'):
         return send_from_directory(app.config['RESULTS_FOLDER'],'acceleratedrefs.json')
+    else:
+        return jsonify([])
 
 @app.route('/analyze')
 def analyze():
@@ -105,7 +124,7 @@ def startjob():
               "reference": request.form.get('genusselect','NA')}
     if request.form.get("workflow") == "classic":
         print jobid
-        automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'))
+        automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""))
         with open('/Users/labuser/Downloads/examplein.json','w') as uploadfile:
             json.dump(jobdict,uploadfile)
         return redirect('/results/'+jobid)
@@ -113,7 +132,7 @@ def startjob():
         print jobid
         automlstjob = routines.addjob(id=jobid, workflow=request.form.get("workflow"),
                                       genomes=request.form.getlist('upfiles'),
-                                      reference=request.form.get('genusselect', 'NA'))
+                                      reference=request.form.get('genusselect', 'NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""))
         return redirect('/results2/' + jobid + '/loading')
 
 @app.route('/results/<jobid>/step2/orgs', methods=['GET'])
@@ -147,7 +166,7 @@ def orgin(jobid):
     jobid = request.form.get('jobinfo')
     with open('/Users/labuser/Downloads/userlist.json','w') as userfile:
         json.dump({"selspecies":species, "seloutgroups":outgroups},userfile)
-    return redirect('/results/'+jobid+'/step3')
+    return redirect('/results/'+jobid+'/loading?laststep=step2') # when is checkpoint set? Might get user stuck in a loop of submitting/getting redirected
 
 @app.route('/results/<jobid>/step2/outgroups', methods=['GET'])
 def outgrs(jobid):
@@ -185,23 +204,38 @@ def genein(jobid):
     rmorgs = request.form.get('removeorgs')
     with open('/Users/labuser/Downloads/usergenes.json','w') as usergenes:
         json.dump({"genes":genes,"mode":radioval,"remove":rmorgs},usergenes)
-    return redirect('/results/'+jobid+'/report')
+    return redirect('/results/'+jobid+'/loading?laststep=step3')
 
 @app.route('/jobstatus/<jobid>')
 @app.route('/jobstatus/<jobid>/')
 def status(jobid):
-    jobstatus = ""
-    percent = 0
-    with open('/Users/labuser/Downloads/example.log','r') as infile:
-        for line in infile:
-            if 'JOB_STATUS' in line:
-                statlist = line.strip().split('::')
-                jobstatus = statlist[1]
-            elif 'JOB_PROGRESS' in line:
-                proglist = line.strip().split('::')
-                fraction = str(proglist[1]).split('/')
-                percent = 100 * (float(fraction[0])/float(fraction[1]))
-    return json.dumps({"progress":percent,"status":jobstatus,"mash":"finished"}) # title, progress bar value
+    jobstat = routines.getjobstatus(jobid)
+    workflow = jobstat["workflow"]
+    paramdict = jobstat.get("params")
+    skips = paramdict.get("skip",[])
+    if jobstat["checkpoint"] == "W1-2" and "skip2" not in skips and workflow == "1":
+        #redirdict = {"redirect":"step2"}
+        #return jsonify(redirdict)
+        jobstat["redirect"] = "step2"
+        return jsonify(jobstat)
+    elif jobstat["checkpoint"] == "W1-2" and "skip2" in skips and workflow == "1":
+        jobstat["skip"] = "c1"
+        return jsonify(jobstat)
+    elif jobstat["checkpoint"] == "W1-3" and "skip3" not in skips and workflow == "1":
+        #redirdict = {"redirect":"step3"}
+        #return jsonify(redirdict)
+        jobstat["redirect"] = "step3"
+        return jsonify(jobstat)
+    elif jobstat["checkpoint"] == "W1-3" and "skip3" in skips and workflow == "1":
+        jobstat["skip"] = "c2"
+        return jsonify(jobstat)
+    elif jobstat["checkpoint"] == "W1-R" and workflow == "1":
+        #redirdict = {"redirect":"report"}
+        #return jsonify(redirdict)
+        jobstat["redirect"] = "report"
+        return jsonify(jobstat)
+    else:
+        return jsonify(jobstat)
 
 
 @app.route('/results/example/report')

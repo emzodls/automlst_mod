@@ -25,11 +25,24 @@
                 <hr>
                 <p><b>Classical Mode</b>: After uploading your sequences, choose from which species to construct the tree for them, and choose
                 the genes to use for the MLST.</p>
+                <div class="form-group row">
+        <div class="col-md-2">
+            <h2 class="h4alike">Options</h2></div>
+        <div class="col-md-10">
+            <div class="checkbox">
+                <label><input type="checkbox" value="skip2" id="skip2" name="skip2">Select default nearest organisms (skip Step 2)</label>
+            </div>
+             <div class="checkbox">
+                <label><input type="checkbox" value="skip3" id="skip3" name="skip3">Select default MLST genes (skip Step 3)</label>
+                 <!-- reference alignment thing? -->
+            </div>
+        </div>
+    </div>
             </div>
 
         </div>
     <hr>
-    <h4>Sequences</h4>
+    <h2 class="h4alike">Sequences</h2>
 
         <div class="form-group row">
             <div class="col-md-10">
@@ -40,9 +53,10 @@
                 <button type="button" class="btn btn-default" id="remfiles" style="margin-top:25px" onclick="removeAllSeqs()">Remove selected sequences</button>
             </div>
         </div>
-    <progress id="uploadprog" style="width:100%" value=0 class="bootstripe"></progress>
-        <div id="ncbiload" class="hidden"><b>Downloading file from NCBI...</b></div>
-    <h4>Upload Genomes</h4>
+    <progress id="uploadprog" style="width:100%" value=0 class="bootstripe bootstripe-active"></progress>
+        <div id="ncbiload" class="hidden"><b>Downloading file from NCBI. This may take a few minutes.</b> <div class="loader"></div>
+        </div>
+    <h2 class="h4alike">Upload Genomes</h2>
     <div class="form-group row">
             <label class="control-label col-md-2" for="ncbiacc1">NCBI Accession Number(s)</label>
         <div class="col-md-8">
@@ -66,6 +80,7 @@
         <div class="alert alert-danger hidden" id="uploadwarning"><strong>Error:</strong> Upload failed</div>
         <div class="alert alert-danger hidden" id="errorwarning"><strong>Error:</strong> Invalid accession number or sequence file</div>
         <div class="alert alert-danger hidden" id="accwarning"><strong>Error:</strong> Invalid accession number. Accession numbers may only contain alphanumeric characters (A-Z, 0-9) and underscores.</div>
+        <div class="alert alert-danger hidden" id="duplicatewarning"><strong>Error:</strong> Sequence already uploaded.</div>
         <div class="alert alert-warning hidden" id="seqwarn"><strong>Maximum number of files and accession numbers reached.</strong></div>
         <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> No sequences uploaded. Please upload sequences before submitting.</div>
 
