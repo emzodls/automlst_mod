@@ -1,4 +1,4 @@
-import os, tempfile, models, json
+import os, tempfile, models, json, datetime
 from flask import render_template, jsonify, request, redirect, abort, make_response, send_from_directory, flash, g
 from redis import Redis
 from redis import ConnectionError as redisConnectError
@@ -116,3 +116,14 @@ def getjobstatus(jobid):
                 paramdict = json.loads(paramlist[1])
     jobstatdict = {"progress": percent,"status":jobstatus, "mash":mashstatus, "checkpoint": checkpoint, "workflow": workflow, "params":paramdict}
     return jobstatdict
+
+def reanalyzejob(jobid):
+    paramdict={}
+    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'example.log'),'r') as jobread:
+        for line in jobread:
+            if 'JOB_PARAMS' in line:
+                paramlist = line.strip().split('::')
+                paramdict = json.loads(paramlist[1])
+    paramdict["skip"]=[]
+    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'example.log'),'a') as joblog:
+        joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_REANALYZE::true \n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::W1-2 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Reanalyzing\n'+str(datetime.datetime.now())+' - INFO - JOB_PARAMS::'+json.dumps(paramdict)+'\n')

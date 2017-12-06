@@ -201,12 +201,18 @@ if (($('input[name="workflow"]:checked', '#sequpload').val()) == "2") {
     }
 }
 
+
+
 function validateForm() {
 if ($('.selectablein').has('option').length>0) {
 return "validated";
 } else {
 return "notvalidated";}
 }
+
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
 
 $(document).on("keydown","input:not(button)", function(e) {
     if (e.keyCode == 13) {

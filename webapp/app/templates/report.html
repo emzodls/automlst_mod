@@ -56,7 +56,7 @@
     <!-- button layout? -->
         {% if workflow != 2 %}
     <hr>
-    <a href="/results/{{ jobid }}/step2" role="button" class="btn btn-primary" style="width:300px" id="resubmit" name="resubmit"><span class="glyphicon glyphicon-repeat"></span> Reanalyze from Step 2</a>
+    <a href="/results/{{ jobid }}/reanalyze" role="button" class="btn btn-primary" style="width:300px" id="resubmit" name="resubmit"><span class="glyphicon glyphicon-repeat"></span> Reanalyze from Step 2</a>
     <div class="alert alert-warning" style="margin-top:10px"><strong>Warning:</strong> Reanalyzing will clear your current results.</div>
         {% endif %}
         <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">

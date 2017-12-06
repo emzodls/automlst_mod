@@ -9,5 +9,6 @@ class automlstjob(object):
         #self.skip2 = kwargs.get("skip2","")
         #self.skip3 = kwargs.get("skip3","")
         self.skip = kwargs.get("skip")
+        self.bootstr=kwargs.get("bootstr",0)
     def getdict(self):
         return self.__dict__

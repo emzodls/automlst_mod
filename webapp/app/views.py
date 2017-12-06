@@ -55,6 +55,11 @@ def showstep(jobid,step):
         else:
             return render_template("report.html",jobid=jobid,workflow=2)
 
+@app.route('/results/<jobid>/reanalyze')
+def reanalyze(jobid):
+    routines.reanalyzejob(jobid)
+    return render_template("step2.html", jobid=jobid)
+
 @app.route('/results/<jobid>/tree', methods=['GET'])
 def getTree(jobid):
     format = request.args.get('format','newick')
@@ -124,7 +129,7 @@ def startjob():
               "reference": request.form.get('genusselect','NA')}
     if request.form.get("workflow") == "classic":
         print jobid
-        automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""))
+        automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0))
         with open('/Users/labuser/Downloads/examplein.json','w') as uploadfile:
             json.dump(jobdict,uploadfile)
         return redirect('/results/'+jobid)
@@ -132,7 +137,7 @@ def startjob():
         print jobid
         automlstjob = routines.addjob(id=jobid, workflow=request.form.get("workflow"),
                                       genomes=request.form.getlist('upfiles'),
-                                      reference=request.form.get('genusselect', 'NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""))
+                                      reference=request.form.get('genusselect', 'NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0))
         return redirect('/results2/' + jobid + '/loading')
 
 @app.route('/results/<jobid>/step2/orgs', methods=['GET'])
@@ -187,7 +192,7 @@ def outgrs(jobid):
         with open(os.path.join(app.config['RESULTS_FOLDER'],'reflist_full.json'),'r') as outrefs:
             outdict = json.load(outrefs)
             refrec = outdict['reforgs']
-            newlist = [rec for rec in refrec if str(rec[commongr+"id"]) not in ingroups and str(rec[commongr+"id"]) != "N/A"]
+            newlist = [rec for rec in refrec if str(rec[commongr+"id"]) not in ingroups and str(rec[commongr+"id"]) != "N/A" and not rec in refrec[0:(startindex+500)]]
             return jsonify(newlist[0:500])
     return send_from_directory(app.config['RESULTS_FOLDER'],'outgroups.json')
 
@@ -213,23 +218,23 @@ def status(jobid):
     workflow = jobstat["workflow"]
     paramdict = jobstat.get("params")
     skips = paramdict.get("skip",[])
-    if jobstat["checkpoint"] == "W1-2" and "skip2" not in skips and workflow == "1":
+    if jobstat["checkpoint"].upper() == "W1-2" and "skip2" not in skips and workflow == "1":
         #redirdict = {"redirect":"step2"}
         #return jsonify(redirdict)
         jobstat["redirect"] = "step2"
         return jsonify(jobstat)
-    elif jobstat["checkpoint"] == "W1-2" and "skip2" in skips and workflow == "1":
+    elif jobstat["checkpoint"].upper() == "W1-2" and "skip2" in skips and workflow == "1":
         jobstat["skip"] = "c1"
         return jsonify(jobstat)
-    elif jobstat["checkpoint"] == "W1-3" and "skip3" not in skips and workflow == "1":
+    elif jobstat["checkpoint"].upper() == "W1-3" and "skip3" not in skips and workflow == "1":
         #redirdict = {"redirect":"step3"}
         #return jsonify(redirdict)
         jobstat["redirect"] = "step3"
         return jsonify(jobstat)
-    elif jobstat["checkpoint"] == "W1-3" and "skip3" in skips and workflow == "1":
+    elif jobstat["checkpoint"].upper() == "W1-3" and "skip3" in skips and workflow == "1":
         jobstat["skip"] = "c2"
         return jsonify(jobstat)
-    elif jobstat["checkpoint"] == "W1-R" and workflow == "1":
+    elif jobstat["checkpoint"].upper() == "W1-R" and workflow == "1":
         #redirdict = {"redirect":"report"}
         #return jsonify(redirdict)
         jobstat["redirect"] = "report"

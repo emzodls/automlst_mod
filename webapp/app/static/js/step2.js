@@ -287,10 +287,16 @@ console.log(xhr,ajaxOptions,thrownError);
 function outgroupSuccess(data,textStatus,xhr) {
 //console.log(data);
 var counter;
+var counter2;
+    var optionList = [];
 for (counter=0; counter<data.length;counter++) {
     var outgrInfo = data[counter];
     $('#outgrsel > option').remove('#'+outgrInfo.id); //fix ordering?
-    $('#outgrsel').prepend("<option value='"+outgrInfo.id+"' data-title='"+ outgrInfo.orgname + " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+")"+"' id='" + outgrInfo.id +"' data-genusid='"+outgrInfo.genusid+"' data-genusname='"+outgrInfo.genusname+"' data-familyid='"+outgrInfo.familyid+"' data-familyname='"+outgrInfo.familyname+"' data-orderid='"+outgrInfo.orderid + "' data-ordername='"+outgrInfo.ordername+"' data-phylid='"+outgrInfo.phylid+"' data-phylname='"+outgrInfo.phylname+"'>"+outgrInfo.orgname+ " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+") </option>");
+    var optionInfo = "<option value='"+outgrInfo.id+"' data-title='"+ outgrInfo.orgname + " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+")"+"' id='" + outgrInfo.id +"' data-genusid='"+outgrInfo.genusid+"' data-genusname='"+outgrInfo.genusname+"' data-familyid='"+outgrInfo.familyid+"' data-familyname='"+outgrInfo.familyname+"' data-orderid='"+outgrInfo.orderid + "' data-ordername='"+outgrInfo.ordername+"' data-phylid='"+outgrInfo.phylid+"' data-phylname='"+outgrInfo.phylname+"'>"+outgrInfo.orgname+ " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+") </option>";
+    optionList.unshift(optionInfo);
+}
+for (counter2=0; counter2<optionList.length; counter2++) {
+    $('#outgrsel').prepend(optionList[counter2]);
 }
 if (!($('#outgrsel > option:not([disabled])').length)) {
     $('#nooutgroups').removeClass("hidden");
@@ -305,7 +311,6 @@ function outgroupLoad() {
 var jobid = $('#jobinfo').val();
 var commonTax = commonGroup();
 //add check for if no options in outgrsel?
-if (!($('#outgrsel > option:not([disabled])').length)) {
 if (typeof commonTax[1] == "string") {
 $.ajax({
         // Your server script to process the upload
@@ -330,7 +335,7 @@ $.ajax({
         error: outgroupError});
 }
 }
-}
+
 
 function moreSeqsError(xhr,ajaxOptions,thrownError) { // communication error
 console.log(xhr,ajaxOptions,thrownError);
