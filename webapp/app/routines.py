@@ -1,4 +1,4 @@
-import os, tempfile, models, json, datetime
+import os, tempfile, models, json, datetime, csv
 from flask import render_template, jsonify, request, redirect, abort, make_response, send_from_directory, flash, g
 from redis import Redis
 from redis import ConnectionError as redisConnectError
@@ -127,3 +127,30 @@ def reanalyzejob(jobid):
     paramdict["skip"]=[]
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'example.log'),'a') as joblog:
         joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_REANALYZE::true \n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::W1-2 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Reanalyzing\n'+str(datetime.datetime.now())+' - INFO - JOB_PARAMS::'+json.dumps(paramdict)+'\n')
+
+def jsontotsv(jsonpath):
+    resultdict = {}
+    with open(jsonpath, 'r') as jsondict:
+        fulldict = json.load(jsondict)
+        orglist = fulldict["orglist"]
+        refdict = fulldict["reforgs"]
+        for i in range(0,len(refdict)):
+            currorg = refdict[i]
+            distvals=currorg["dlist"]
+            pvals=currorg["plist"]
+            for j in range (0, len(orglist)):
+                currquery = orglist[j]
+                currd=""
+                currp=""
+                if not j >= len(pvals):
+                    currp=pvals[j]
+                if not j >= len(distvals):
+                    currd=distvals[j]
+                orgcomp = currorg["orgname"] + currquery
+                if orgcomp not in resultdict:
+                    resultdict[orgcomp] = ""
+                resultdict[orgcomp] = {"orgname":currorg["orgname"], "strain":currorg["strain"], "id":currorg["id"], "queryname":currquery,"pval":currp, "dist":currd}
+    with open(os.path.join(app.config['RESULTS_FOLDER'],'reftext.txt'),'wb') as csvfile:
+        csvwriter = csv.writer(csvfile,delimiter="\t")
+        for resultval in resultdict.values():
+            csvwriter.writerow([resultval["orgname"],resultval["strain"],resultval["id"],resultval["queryname"],resultval["pval"],resultval["dist"]])

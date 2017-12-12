@@ -87,6 +87,20 @@ def getTree(jobid):
 #    elif step == "report":
 #        return render_template("report.html",jobid=jobid,workflow=2)
 
+@app.route('/results/<jobid>/downloadorgs', methods=['GET'])
+def downloadorgs(jobid):
+    format = request.args.get('format','json')
+    resultdir = app.config['RESULTS_FOLDER']
+    if format == 'json':
+        return send_from_directory(resultdir,'reflist_full.json',as_attachment=True)
+    elif format == 'txt':
+        if os.path.exists(os.path.join(resultdir,'reftext.txt')):
+            return send_from_directory(resultdir,'reftext.txt',as_attachment=True)
+        else:
+            jsonpath = os.path.join(resultdir,'reflist_full.json')
+            routines.jsontotsv(jsonpath)
+            return send_from_directory(resultdir,'reftext.txt',as_attachment=True)
+
 @app.route('/results2/<jobid>/refs')
 def getrefs(jobid):
     if os.path.exists('/Users/labuser/Downloads/genuslist_example2.json'):
