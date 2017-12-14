@@ -105,11 +105,12 @@ def rebalancefuncs(genelist,OVthresh=2.0,maxgenes=100,maxiter=100, exfuncs=[], E
                 break
         #Recursively return reshuffled list
         maxiter -= 1
-        return rebalancefuncs(genelist,OVthresh=OVthresh,maxgenes=maxgenes,maxiter=maxiter,exfuncs=exfuncs,EQratio=EQratio),topfuncs
+        genelist,topfuncs = rebalancefuncs(genelist,OVthresh=OVthresh,maxgenes=maxgenes,maxiter=maxiter,exfuncs=exfuncs,EQratio=EQratio)
+        return genelist,topfuncs
     else:
         return genelist,topfuncs
 
-def prioritize(genemat,orgs,dndsfile="",jsonfile="",metadata="",pct=0.5):
+def prioritize(genemat,orgs,dndsfile="",jsonfile="",metadata="",pct=0.5,maxgenes=100):
     gsets = getgenesets(genemat,orgs,missing=True)
     if not metadata or not os.path.exists(metadata):
         metadata = os.path.join(os.path.dirname(os.path.realpath(__file__)),"model_metadata.json")
@@ -143,9 +144,10 @@ def prioritize(genemat,orgs,dndsfile="",jsonfile="",metadata="",pct=0.5):
             json.dump(genelist,fil,indent=2)
 
     #Rebalance function diversity for MLST singles
-    genelist = rebalancefuncs(genelist,exfuncs=exfuncs,maxgenes=20)
+    genelist, topgenes = rebalancefuncs(genelist,exfuncs=exfuncs,maxgenes=maxgenes,maxiter=900)
 
-    log.info("Top")
+    log.info("Topgenes: %s"%topgenes)
+    log.info("Delete Org counts: %s"%set([x["delcount"] for x in genelist[:maxgenes]]))
 
     return genelist
 
