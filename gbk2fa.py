@@ -62,7 +62,8 @@ def convertgenes(filename, outdir="./", genes=False,f="",rename=False,usetrans=F
     log.info("Starting %s..."%filename)
     fpath, fname = os.path.split(filename)
     fname, ext = os.path.splitext(fname)
-    SeqIO.convert(filename, "genbank", outdir + fname + ".fa", "fasta")
+    basename = os.path.join(outdir,fname)
+    SeqIO.convert(filename, "genbank", basename + ".fa", "fasta")
     if genes:
         reclist = SeqIO.parse(filename, "genbank")
         if not os.path.isdir(outdir):
@@ -74,9 +75,9 @@ def convertgenes(filename, outdir="./", genes=False,f="",rename=False,usetrans=F
         features=["CDS"]
         if len(f.split(","))>0:
             features.extend(f.split(","))
-        with open(outdir + fname + ".genelist", "w") as gn_handle, \
-                open(outdir + fname + ".faa", "w") as aa_handle, \
-                open(outdir + fname + ".fna", "w") as nuc_handle:
+        with open(basename + ".genelist", "w") as gn_handle, \
+                open(basename + ".faa", "w") as aa_handle, \
+                open(basename + ".fna", "w") as nuc_handle:
             for seq_record in reclist:
                 recnum += 1
                 seqtitle, seqdesc = getheader(seq_record,recnum,userecnum)
@@ -122,10 +123,10 @@ def convertgenes(filename, outdir="./", genes=False,f="",rename=False,usetrans=F
                 else:
                     orgname=""
         if rename and len(orgname)>0:
-            os.rename(outdir + fname + ".genelist", outdir + orgname + ".genelist")
-            os.rename(outdir + fname + ".faa", outdir + orgname + ".faa")
-            os.rename(outdir + fname + ".fna", outdir + orgname + ".fna")
-            os.rename(outdir + fname + ".fa", outdir + orgname + ".fa")
+            os.rename(basename + ".genelist", outdir + orgname + ".genelist")
+            os.rename(basename + ".faa", outdir + orgname + ".faa")
+            os.rename(basename + ".fna", outdir + orgname + ".fna")
+            os.rename(basename + ".fa", outdir + orgname + ".fa")
             outfile=orgname
         else:
             outfile=fname

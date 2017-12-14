@@ -45,7 +45,7 @@ def fastatype(fastafil, tol=0.05):
 def parsegbks(flist, outdir):
     for fname in flist:
         try:
-            gbk2fa.convertgenes(fname,outdir,genes=True,f="rRNA")
+            gbk2fa.convertgenes(fname,outdir=outdir,genes=True,f="rRNA")
         except Exception as e:
             log.error("Could not parse %s : %s"%(os.path.split(fname)[-1],e))
 

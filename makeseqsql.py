@@ -191,7 +191,8 @@ def runlist(finput,ofil,transonly=False,orgname=False,inc=False):
 
         try:
             log.info("Rebuilding index if present...")
-            csr.execute("REINDEX Seqs.seqidx")
+            csr.execute("REINDEX seqidx")
+            log.info("Done indexing")
         except exc.OperationalError:
             log.info("No index present")
         csr.close()

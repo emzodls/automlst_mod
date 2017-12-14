@@ -25,7 +25,6 @@ def init(logfile=None,toconsole=False,level="debug"):
         handler.setFormatter(formatter)
         log.addHandler(handler)
     if toconsole:
-        log.handlers = []
         handler=logging.StreamHandler()
         handler.setFormatter(formatter)
         log.addHandler(handler)

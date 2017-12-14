@@ -21,9 +21,9 @@ log = setlog.init(toconsole=True)
 
 def copydb(finput,sourcedb,ofil):
     if type(finput) is list:
-        flist=[x.strip() for x in finput if os.path.exists(x.strip())]
+        flist=[x.strip() for x in finput]
     elif type(finput) is file:
-        flist=[x.strip() for x in finput if os.path.exists(x.strip())]
+        flist=[x.strip() for x in finput]
     elif os.path.exists(finput) and "json" in finput:
         with open(finput,"r") as ifil:
             obj = json.load(ifil)
@@ -39,6 +39,7 @@ def copydb(finput,sourcedb,ofil):
     else:
         log.error("No id list found")
         return False
+    log.info("Copying: %s from %s"%(flist,sourcedb))
     numrecs=len(flist)
     if numrecs and os.path.exists(sourcedb):
         conn = sql.connect(sourcedb)

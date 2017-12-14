@@ -6,7 +6,7 @@ from multiprocessing import cpu_count
 log = setlog.init(toconsole=True)
 
 def mashdist(listfile,reffile,outputfile,cpu=1,maxdist=1.0):
-    cmd = ["mash","dist",reffile,"-l", listfile,"-d",maxdist]
+    cmd = ["mash","dist","-d",str(maxdist),reffile,"-l", listfile]
     if(cpu > 1):
         cmd = cmd[:2] + ["-p",str(cpu)] + cmd[2:]
     with open(outputfile,"w") as ofil:
@@ -55,7 +55,7 @@ def parse(mashresult,taxdb="",maxdist=0.5,TStol=0.05):
                                 lookup["family_id"],lookup["family_name"],lookup["order_id"],lookup["order_name"],
                                 lookup["phylum_id"],lookup["phylum_name"],lookup["taxid"],lookup.get("strain","N/A"),refseq,typestrain])
         for qorg in recs:
-            # Typestrain genome distances are allowed to be +(tolerance) larger for prioritization
+            # Typestrain genome distances are allowed to be -(tolerance) larger for prioritization
             recs[qorg] = sorted(recs[qorg], key=lambda row: row[2]-TStol if row[-1] else row[2])
     return recs
 
@@ -150,8 +150,6 @@ def getnearestrefs(recs,NOlimit=25):
 
 def getdistances(indir,outdir,reffile="",cpu=1,limit=50,outputfile="",TStol=0.05,NOlimit=25,OGlimit=100,maxdist=0.5):
     status = False
-    print indir
-    print outdir
     if not reffile or not os.path.exists(reffile):
         reffile = os.path.join(os.path.dirname(os.path.realpath(__file__)),"refseq.msh")
         log.info("Loading default refseq MASH database")
