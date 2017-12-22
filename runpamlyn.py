@@ -28,6 +28,7 @@ def convertandrun(finput,outdir):
         for line in infil:
             if line.startswith(">"):
                 ofil.write(">org%d\n"%orgcounter)
+                orgcounter += 1
             else:
                 ofil.write(line)
     print outfname

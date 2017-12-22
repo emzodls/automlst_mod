@@ -18,7 +18,7 @@ function addtolist(id1,id2) {
 var optionList = [];
     $(id1+' > option:selected').each(function() {
     //if ($(this).data("phylid").length) {
-        var speciesOption = "<option value='"+$(this).val()+"' class='"+hashCode($(this).val())+" picked' data-title='"+$(this).data("title")+"' data-genusid='"+$(this).data("genusid")+"' data-genusname='"+$(this).data("genusname")+"' data-familyid='"+$(this).data("familyid")+"' data-familyname='"+$(this).data("familyname")+"' data-orderid='"+$(this).data("orderid")+"' data-ordername='"+$(this).data("ordername")+"' data-phylid='"+$(this).data("phylid")+"' data-phylname='"+$(this).data("phylname")+"'>"+$(this).data("title")+"</option>";
+        var speciesOption = "<option value='"+$(this).val()+"' class='"+hashCode($(this).val())+" picked' data-title='"+$(this).data("title")+"' data-genusid='"+$(this).data("genusid")+"' data-genusname='"+$(this).data("genusname")+"' data-familyid='"+$(this).data("familyid")+"' data-familyname='"+$(this).data("familyname")+"' data-orderid='"+$(this).data("orderid")+"' data-ordername='"+$(this).data("ordername")+"' data-phylid='"+$(this).data("phylid")+"' data-phylname='"+$(this).data("phylname")+"' data-del='"+ $(this).data("del")+"'>"+$(this).data("title")+"</option>";
     /*} else {
         var speciesOption = "<option value='"+$(this).val()+"' class='"+hashCode($(this).val())+" picked' data-title='"+$(this).data("title")+"'>"+$(this).data("title")+"</option>";
     }*/

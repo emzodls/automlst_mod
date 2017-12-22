@@ -45,10 +45,10 @@
             </select>
         </div>
             <div class="col-md-2" style="padding-top:65px">
-                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#mlstsel','#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit');idSearch();">Add to list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit');idSearch();">Remove from list</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#mlstlist','#mlstlist'); refreshView('#mlstlist',10,'#mlstlimit');idSearch();">Move to top</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="resetSels('#mlstsel','#mlstlist',10); refreshView('#mlstlist',10,'#mlstlimit');idSearch();">Reset to default</button>
+                <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#mlstsel','#mlstlist'); refreshView('#mlstlist',100,'#mlstlimit');idSearch();findDeleted();">Add to list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#mlstlist'); refreshView('#mlstlist',100,'#mlstlimit');idSearch();findDeleted();">Remove from list</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#mlstlist','#mlstlist'); refreshView('#mlstlist',100,'#mlstlimit');idSearch();findDeleted();">Move to top</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="resetSels('#mlstsel','#mlstlist',10); refreshView('#mlstlist',100,'#mlstlimit');idSearch();findDeleted();">Reset to default</button>
             </div>
             <div class="form-group col-md-5">
                 <h4>Selected genes</h4>
@@ -59,13 +59,13 @@
         </div>
         <div class="hidden" id="deletewarning">
             <div class="alert alert-warning">
-                <p><b>Note:</b> only a limited subset of MLST genes are present in all organisms. Full MLST set can be used by removing:</p>
+                <p><b>Note:</b> some organisms have to be removed to use the current set of genes. The organisms that have to be removed are:</p>
                 <ul id="todelete">
 
                 </ul>
             </div>
             <div class="checkbox">
-                <label><input type="checkbox" id="removeorgs" name="removeorgs" value="checked">Remove suggested organisms and proceed with full set</label>
+                <label><input type="checkbox" id="removeorgs" name="removeorgs" value="checked">Remove suggested organisms and proceed with current set</label>
             </div>
         </div>
         <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> No MLST genes selected. Please select MLST genes before submitting.</div>

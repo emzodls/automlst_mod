@@ -23,7 +23,8 @@ def runall(finput, fout=None, lt=1.0, gt=1.0, method="NG86"):
     else:
         flist=glob.glob(finput)
     for fname in flist:
-        gene = os.path.splitext(os.path.split(fname)[-1])[0]
+        gene = os.path.split(fname)[-1]
+        gene = gene[:gene.index(".")]
         recs={}
         recs['NG86']=[] #(A) Nei-Gojobori (1986) method
         recs['YN2K']=[] #(B) Yang & Nielsen (2000) method
@@ -110,7 +111,8 @@ def runall(finput, fout=None, lt=1.0, gt=1.0, method="NG86"):
         except Exception as e:
             print "Error calculating median %s"%e
 
-        Allrecs[gene]={"AVG":[omegaAV,dNAV,dSAV],"STDev":[omegaSD,dNSD,dSSD]}
+        #Allrecs[gene]={"AVG":[omegaAV,dNAV,dSAV],"STDev":[omegaSD,dNSD,dSSD]}
+        Allrecs[gene] = omegaAV
 
     #Get gene list under threshold and calculate method agreement:
     # LTlist = []

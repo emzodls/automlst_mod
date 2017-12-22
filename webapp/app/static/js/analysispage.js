@@ -146,6 +146,7 @@ clearErrors('#errorwarning');
 clearErrors('#uploadsuccess');
 clearErrors('#accwarning');
 clearErrors('#duplicatewarning');
+clearErrors('.selectablewarn');
 $("#filesrc").val(filesrc);
 console.log($("#ncbiacc1").val());
 if (filesrc == 'ncbi' && !(validateAcc())) {

@@ -29,7 +29,8 @@ def getreport():
 @app.route('/results/<jobid>')
 @app.route('/results/<jobid>/')
 def showresults(jobid):
-    return render_template("startjob.html",jobid=jobid)
+    #return render_template("startjob.html",jobid=jobid)
+    return redirect("/results/"+jobid+"/loading")
 
 @app.route('/results/<jobid>/<step>', methods=['GET'])
 @app.route('/results/<jobid>/<step>/', methods = ['GET'])
@@ -117,7 +118,7 @@ def selectgenus():
         genusdict["maxgenus"] = newref
     with open(os.path.join(app.config['RESULTS_FOLDER'],'genuslist_example2.json'),'w') as fileout:
         json.dump(genusdict,fileout,indent=2)
-    return json.dumps({"status":1})
+    return json.dumps({"status":1,"newmax":newref})
 
 @app.route('/results2/refgenus')
 def refgenus():
@@ -212,8 +213,8 @@ def outgrs(jobid):
 
 @app.route('/results/<jobid>/step3/genes')
 def getgenes(jobid):
-    if os.path.exists('/Users/labuser/Downloads/mlstlist_example2.json'):
-        return send_from_directory(app.config['RESULTS_FOLDER'], 'mlstlist_example2.json')
+    if os.path.exists('/Users/labuser/Downloads/mlstpriority.json'):
+        return send_from_directory(app.config['RESULTS_FOLDER'], 'mlstpriority.json')
 
 @app.route('/results/<jobid>/step3/genein', methods=['POST'])
 def genein(jobid):
@@ -222,7 +223,7 @@ def genein(jobid):
     radioval = request.form.get('optradio')
     rmorgs = request.form.get('removeorgs')
     with open('/Users/labuser/Downloads/usergenes.json','w') as usergenes:
-        json.dump({"genes":genes,"mode":radioval,"remove":rmorgs},usergenes)
+        json.dump({"genes":genes,"mode":radioval,"remove":rmorgs.split(",")},usergenes)
     return redirect('/results/'+jobid+'/loading?laststep=step3')
 
 @app.route('/jobstatus/<jobid>')

@@ -61,7 +61,8 @@ var data = JSON.parse(data);
 if (parseInt(data["status"]) != 1) {
     $('#statuserror').removeClass("hidden");
 } else {
-$('#selectedgenus').text(genusKeys[0]);
+//$('#selectedgenus').text(genusKeys[0]);
+$('#selectedgenus').text(data["newmax"]);
         $('#genuswarn').addClass("hidden");
 }
 }

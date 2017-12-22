@@ -4,7 +4,8 @@ mlstInfo = $('#geneinfo').DataTable({
     ajax: {
         contentType: 'application/json',
         url: '/results/'+jobid+'/step3/genes',
-        dataSrc: 'genes'
+        //dataSrc: 'genes'
+        dataSrc: ''
     },
     columns: [
         {data: "name",
