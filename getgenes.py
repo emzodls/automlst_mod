@@ -18,21 +18,30 @@ import os, argparse, setlog, json, pickle, sqlite3 as sql
 
 log = setlog.init(toconsole=True,level="info")
 
-def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False):
+def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False,genelimit=10000):
     outdir = os.path.realpath(outdir)
     if type(glist) is not list and os.path.exists(str(glist)):
         with open(glist,"r") as fil:
-            glist = [x.strip() for x in fil]
+            if ".json" in glist:
+                temp = json.load(fil)
+                glist = [x.get('acc','') for x in temp]
+                glist = [x for x in glist if x]
+            else:
+                glist = [x.strip() for x in fil]
     if type(ignore) is not list and os.path.exists(str(ignore)):
         with open(ignore,"r") as fil:
             ignore = [x.strip() for x in fil]
 
+    glist = glist[:genelimit]
+
     #Use taxonomy dictionary
-    taxonomy = {}
     if tax and os.path.exists(tax):
-        log.info("Loading taxonomy definitions...")
-        with open(tax,"r") as fil:
-            taxonomy = pickle.load(fil)
+        pass
+    else:
+        tax = os.path.join(os.path.dirname(os.path.realpath(__file__)),"gcf2names.pkl")
+    log.info("Loading taxonomy definitions...")
+    with open(tax,"r") as fil:
+        taxonomy = pickle.load(fil)
 
     log.info("Writing genes: %s"%glist)
     if not os.path.exists(outdir):
@@ -57,14 +66,12 @@ def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False):
         with open(os.path.join(outdir,gene+".fna"),"w") as nafil, open(os.path.join(outdir,gene+".faa"),"w") as aafil:
             for row in results:
                 #Translate assembly id using taxonomy table if applicable
-                orgname = row[0]
-                if row[0] in taxonomy.keys():
-                    orgname = taxonomy[row[0]]["organism_name"]
-                    if taxonomy[row[0]]["strain"] not in orgname:
-                        orgname += "[%s]" % taxonomy[row[0]]["strain"]
-                    orgname = orgname.replace(" ","_")
-                    # remove equal strain designations
-                    orgname = orgname[:orgname.find("_=")]
+                orgname = taxonomy.get(row[0],row[0])
+                # if row[0] in taxonomy.keys():
+                    # orgname = taxonomy[row[0]]["organism_name"]
+                    # if taxonomy[row[0]]["strain"] not in orgname:
+                    #     orgname += "[%s]" % taxonomy[row[0]]["strain"]
+                    # orgname = orgname.replace(" ","_")
 
                 nafil.write(">%s|%s %s\n%s\n" % (orgname, row[1], row[2], row[3]))
 
@@ -83,8 +90,9 @@ if __name__ == '__main__':
     parser.add_argument("input", help="Input sequence database")
     parser.add_argument("-a", "--allgenes", help="Extract every gene in database (default: FALSE)",action="store_true",default=False)
     parser.add_argument("-l","--listfile", help="List file of genes to extract (plaintxt)",default="")
+    parser.add_argument("-gl","--genelimit", help="Only print top X genes from list file (default = 10000)",type=int,default=10000)
     parser.add_argument("-i","--ignorefile", help="List file of organisms to ignore (plaintxt)",default="")
     parser.add_argument("-t","--tax", help="Use taxonomy db for organism names",default="")
     parser.add_argument("-od","--outdir", help="List file of genes to extract (default current dir)",default="./")
     args = parser.parse_args()
-    writeallgenes(args.input,args.listfile,args.ignorefile,args.outdir,args.tax,args.allgenes)
+    writeallgenes(args.input,args.listfile,args.ignorefile,args.outdir,args.tax,args.allgenes,args.genelimit)

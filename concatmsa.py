@@ -16,7 +16,7 @@
 
 import glob, argparse
 
-def concatmsa(finput,fout,frp,fsplit=None,aam="WAG"):
+def concatmsa(finput,fout,frp,fsplit=None,aam="WAG",checktype=True):
     if type(finput) is list:
         flist=finput
     else:
@@ -50,7 +50,10 @@ def concatmsa(finput,fout,frp,fsplit=None,aam="WAG"):
                     if len(aseqs[x]) < maxL:
                         aseqs[x]+="-"*(maxL-len(aseqs[x]))
                 #crude check for type
-                ptype.append(all((c=="A" or c=="T" or c=="G" or c=="C" or c=="-" or c=="N") for c in "".join([r[plens[-1]:] for r in aseqs.values()])))
+                if checktype:
+                    ptype.append(all((c=="A" or c=="T" or c=="G" or c=="C" or c=="-" or c=="N") for c in "".join([r[plens[-1]:] for r in aseqs.values()])))
+                else:
+                    ptype.append(True)
                 #Check all same length
                 #l=[len(x) for x in aseqs.values()]
                 if max(l)==min(l):
