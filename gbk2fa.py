@@ -161,7 +161,7 @@ def runall(finput="./", outdir="./", genes=False, cpu=1, features="",rename=Fals
         if not os.path.isdir(outdir):
             os.makedirs(outdir)
         if cpu > 1:
-            pool = mp.Pool()
+            pool = mp.Pool(cpu)
             for filename in flist:
                 pool.apply_async(convertgenes, args=(filename, outdir, genes, features, rename, usetrans, plasmid))
             pool.close()
