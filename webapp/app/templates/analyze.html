@@ -86,6 +86,15 @@
         <div class="alert alert-danger hidden" id="duplicatewarning"><strong>Error:</strong> Sequence already uploaded.</div>
         <div class="alert alert-warning hidden" id="seqwarn"><strong>Maximum number of files and accession numbers reached.</strong></div>
         <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> No sequences uploaded. Please upload sequences before submitting.</div>
+        {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="flashes alert alert-danger">
+    {% for message in messages %}
+      <strong>Error: </strong>{{ message }}
+    {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
 
         <button type="button" class="btn btn-primary" style="width:300px" id="submitjob" onclick="selectAndSend('#sequpload');">Submit Job &raquo;</button>
         <input type="hidden" id="filesrc" name="filesrc" value="">

@@ -39,7 +39,7 @@ def showstep(jobid,step):
     paramdict = jobinfo.get("params")
     laststep = request.args.get('laststep','NONE')
     if step == "loading":
-        if jobinfo["workflow"] == "1":
+        if jobinfo["workflow"] == "1" or jobinfo["workflow"] == 0:
             if laststep == "step2" or laststep == "step3":
                 return render_template("startjob.html", jobid=jobid, laststep=laststep)
             else:
@@ -146,8 +146,8 @@ def startjob():
     if request.form.get("workflow") == "1":
         print jobid
         automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0))
-        with open(os.path.join(app.config['RESULTS_FOLDER'],'examplein.json'),'w') as uploadfile:
-            json.dump(jobdict,uploadfile)
+        #with open(os.path.join(app.config['RESULTS_FOLDER'],'examplein.json'),'w') as uploadfile:
+        #    json.dump(jobdict,uploadfile)
         return redirect('/results/'+jobid)
     elif request.form.get("workflow") == "2":
         print jobid
@@ -155,6 +155,9 @@ def startjob():
                                       genomes=request.form.getlist('upfiles'),
                                       reference=request.form.get('genusselect', 'NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0))
         return redirect('/results/' + jobid + '/loading')
+    else:
+        flash('Invalid workflow')
+        return redirect('/analyze')
 
 @app.route('/results/<jobid>/step2/orgs', methods=['GET'])
 def getOrgs(jobid):
