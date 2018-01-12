@@ -104,7 +104,7 @@ def downloadorgs(jobid):
 
 @app.route('/results2/<jobid>/refs')
 def getrefs(jobid):
-    if os.path.exists('/Users/labuser/Downloads/genuslist_example2.json'):
+    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],'genuslist_example2.json')):
         return send_from_directory(app.config['RESULTS_FOLDER'],'genuslist_example2.json')
 @app.route('/results2/selectgenus', methods=['POST'])
 def selectgenus():
@@ -122,7 +122,7 @@ def selectgenus():
 
 @app.route('/results2/refgenus')
 def refgenus():
-    if os.path.exists('/Users/labuser/Downloads/acceleratedrefs.json'):
+    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],'acceleratedrefs.json')):
         return send_from_directory(app.config['RESULTS_FOLDER'],'acceleratedrefs.json')
     else:
         return jsonify([])
@@ -142,10 +142,11 @@ def startjob():
     jobid = unicode(uuid.uuid4())
     jobdict = {"jobid": jobid, "workflow": request.form.get("workflow"), "genomes": request.form.getlist('upfiles'),
               "reference": request.form.get('genusselect','NA')}
+    os.mkdir(os.path.join(app.config['RESULTS_FOLDER'],jobid))
     if request.form.get("workflow") == "classic":
         print jobid
         automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0))
-        with open('/Users/labuser/Downloads/examplein.json','w') as uploadfile:
+        with open(os.path.join(app.config['RESULTS_FOLDER'],'examplein.json'),'w') as uploadfile:
             json.dump(jobdict,uploadfile)
         return redirect('/results/'+jobid)
     elif request.form.get("workflow") == "auto":
@@ -153,13 +154,13 @@ def startjob():
         automlstjob = routines.addjob(id=jobid, workflow=request.form.get("workflow"),
                                       genomes=request.form.getlist('upfiles'),
                                       reference=request.form.get('genusselect', 'NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0))
-        return redirect('/results2/' + jobid + '/loading')
+        return redirect('/results/' + jobid + '/loading')
 
 @app.route('/results/<jobid>/step2/orgs', methods=['GET'])
 def getOrgs(jobid):
     orgstart = int(request.args.get('start',0))
-    if os.path.exists('/Users/labuser/Downloads/userlist.json'):
-        with open('/Users/labuser/Downloads/reflist_full.json','r') as reffile, open('/Users/labuser/Downloads/userlist.json','r') as userfile:
+    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],'userlist.json')):
+        with open(os.path.join(app.config['RESULTS_FOLDER'],'reflist_full.json'),'r') as reffile, open(os.path.join(app.config['RESULTS_FOLDER'],'userlist.json'),'r') as userfile:
             refdict = json.load(reffile)
             userdict = json.load(userfile)
             tempdict = [ref for ref in refdict["reforgs"] if ref["id"] in userdict["selspecies"] and not ref in refdict["reforgs"][0:(orgstart+500)]]
@@ -171,7 +172,7 @@ def getOrgs(jobid):
             refdict["reforgs"].extend(tempdict)
             refdict.update(userdict)
             return jsonify(refdict)
-    elif os.path.exists('/Users/labuser/Downloads/reflist_full.json'):
+    elif os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],'reflist_full.json')):
         with open(os.path.join(app.config['RESULTS_FOLDER'],'reflist_full.json'),'r') as firstref:
             refdict = json.load(firstref)
             refdict["reforgs"] = refdict["reforgs"][orgstart:(orgstart+500)]
@@ -184,7 +185,7 @@ def orgin(jobid):
     species = request.form.getlist('specieslist')
     outgroups = request.form.getlist('outgrlist')
     jobid = request.form.get('jobinfo')
-    with open('/Users/labuser/Downloads/userlist.json','w') as userfile:
+    with open(os.path.join(app.config['RESULTS_FOLDER'],'userlist.json'),'w') as userfile:
         json.dump({"selspecies":species, "seloutgroups":outgroups},userfile)
     return redirect('/results/'+jobid+'/loading?laststep=step2') # when is checkpoint set? Might get user stuck in a loop of submitting/getting redirected
 
@@ -213,7 +214,7 @@ def outgrs(jobid):
 
 @app.route('/results/<jobid>/step3/genes')
 def getgenes(jobid):
-    if os.path.exists('/Users/labuser/Downloads/mlstpriority.json'):
+    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],'mlstpriority.json')):
         return send_from_directory(app.config['RESULTS_FOLDER'], 'mlstpriority.json')
 
 @app.route('/results/<jobid>/step3/genein', methods=['POST'])
@@ -222,7 +223,7 @@ def genein(jobid):
     genes = request.form.getlist('mlstlist')
     radioval = request.form.get('optradio')
     rmorgs = request.form.get('removeorgs')
-    with open('/Users/labuser/Downloads/usergenes.json','w') as usergenes:
+    with open(os.path.join(app.config['RESULTS_FOLDER'],'usergenes.json'),'w') as usergenes:
         json.dump({"genes":genes,"mode":radioval,"remove":rmorgs.split(",")},usergenes)
     return redirect('/results/'+jobid+'/loading?laststep=step3')
 
