@@ -87,7 +87,7 @@ def updatejob(jobid,newref):
         rddb.hset(redisid,"reference",newref)
 
 def getjobstatus(jobid):
-    jobstatus = "Waiting for queue"
+    jobstatus = "Waiting in queue"
     mashstatus = ""
     checkpoint = ""
     percent = 0

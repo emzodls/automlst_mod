@@ -21,7 +21,7 @@ from flask_mail import Mail
 app = Flask(__name__)
 
 parentdir = os.path.sep.join(os.path.realpath(__file__).split(os.path.sep)[:-2])
-if os.path.join(parentdir,"config","active_config.py"):
+if os.path.exists(os.path.join(parentdir,"config","active_config.py")):
     app.config.from_pyfile(os.path.join(parentdir,"config","active_config.py"))
 else:
     app.config.from_pyfile(os.path.join(parentdir,"config","webapp.py"))

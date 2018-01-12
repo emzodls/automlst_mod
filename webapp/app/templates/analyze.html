@@ -2,8 +2,8 @@
 {% block mainbody %}
 <div class="container" style="padding-top:25px;">
     <ul class="nav nav-tabs">
-        <li class="active" id="fasttab"><a data-toggle="tab" href="#fastwork" onclick="$('#workflow').val('auto');">Accelerated workflow</a> </li> <!-- active class is lost after scrolling -->
-        <li id="mtab"><a data-toggle="tab" href="#manual" onclick="$('#workflow').val('classic');">Classical workflow</a> </li>
+        <li class="active" id="fasttab"><a data-toggle="tab" href="#fastwork" onclick="$('#workflow').val('2');">Accelerated workflow</a> </li> <!-- active class is lost after scrolling -->
+        <li id="mtab"><a data-toggle="tab" href="#manual" onclick="$('#workflow').val('1');">Classical workflow</a> </li>
     </ul>
     <br />
 
@@ -89,7 +89,7 @@
 
         <button type="button" class="btn btn-primary" style="width:300px" id="submitjob" onclick="selectAndSend('#sequpload');">Submit Job &raquo;</button>
         <input type="hidden" id="filesrc" name="filesrc" value="">
-        <input type="hidden" id="workflow" name="workflow" value="auto">
+        <input type="hidden" id="workflow" name="workflow" value="2">
     </form>
     <hr>
     <div style="margin-top:10px">

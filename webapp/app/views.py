@@ -143,13 +143,13 @@ def startjob():
     jobdict = {"jobid": jobid, "workflow": request.form.get("workflow"), "genomes": request.form.getlist('upfiles'),
               "reference": request.form.get('genusselect','NA')}
     os.mkdir(os.path.join(app.config['RESULTS_FOLDER'],jobid))
-    if request.form.get("workflow") == "classic":
+    if request.form.get("workflow") == "1":
         print jobid
         automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0))
         with open(os.path.join(app.config['RESULTS_FOLDER'],'examplein.json'),'w') as uploadfile:
             json.dump(jobdict,uploadfile)
         return redirect('/results/'+jobid)
-    elif request.form.get("workflow") == "auto":
+    elif request.form.get("workflow") == "2":
         print jobid
         automlstjob = routines.addjob(id=jobid, workflow=request.form.get("workflow"),
                                       genomes=request.form.getlist('upfiles'),
