@@ -153,7 +153,7 @@ def startjob():
     os.mkdir(os.path.join(app.config['RESULTS_FOLDER'],jobid))
     if request.form.get("workflow") == "1":
         print jobid
-        automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0), mode=request.form.get('optradio',"concatenated"))
+        automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0), mode=request.form.get('optradio',"concatenated"),modelfind=request.form.get("modelfinder","GTR"))
         #with open(os.path.join(app.config['RESULTS_FOLDER'],'examplein.json'),'w') as uploadfile:
         #    json.dump(jobdict,uploadfile)
         return redirect('/results/'+jobid)
