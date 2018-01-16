@@ -10,5 +10,6 @@ class automlstjob(object):
         #self.skip3 = kwargs.get("skip3","")
         self.skip = kwargs.get("skip")
         self.bootstr=kwargs.get("bootstr",0)
+        self.mode=kwargs.get("mode","concatenated")
     def getdict(self):
         return self.__dict__
