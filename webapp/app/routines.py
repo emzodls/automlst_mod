@@ -93,8 +93,8 @@ def getjobstatus(jobid):
     percent = 0
     workflow = 0
     paramdict = {}
-    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid,'example.log')):
-        with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'example.log'), 'r') as infile:
+    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log')):
+        with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'), 'r') as infile:
             for line in infile:
                 if 'JOB_STATUS' in line:
                     statlist = line.strip().split('::')
@@ -120,13 +120,13 @@ def getjobstatus(jobid):
 
 def reanalyzejob(jobid):
     paramdict={}
-    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'example.log'),'r') as jobread:
+    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'r') as jobread:
         for line in jobread:
             if 'JOB_PARAMS' in line:
                 paramlist = line.strip().split('::')
                 paramdict = json.loads(paramlist[1])
     paramdict["skip"]=[]
-    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'example.log'),'a') as joblog:
+    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
         joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_REANALYZE::true \n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::W1-2 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Reanalyzing\n'+str(datetime.datetime.now())+' - INFO - JOB_PARAMS::'+json.dumps(paramdict)+'\n')
 
 def jsontotsv(jsonpath):

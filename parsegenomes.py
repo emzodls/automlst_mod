@@ -50,7 +50,12 @@ def parsegbks(flist, outdir):
             log.error("Could not parse %s : %s"%(os.path.split(fname)[-1],e))
 
 def parseall(indir,outdir):
-    allfiles = os.listdir(indir)
+    #allow explicit list input instead of directory
+    if type(indir) is list:
+        allfiles = indir
+        indir = ""
+    else:
+        allfiles = os.listdir(indir)
     #extention filtering
     allowed = [".fasta",".fa",".faa",".fna",".fas"]
     fastafiles = [os.path.join(indir,x) for x in allfiles if os.path.splitext(x)[-1].lower() in allowed]
@@ -73,6 +78,7 @@ def parseall(indir,outdir):
     for fname in contigfiles:
         #copy input files to job directory and run gene finding
         outfile = os.path.join(outdir,os.path.splitext(os.path.split(fname)[-1])[0])
+        log.info("copying %s to %s"%(fname,outfile))
         shutil.copy(fname,outfile+".fa")
         runprodigal(fname,outfile+".fna")
 

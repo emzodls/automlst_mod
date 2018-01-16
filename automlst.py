@@ -6,7 +6,7 @@ import makehmmsql, getgenematrix, getgenes, concatmsa
 
 def startwf2(indir,resultdir,checkpoint=False,genus="auto",model="MFP"):
     """WORKFLOW 2: Get all query genomes and identify reference tree to add sequences to"""
-    pass
+
 
 ##
 ## Workflow 1: Build query + reference phylogeny from scratch
@@ -202,6 +202,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         if parsegenomes.parseall(indir,queryseqs):
             checkpoint = "w1-1"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
+            log.info("JOB_PROGRESS::5/100")
         else:
             log.error("Problem parsing input genomes")
             return False
@@ -213,6 +214,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         if mashresult:
             checkpoint = "w1-2"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
+            log.info("JOB_PROGRESS::15/100")
         else:
             log.error("MASH distance failed")
             return False
@@ -235,8 +237,9 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         if selorgs:
             checkpoint = "w1-3"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
+            log.info("JOB_PROGRESS::25/100")
         else:
-            log.info("JOB_STATUS: Waiting for selected organisms")
+            log.info("JOB_STATUS:: Waiting for selected organisms")
             return "waiting"
 
     #Copy reference sequence database and add query organisms
@@ -278,7 +281,8 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         seqsql2fa.writefasta(orgdb,naseqs,True,"",True)
 
         #Run HMM searches
-        log.info("JOB_STATUS: Searching for MLST genes in query sequences...")
+        log.info("JOB_STATUS:: Searching for MLST genes in query sequences...")
+        log.info("JOB_PROGRESS::35/100")
         if not hmmdb:
             hmmdb = os.path.join(os.path.dirname(os.path.realpath(__file__)),"reducedcore.hmm")
         if not rnadb:
@@ -320,7 +324,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
             checkpoint = "w1-6"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
         else:
-            log.info("JOB_STATUS: Waiting for MLST selection")
+            log.info("JOB_STATUS:: Waiting for MLST selection")
             return "waiting"
 
     ## Align and trim all MLST genes
@@ -328,11 +332,13 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
     trimdir = os.path.join(resultdir,"mlst_trimmed")
 
     if checkpoint == "w1-6":
-        log.info("JOB_STATUS: Aligning MLST genes")
+        log.info("JOB_STATUS:: Aligning MLST genes")
+        log.info("JOB_PROGRESS::45/100")
         #align all
         processmlst(mlstdir,aligndir,cpu=cpu)
         #trim all
-        log.info("JOB_STATUS: Trimming alignments")
+        log.info("JOB_STATUS:: Trimming alignments")
+        log.info("JOB_PROGRESS::55/100")
         processmlst(aligndir,trimdir,cpu=cpu,trim=True)
 
         checkpoint = "w1-7"
@@ -340,15 +346,16 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
 
     #Build trees
     if checkpoint == "w1-7":
+        log.info("JOB_PROGRESS::70/100")
         if concat:
-            log.info("JOB_STATUS: Running concatenated supermatrix phylogeny")
+            log.info("JOB_STATUS:: Running concatenated supermatrix phylogeny")
             concatfasta = os.path.join(resultdir,"concatMLST.fasta")
             partfile = os.path.join(resultdir,"nucpartition.txt")
             concatphylogeny(resultdir, concatfasta, partfile,cpu=cpu,model=model)
             checkpoint = "w1-F"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
         else:
-            log.info("JOB_STATUS: Running coalescent tree phylogeny")
+            log.info("JOB_STATUS:: Running coalescent tree phylogeny")
             colphylogeny(resultdir,trimdir,cpu=cpu,model=model)
             checkpoint = "w1-F"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
@@ -360,7 +367,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
 
 def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="MFP"):
     #Setup working directory
-    if not os.path.exists(resultdir):
+    if not os.path.exists(os.path.join(os.path.realpath(resultdir),"queryseqs")):
         os.makedirs(os.path.join(os.path.realpath(resultdir),"queryseqs")) #query sequence folder
 
     #Read checkpoint from log if exists or use checkpoint parameter
@@ -383,11 +390,14 @@ def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,
     elif workflow == 2:
         log.info("WORKFLOW::2")
         return startwf2(indir,resultdir,checkpoint=checkpoint,model=model)
+    else:
+        log.error("Improper workflow specified: %s"%workflow)
+        return False
 
 # Commandline Execution
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Start from input directory of genomes, get all reference distances and build phylogeny""")
-    parser.add_argument("indir", help="Directory of input genomes")
+    parser.add_argument("indir", help="Directory of input genomes or list of files")
     parser.add_argument("resultdir", help="Directory to store all results")
     parser.add_argument("-skip","--skip", help="Flag to skip manual intervention of organism selection. Ex: 'skip2.skip3' skips organism and mlst selection (default for cmdline execution)",default="skip2.skip3")
     parser.add_argument("-ref","--refdb", help="Reference database of orgs",default="")
@@ -397,4 +407,3 @@ if __name__ == '__main__':
     parser.add_argument("-c","--cpu", help="Number of cpu cores to use",type=int, default=1)
     args = parser.parse_args()
     startjob(args.indir,args.resultdir,args.skip,refdb=args.refdb,cpu=args.cpu,concat=args.concat,model=args.model,checkpoint=args.checkpoint)
-
