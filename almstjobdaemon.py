@@ -158,13 +158,14 @@ class AmlstDaemon(Daemon):
                         skip = jobargs.get("skip","")
                         concat = jobargs.get("concatenate","True")
                         model = jobargs.get("model","MFP")
+                        bs = jobargs.get("bootstr","")
                         refdb = self.config.get("REFDB",False)
                         cpu = int(self.config.get("MCPU",1))
 
                         self.log.info("ARGS: workflow=%s skip=%s concat=%s model=%s refdb=%s cpu=%s"%(workflow,skip,concat,model,refdb,cpu))
 
                         ## Do the job
-                        exitstatus = automlst.startjob(genomes,resultdir,skip=skip,checkpoint=False,workflow=workflow,refdb=refdb,cpu=cpu,concat=concat,model=model)
+                        exitstatus = automlst.startjob(genomes,resultdir,skip=skip,checkpoint=False,workflow=workflow,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs)
 
                         self.runningjob = False
                         self.redis.lrem("AMLSTRQ",jobid)
