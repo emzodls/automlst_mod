@@ -37,6 +37,7 @@ def showresults(jobid):
 def showstep(jobid,step):
     jobinfo = routines.getjobstatus(jobid)
     paramdict = jobinfo.get("params")
+    skips = paramdict.get("skip",[])
     laststep = request.args.get('laststep','NONE')
     if step == "loading":
         if jobinfo["workflow"] == "1" or jobinfo["workflow"] == 0:
@@ -47,14 +48,21 @@ def showstep(jobid,step):
         else:
             return render_template("startjob2.html", jobid=jobid)
     elif step == "step2":
-        return render_template("step2.html",jobid=jobid)
+        if "skip2" not in skips:
+            return render_template("step2.html",jobid=jobid)
+        else:
+            return redirect('/results/'+jobid+'/loading')
     elif step == "step3":
-        return render_template("step3.html",jobid=jobid)
+        if "skip3" not in skips:
+            return render_template("step3.html",jobid=jobid)
+        else:
+            return redirect('/results/'+jobid+'/loading')
     elif step == "report":
         if jobinfo["workflow"] == "1":
             return render_template("report.html",jobid=jobid)
         else:
             return render_template("report.html",jobid=jobid,workflow=2)
+
 
 @app.route('/results/<jobid>/reanalyze')
 def reanalyze(jobid):
@@ -237,7 +245,8 @@ def status(jobid):
     workflow = jobstat["workflow"]
     paramdict = jobstat.get("params")
     skips = paramdict.get("skip",[])
-    if jobstat["checkpoint"].upper() == "W1-2" and "skip2" not in skips and workflow == "1":
+    percent = jobstat.get("progress",0)
+    if jobstat["checkpoint"].upper() == "W1-2" and percent >= 50 and "skip2" not in skips and workflow == "1":
         #redirdict = {"redirect":"step2"}
         #return jsonify(redirdict)
         jobstat["redirect"] = "step2"
@@ -245,7 +254,7 @@ def status(jobid):
     elif jobstat["checkpoint"].upper() == "W1-2" and "skip2" in skips and workflow == "1":
         jobstat["skip"] = "c1"
         return jsonify(jobstat)
-    elif jobstat["checkpoint"].upper() == "W1-3" and "skip3" not in skips and workflow == "1":
+    elif jobstat["checkpoint"].upper() == "W1-3" and percent >= 75 and "skip3" not in skips and workflow == "1":
         #redirdict = {"redirect":"step3"}
         #return jsonify(redirdict)
         jobstat["redirect"] = "step3"
