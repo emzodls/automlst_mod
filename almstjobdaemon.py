@@ -169,10 +169,16 @@ class AmlstDaemon(Daemon):
 
                         self.runningjob = False
                         self.redis.lrem("AMLSTRQ",jobid)
-                        self.redis.lpush("AMLSTDQ",jobid)
-                        self.redis.hset("automlstjob:%s"%jobid,"finished",int(time.time())) # Mark finish time (epoch time)
-                        self.log.info("Finished %s with status: %s"%(jobid,exitstatus))
-                        self.log.info("Compressing job to Archive %s"%jobid)
+
+                        if exitstatus == "waiting":
+                            self.redis.lpush("AMLSTWQ",jobid)
+                            self.redis.hset("automlstjob:%s"%jobid,"waiting",int(time.time())) # Mark finish time (epoch time)
+                            self.log.info("Waiting for user input %s"%jobid)
+                        else:
+                            self.redis.lpush("AMLSTDQ",jobid)
+                            self.redis.hset("automlstjob:%s"%jobid,"finished",int(time.time())) # Mark finish time (epoch time)
+                            self.log.info("Finished %s with status: %s"%(jobid,exitstatus))
+                            self.log.info("Compressing job to Archive %s"%jobid)
                         try:
                             ad = self.config.get("ARCHIVE_FOLDER","/tmp")
                             shutil.make_archive(os.path.join(ad,str(jobid)),"zip",os.path.join(self.config["RESULTS_FOLDER"],str(jobid)))

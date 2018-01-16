@@ -222,7 +222,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
     #Get set of organisms to build seq DB
     selorgs = False
     if checkpoint == "w1-2":
-        log.info("Loading mash results...")
+        log.info("JOB_STATUS::Loading mash results...")
         if mashresult:
             pass
         elif not mashresult and os.path.exists(os.path.join(resultdir,"reflist.json")):
@@ -239,8 +239,12 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
             log.info("JOB_PROGRESS::25/100")
         else:
-            log.info("JOB_STATUS:: Waiting for selected organisms")
-            return "waiting"
+            checkpoint = "w1-STEP2"
+            log.info("JOB_CHECKPOINT::%s"%checkpoint)
+
+    if checkpoint == "w1-STEP2":
+        log.info("JOB_STATUS:: Waiting for selected organisms")
+        return "waiting"
 
     #Copy reference sequence database and add query organisms
     orgdb = os.path.join(resultdir,"refquery.db")
@@ -324,8 +328,12 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
             checkpoint = "w1-6"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
         else:
-            log.info("JOB_STATUS:: Waiting for MLST selection")
-            return "waiting"
+            checkpoint = "w1-STEP3"
+            log.info("JOB_CHECKPOINT::%s"%checkpoint)
+
+    if checkpoint == "w1-STEP3":
+        log.info("JOB_STATUS:: Waiting for selected organisms")
+        return "waiting"
 
     ## Align and trim all MLST genes
     aligndir = os.path.join(resultdir,"mlst_aligned")
