@@ -2,15 +2,15 @@
 {% block mainbody %}
 <div class="container" style="padding-top:25px;">
     <ul class="nav nav-tabs">
-        <li class="active" id="fasttab"><a data-toggle="tab" href="#fastwork" onclick="$('#workflow').val('2');">Accelerated workflow</a> </li> <!-- active class is lost after scrolling -->
-        <li id="mtab"><a data-toggle="tab" href="#manual" onclick="$('#workflow').val('1');">Classical workflow</a> </li>
+        <li class="active" id="fasttab"><a data-toggle="tab" href="#fastwork" onclick="$('#workflow').val('2');">Default workflow</a> </li> <!-- active class is lost after scrolling -->
+        <li id="mtab"><a data-toggle="tab" href="#manual" onclick="$('#workflow').val('1');">Advanced workflow</a> </li>
     </ul>
     <br />
 
     <form action="startjob" method="post" enctype="multipart/form-data" name="sequpload" id="sequpload">
             <div class="tab-content">
             <div id="fastwork" class="tab-pane fade in active">
-                <p><b>Accelerated Mode</b>: Automatically add your sequences to a precreated reference tree for a genus of your choice.</p>
+                <p><b>Default Mode</b>: Automatically add your sequences to a precreated reference tree for a genus of your choice.</p>
                 <hr>
         <div class="form-group" id="genusform">
             <label for="genusselect">Select reference genus:</label>
@@ -23,7 +23,7 @@
                 <div id="manual" class="tab-pane fade">
                     <span class="sr-only">Workflow progress: The current step is </span><a href="/analyze" class="steps">Step 1 <small>Enter sequences</small> &raquo;</a> <span class="sr-only">The next steps in this workflow are </span><span class="steps-disabled">Step 2 &raquo;</span> <span class="steps-disabled">Step 3 &raquo;</span> <span class="steps-disabled">Results</span>
                     <hr>
-                    <p><b>Classical Mode</b>: After uploading your sequences, choose from which species to construct the tree for them, and choose
+                    <p><b>Advanced Mode</b>: After uploading your sequences, choose from which species to construct the tree for them, and choose
                         the genes to use for the MLST.</p>
                     <div class="form-group row">
                         <div class="col-md-2">

@@ -88,6 +88,7 @@ def updatejob(jobid,newref):
 
 def getjobstatus(jobid):
     jobstatus = "Waiting in queue"
+    mashstatus = ""
     checkpoint = ""
     percent = 0
     workflow = 0
@@ -95,13 +96,16 @@ def getjobstatus(jobid):
     if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log')):
         with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'), 'r') as infile:
             for line in infile:
-                if 'JOB_STATUS' in line or 'MASH_STATUS' in line:
+                if 'JOB_STATUS' in line:
                     statlist = line.strip().split('::')
                     jobstatus = statlist[1]
                 elif 'JOB_PROGRESS' in line:
                     proglist = line.strip().split('::')
                     fraction = str(proglist[1]).split('/')
                     percent = 100 * (float(fraction[0]) / float(fraction[1]))
+                elif 'MASH_STATUS' in line:
+                    mashlist = line.strip().split('::')
+                    mashstatus = mashlist[1]
                 elif 'JOB_CHECKPOINT' in line:
                     checklist = line.strip().split('::')
                     checkpoint = checklist[1]
@@ -111,7 +115,7 @@ def getjobstatus(jobid):
                 elif 'JOB_PARAMS' in line:
                     paramlist = line.strip().split('::')
                     paramdict = json.loads(paramlist[1])
-    jobstatdict = {"progress": percent,"status":jobstatus, "checkpoint": checkpoint, "workflow": workflow, "params":paramdict}
+    jobstatdict = {"progress": percent,"status":jobstatus, "mash":mashstatus, "checkpoint": checkpoint, "workflow": workflow, "params":paramdict}
     return jobstatdict
 
 def reanalyzejob(jobid):
@@ -123,7 +127,7 @@ def reanalyzejob(jobid):
                 paramdict = json.loads(paramlist[1])
     paramdict["skip"]=[]
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
-        joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_REANALYZE::true \n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::W1-2 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Reanalyzing\n'+str(datetime.datetime.now())+' - INFO - JOB_PARAMS::'+json.dumps(paramdict)+'\n')
+        joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_REANALYZE::true \n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::W1-STEP2 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Reanalyzing\n'+str(datetime.datetime.now())+' - INFO - JOB_PARAMS::'+json.dumps(paramdict)+'\n')
 
 def jsontotsv(jsonpath):
     resultdict = {}

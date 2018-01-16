@@ -1,5 +1,5 @@
 
-import os, routines, json, uuid
+import os, routines, json, uuid, datetime
 from flask import render_template, jsonify, request, redirect, abort, make_response, send_from_directory, flash, Response, url_for
 from Bio import Phylo
 from app import app
@@ -37,7 +37,7 @@ def showresults(jobid):
 def showstep(jobid,step):
     jobinfo = routines.getjobstatus(jobid)
     paramdict = jobinfo.get("params")
-    skips = paramdict.get("skip",[])
+    #skips = paramdict.get("skip",[])
     laststep = request.args.get('laststep','NONE')
     if step == "loading":
         if jobinfo["workflow"] == "1" or jobinfo["workflow"] == 0:
@@ -48,12 +48,12 @@ def showstep(jobid,step):
         else:
             return render_template("startjob2.html", jobid=jobid)
     elif step == "step2":
-        if "skip2" not in skips:
+        if jobinfo["checkpoint"].upper() == "W1-STEP2":
             return render_template("step2.html",jobid=jobid)
         else:
             return redirect('/results/'+jobid+'/loading')
     elif step == "step3":
-        if "skip3" not in skips:
+        if jobinfo["checkpoint"].upper() == "W1-STEP3":
             return render_template("step3.html",jobid=jobid)
         else:
             return redirect('/results/'+jobid+'/loading')
@@ -198,6 +198,8 @@ def orgin(jobid):
     jobid = request.form.get('jobinfo')
     with open(os.path.join(app.config['RESULTS_FOLDER'],'userlist.json'),'w') as userfile:
         json.dump({"selspecies":species, "seloutgroups":outgroups},userfile)
+    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
+        joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::w1-3 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Resuming job...\n')
     return redirect('/results/'+jobid+'/loading?laststep=step2') # when is checkpoint set? Might get user stuck in a loop of submitting/getting redirected
 
 @app.route('/results/<jobid>/step2/outgroups', methods=['GET'])
@@ -233,9 +235,11 @@ def genein(jobid):
     jobid = request.form.get('jobinfo')
     genes = request.form.getlist('mlstlist')
     radioval = request.form.get('optradio')
-    rmorgs = request.form.get('removeorgs')
+    rmorgs = request.form.get('removeorgs','NONE')
     with open(os.path.join(app.config['RESULTS_FOLDER'],'usergenes.json'),'w') as usergenes:
-        json.dump({"genes":genes,"mode":radioval,"remove":rmorgs.split(",")},usergenes)
+        json.dump({"genes":genes,"mode":radioval,"remove":rmorgs},usergenes)
+    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
+        joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::w1-6 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Resuming job...\n')
     return redirect('/results/'+jobid+'/loading?laststep=step3')
 
 @app.route('/jobstatus/<jobid>')
@@ -244,25 +248,24 @@ def status(jobid):
     jobstat = routines.getjobstatus(jobid)
     workflow = jobstat["workflow"]
     paramdict = jobstat.get("params")
-    skips = paramdict.get("skip",[])
-    percent = jobstat.get("progress",0)
-    if jobstat["checkpoint"].upper() == "W1-2" and percent >= 50 and "skip2" not in skips and workflow == "1":
+    #skips = paramdict.get("skip",[])
+    if jobstat["checkpoint"].upper() == "W1-STEP2" and workflow == "1":
         #redirdict = {"redirect":"step2"}
         #return jsonify(redirdict)
         jobstat["redirect"] = "step2"
         return jsonify(jobstat)
-    elif jobstat["checkpoint"].upper() == "W1-2" and "skip2" in skips and workflow == "1":
-        jobstat["skip"] = "c1"
-        return jsonify(jobstat)
-    elif jobstat["checkpoint"].upper() == "W1-3" and percent >= 75 and "skip3" not in skips and workflow == "1":
+    #elif jobstat["checkpoint"].upper() == "W1-2" and "skip2" in skips and workflow == "1":
+        #jobstat["skip"] = "c1"
+        #return jsonify(jobstat)
+    elif jobstat["checkpoint"].upper() == "W1-STEP3" and workflow == "1":
         #redirdict = {"redirect":"step3"}
         #return jsonify(redirdict)
         jobstat["redirect"] = "step3"
         return jsonify(jobstat)
-    elif jobstat["checkpoint"].upper() == "W1-3" and "skip3" in skips and workflow == "1":
-        jobstat["skip"] = "c2"
-        return jsonify(jobstat)
-    elif jobstat["checkpoint"].upper() == "W1-R" and workflow == "1":
+    #elif jobstat["checkpoint"].upper() == "W1-3" and "skip3" in skips and workflow == "1":
+        #jobstat["skip"] = "c2"
+        #return jsonify(jobstat)
+    elif jobstat["checkpoint"].upper() == "W1-F" and workflow == "1":
         #redirdict = {"redirect":"report"}
         #return jsonify(redirdict)
         jobstat["redirect"] = "report"
