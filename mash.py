@@ -11,12 +11,12 @@ def mashdist(listfile,reffile,outputfile,cpu=1,maxdist=1.0):
         cmd = cmd[:2] + ["-p",str(cpu)] + cmd[2:]
     with open(outputfile,"w") as ofil:
         try:
-            log.info("MASH_STATUS:: Running all input genomes")
+            log.info("MASH_STATUS:: Running MASH ANI estimation on all input genomes")
             subprocess.call(cmd, stdout=ofil)
-            log.debug("MASH_STATUS:: finished %s"%outputfile)
+            log.debug("MASH_STATUS:: Finished MASH ANI estimation")
             return True
         except subprocess.CalledProcessError as e:
-            log.error("MASH_STATUS:: error, could not process %s - %s"%(listfile,e))
+            log.error("MASH_ERROR:: Could not process %s - %s"%(listfile,e))
             return False
 
 def writefilelist(indir,outdir):

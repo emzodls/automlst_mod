@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-import os, json, argparse, setlog, parsegenomes, mash
+import os, json, argparse, setlog, parsegenomes, mash, shutil
 import copyseqsql, makeseqsql, glob, seqsql2fa, subprocess
 import multiprocessing as mp
 import makehmmsql, getgenematrix, getgenes, concatmsa
 
-def startwf2(indir,resultdir,checkpoint=False,genus="auto",model="MFP",bs=""):
+def startwf2(indir,resultdir,checkpoint=False,genus="auto",model="MFP",bs=0,kf=False):
     """WORKFLOW 2: Get all query genomes and identify reference tree to add sequences to"""
 
 
-##
-## Workflow 1: Build query + reference phylogeny from scratch
-##
+###
+##### Workflow 1: Build query + reference phylogeny from scratch
+###
 
 def catTrees(flist,outfile):
     with open(outfile,"w") as ofil:
@@ -130,10 +130,10 @@ def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip=""):
 
     return selection, list(delorgs)
 
-def runIQtree(outdir,infasta,partfile="",cpu=1,model="MFP",bs="",fout="speciestree",titlesep=""):
+def runIQtree(outdir,infasta,partfile="",cpu=1,model="MFP",bs=0,fout="speciestree",titlesep=""):
     #If title seperator exists rename titles in file first
     if titlesep:
-        tf = os.path.join(infasta,".renamed")
+        tf = infasta+".renamed"
         with open(tf,"w") as ofil, open(infasta,"r") as ifil:
             for line in ifil:
                 lineout = line.strip()
@@ -158,7 +158,7 @@ def runAstral(resultdir,intree,outtree,astjar=""):
     with open(os.path.join(resultdir,"astral.log"),"w") as astlog:
         subprocess.call(cmd,stdout=astlog,stderr=astlog)
 
-def colphylogeny(resultdir,trimdir,cpu=1,model="MFP",bs=""):
+def colphylogeny(resultdir,trimdir,cpu=1,model="MFP",bs=0):
     treedir = os.path.join(resultdir,"trees")
     if not os.path.exists(treedir):
         os.makedirs(treedir)
@@ -180,7 +180,7 @@ def colphylogeny(resultdir,trimdir,cpu=1,model="MFP",bs=""):
     coltree = os.path.join(treedir,"summaryTree.tree")
     runAstral(resultdir,alltrees,coltree)
 
-def concatphylogeny(resultdir,concatfasta,partfile,cpu=1,model="MFP",bs=""):
+def concatphylogeny(resultdir,concatfasta,partfile,cpu=1,model="MFP",bs=0):
     trimdir = os.path.join(resultdir,"mlst_trimmed")
     log.info("Concatenating all MLST genes")
     concatmsa.concatmsa(os.path.join(trimdir,"*.fna"),concatfasta,partfile,fsplit="|",checktype=False)
@@ -191,7 +191,7 @@ def concatphylogeny(resultdir,concatfasta,partfile,cpu=1,model="MFP",bs=""):
     runIQtree(treedir,concatfasta,partfile=partfile,cpu=cpu,fout="concatTree.tree",bs=bs,model=model)
 
 
-def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="MFP",bs=""):
+def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="MFP",bs=0,kf=False):
     """WORKFLOW 2: Build phylogeny from scratch"""
     if not checkpoint:
         checkpoint = "w1-0"
@@ -352,9 +352,12 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         checkpoint = "w1-7"
         log.info("JOB_CHECKPOINT::%s"%checkpoint)
 
+    treedir = os.path.join(resultdir,"trees")
+    finishedtree = finaltree = ""
     #Build trees
     if checkpoint == "w1-7":
         log.info("JOB_PROGRESS::70/100")
+        finaltree = os.path.join(resultdir,"final.tree")
         if concat:
             log.info("JOB_STATUS:: Running concatenated supermatrix phylogeny")
             concatfasta = os.path.join(resultdir,"concatMLST.fasta")
@@ -362,18 +365,33 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
             concatphylogeny(resultdir, concatfasta, partfile,cpu=cpu,model=model,bs=bs)
             checkpoint = "w1-F"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
+            finishedtree = os.path.join(treedir,"concatTree.tree.treefile")
         else:
             log.info("JOB_STATUS:: Running coalescent tree phylogeny")
             colphylogeny(resultdir,trimdir,cpu=cpu,model=model,bs=bs)
             checkpoint = "w1-F"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
+            finishedtree = os.path.join(treedir,"summaryTree.tree.treefile")
 
     if checkpoint == "w1-F":
-        #Job finished? do some cleanup
-        if os.path.exists(orgdb):
-            os.remove(orgdb)
+        #Copy final tree to root dir
+        if finishedtree and os.path.exists(finishedtree):
+            shutil.copy(finishedtree,finaltree)
+        else:
+            log.error("Could not find final tree. Tree building failed")
 
-def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="GTR",bs=""):
+        #Job finished? do some cleanup
+        if not kf:
+            if os.path.exists(orgdb):
+                os.remove(orgdb)
+            shutil.rmtree(os.path.join(resultdir,"queryseqs"))
+            shutil.rmtree(os.path.join(resultdir,"mlst_trimmed"))
+            shutil.rmtree(os.path.join(resultdir,"mlstgenes"))
+            for oldfil in glob.glob(os.path.join(treedir,"*.model")):
+                os.remove(oldfil)
+
+
+def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="GTR",bs=0,kf=False):
     #Setup working directory
     if not os.path.exists(os.path.join(os.path.realpath(resultdir),"queryseqs")):
         os.makedirs(os.path.join(os.path.realpath(resultdir),"queryseqs")) #query sequence folder
@@ -406,10 +424,10 @@ def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,
     log.info('JOB_PARAMS::{"resultdir":"%s","skip":"%s","workflow":%s,"concat":"%s","model":"%s"}'%(resultdir,skip,workflow,concat,model))
     if workflow == 1:
         log.info("WORKFLOW::1")
-        return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs)
+        return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=kf)
     elif workflow == 2:
         log.info("WORKFLOW::2")
-        return startwf2(indir,resultdir,checkpoint=checkpoint,model=model,bs=bs)
+        return startwf2(indir,resultdir,checkpoint=checkpoint,model=model,bs=bs,kf=kf)
     else:
         log.error("Improper workflow specified: %s"%workflow)
         return False
@@ -423,8 +441,9 @@ if __name__ == '__main__':
     parser.add_argument("-ref","--refdb", help="Reference database of orgs",default="")
     parser.add_argument("-bs","--bootstrap", help="Bootstrap replicates (default: None)",default="")
     parser.add_argument("-cat","--concat", help="Use concatenated supermatrix to build tree",action="store_true",default=False)
+    parser.add_argument("-kf","--keepfiles", help="Do not delete intermediate files after completion",action="store_true",default=False)
     parser.add_argument("-m","--model", help="Use specific model for iqtree parameter (default: Use model finder)",default="MFP")
     parser.add_argument("-ch","--checkpoint", help="Explicitly start at checkpoint",default=False)
     parser.add_argument("-c","--cpu", help="Number of cpu cores to use",type=int, default=1)
     args = parser.parse_args()
-    startjob(args.indir,args.resultdir,args.skip,refdb=args.refdb,cpu=args.cpu,concat=args.concat,model=args.model,checkpoint=args.checkpoint,bs=args.bootstrap)
+    startjob(args.indir,args.resultdir,args.skip,refdb=args.refdb,cpu=args.cpu,concat=args.concat,model=args.model,checkpoint=args.checkpoint,bs=args.bootstrap,kf=args.keepfiles)

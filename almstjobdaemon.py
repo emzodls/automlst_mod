@@ -156,9 +156,12 @@ class AmlstDaemon(Daemon):
                         ## Get job options
                         workflow = int(jobargs.get("workflow",0))
                         skip = jobargs.get("skip","")
-                        concat = jobargs.get("concatenate","True")
                         model = jobargs.get("model","MFP")
                         bs = jobargs.get("bootstr","")
+                        mode = jobargs.get("mode","concatenated")
+                        concat = True
+                        if mode != "concatenated":
+                            concat = False
                         refdb = self.config.get("REFDB",False)
                         cpu = int(self.config.get("MCPU",1))
 
