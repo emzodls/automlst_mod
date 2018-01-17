@@ -87,6 +87,13 @@
             <button type="button" class="btn btn-primary" id="seqbtn" onclick="uploadSequence('seqfile')"><span class="glyphicon glyphicon-plus"></span> Upload</button>
         </div>
         </div>
+        <div class="form-group row">
+            <label class="control-label col-md-2" for="email">Enter email address (optional)</label>
+
+            <div class="col-md-8">
+                <input type="text" class="form-control" name="email" id="email" placeholder="(Optional)">
+            </div>
+        </div>
 <!-- if file fails/ID not found, unhide warning -->
         <div class="alert alert-success hidden" id="uploadsuccess">Upload successful</div>
         <div class="alert alert-danger hidden" id="uploadwarning"><strong>Error:</strong> Upload failed</div>

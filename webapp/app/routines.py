@@ -1,8 +1,10 @@
 import os, tempfile, models, json, datetime, csv
 from flask import render_template, jsonify, request, redirect, abort, make_response, send_from_directory, flash, g
+from flask_mail import Message
 from redis import Redis
 from redis import ConnectionError as redisConnectError
 from app import app
+from app import mail
 from werkzeug.utils import secure_filename
 from Bio import Entrez
 
@@ -155,3 +157,15 @@ def jsontotsv(jsonpath):
         csvwriter = csv.writer(csvfile,delimiter="\t")
         for resultval in resultdict.values():
             csvwriter.writerow([resultval["orgname"],resultval["strain"],resultval["id"],resultval["queryname"],resultval["pval"],resultval["dist"]])
+
+def sendnotifymail(msg="",jobid="",to=""):
+    try:
+        if not msg:
+            msg = "Hello, your autoMLST job has been submitted! Your job id is: "
+        assert to, jobid
+        msgobj = Message("Your autoMLST Job (%s) has been submitted"%jobid,recipients=[to])
+        msgobj.html = "%s %s <br> <a href='http://127.0.0.1:5000/results/%s'>http://127.0.0.1:5000/results/%s</a>"%(msg,jobid,jobid,jobid) #placeholder address while testing
+        mail.send(msgobj)
+    except Exception as e:
+        print "Warning: Email not sent, check email configuration"
+        print e
