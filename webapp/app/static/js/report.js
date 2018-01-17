@@ -29,13 +29,22 @@ phylocanvas = new Smits.PhyloCanvas(
 }
 function repairSize() {
 var canvasHeight = parseInt($('svg').attr("height"));
+var canvasWidth = parseInt($('svg').attr("width"));
 $('text:has(tspan)').each(function(objindex, obj) {
     var textHeight = parseInt($(this).attr("y"));
+    var textY = parseInt($(this).attr("x"));
+    var textLength = $(this).children("tspan").text().length;
+    var textWidth = textY + (7*textLength);
     if (textHeight > canvasHeight) {
         console.log(textHeight);
         $('svg').attr("height",textHeight +10);
         $('#svgCanvas').attr("height",textHeight + 10);
         }
+    if (textWidth > canvasWidth) {
+        $('svg').attr("width",textWidth + 30);
+        $('#svgCanvas').attr("width",textWidth + 30);
+    }
+
 });
 }
 
@@ -65,6 +74,7 @@ dataObject = {
 				fileSource: true
 			};
 			renderTree(dataObject,1000,1000);
+			repairSize();
 			clearInterval(timer);
 }
 }
@@ -87,5 +97,8 @@ $.ajax({
 
 }
 
+$("button[data-toggle='tooltip']").on('click',function(){
+    $(this).blur();
+})
 
 var timer = setInterval(drawTree, 3000);
