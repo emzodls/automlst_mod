@@ -102,14 +102,14 @@ def getTree(jobid):
 @app.route('/results/<jobid>/downloadorgs', methods=['GET'])
 def downloadorgs(jobid):
     format = request.args.get('format','json')
-    resultdir = app.config['RESULTS_FOLDER']
+    resultdir = os.path.join(app.config['RESULTS_FOLDER'],jobid)
     if format == 'json':
-        return send_from_directory(resultdir,'reflist_full.json',as_attachment=True)
+        return send_from_directory(resultdir,'reflist.json',as_attachment=True)
     elif format == 'txt':
         if os.path.exists(os.path.join(resultdir,'reftext.txt')):
             return send_from_directory(resultdir,'reftext.txt',as_attachment=True)
         else:
-            jsonpath = os.path.join(resultdir,'reflist_full.json')
+            jsonpath = os.path.join(resultdir,'reflist.json')
             routines.jsontotsv(jsonpath)
             return send_from_directory(resultdir,'reftext.txt',as_attachment=True)
 
@@ -182,8 +182,8 @@ def startjob():
 @app.route('/results/<jobid>/step2/orgs', methods=['GET'])
 def getOrgs(jobid):
     orgstart = int(request.args.get('start',0))
-    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],'userlist.json')):
-        with open(os.path.join(app.config['RESULTS_FOLDER'],'reflist_full.json'),'r') as reffile, open(os.path.join(app.config['RESULTS_FOLDER'],'userlist.json'),'r') as userfile:
+    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid,'userlist.json')):
+        with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'reflist.json'),'r') as reffile, open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'userlist.json'),'r') as userfile:
             refdict = json.load(reffile)
             userdict = json.load(userfile)
             tempdict = [ref for ref in refdict["reforgs"] if ref["id"] in userdict["selspecies"] and not ref in refdict["reforgs"][0:(orgstart+500)]]
@@ -195,20 +195,20 @@ def getOrgs(jobid):
             refdict["reforgs"].extend(tempdict)
             refdict.update(userdict)
             return jsonify(refdict)
-    elif os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],'reflist_full.json')):
-        with open(os.path.join(app.config['RESULTS_FOLDER'],'reflist_full.json'),'r') as firstref:
+    elif os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid,'reflist.json')):
+        with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'reflist.json'),'r') as firstref:
             refdict = json.load(firstref)
             refdict["reforgs"] = refdict["reforgs"][orgstart:(orgstart+500)]
             refdict["outgroups"] = [rec for rec in refdict["outgroups"] if str(rec["phylid"]) != "N/A" and str(rec["familyid"]) != "N/A" and str(rec["orderid"]) != "N/A" and str(rec["genusid"]) != "N/A"]
             return jsonify(refdict)
-
+    return jsonify({"error":"No List found."})
 
 @app.route('/results/<jobid>/step2/orgin', methods=['POST'])
 def orgin(jobid):
     species = request.form.getlist('specieslist')
     outgroups = request.form.getlist('outgrlist')
     jobid = request.form.get('jobinfo')
-    with open(os.path.join(app.config['RESULTS_FOLDER'],'userlist.json'),'w') as userfile:
+    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'userlist.json'),'w') as userfile:
         json.dump({"selspecies":species, "seloutgroups":outgroups},userfile)
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
         joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::w1-3 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Resuming job...\n')
@@ -230,7 +230,7 @@ def outgrs(jobid):
     outgrlimit = request.args.get('limit',1000)
     startindex = request.args.get('start',0)
     if commongr and commonid:
-        with open(os.path.join(app.config['RESULTS_FOLDER'],'reflist_full.json'),'r') as outrefs:
+        with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'reflist.json'),'r') as outrefs:
             outdict = json.load(outrefs)
             refrec = outdict['reforgs']
             newlist = [rec for rec in refrec if str(rec[commongr+"id"]) not in ingroups and str(rec[commongr+"id"]) != "N/A" and not rec in refrec[0:(startindex+500)]]
@@ -239,8 +239,8 @@ def outgrs(jobid):
 
 @app.route('/results/<jobid>/step3/genes')
 def getgenes(jobid):
-    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],'mlstpriority.json')):
-        return send_from_directory(app.config['RESULTS_FOLDER'], 'mlstpriority.json')
+    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid,'mlstpriority.json')):
+        return send_from_directory(os.path.join(app.config['RESULTS_FOLDER'],jobid),'mlstpriority.json')
 
 @app.route('/results/<jobid>/step3/genein', methods=['POST'])
 def genein(jobid):
@@ -248,10 +248,10 @@ def genein(jobid):
     genes = request.form.getlist('mlstlist')
     radioval = request.form.get('optradio')
     rmorgs = request.form.get('removeorgs','NONE')
-    with open(os.path.join(app.config['RESULTS_FOLDER'],'usergenes.json'),'w') as usergenes:
+    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'usergenes.json'),'w') as usergenes:
         json.dump({"genes":genes,"mode":radioval,"remove":rmorgs},usergenes)
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
-        joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::w1-6 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Resuming job...\n')
+        joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Resuming job...\n')
     return redirect('/results/'+jobid+'/loading?laststep=step3')
 
 @app.route('/jobstatus/<jobid>')

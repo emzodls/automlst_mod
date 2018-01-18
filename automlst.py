@@ -89,7 +89,7 @@ def buildseqdb(selorgs,queryseqs,resultdir,sourcedb):
 
 def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=5):
     #Get user selection if exists
-    usersel = os.path.join(resultdir,"userOrglist.json")
+    usersel = os.path.join(resultdir,"userlist.json")
     autosel = os.path.join(resultdir,"autoOrglist.json")
     selection = False
     if os.path.exists(usersel):
@@ -107,11 +107,11 @@ def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=5):
     return selection
 
 def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip=""):
-    usersel = os.path.join(resultdir,"userMlstlist.json")
+    usersel = os.path.join(resultdir,"usergenes.json")
     autosel = os.path.join(resultdir,"autoMlstlist.json")
     selection = False
     delorgs = set()
-    if os.path.exists(usersel):
+    if os.path.exists(usersel) and not "skip3" in skip:
         with open(usersel,"r") as fil:
             temp = json.load(fil)
             selection = temp["selection"]
@@ -121,7 +121,7 @@ def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip=""):
             temp = json.load(fil)
             selection = temp["selection"]
             delorgs = temp["delorgs"]
-    elif "skip3" in skip:
+    else:
         selection = [x["acc"] for x in mlstpriority[:maxmlst]]
         for x in mlstpriority[:maxmlst]:
             delorgs = delorgs | set(x["orgdel"])
@@ -225,8 +225,8 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         log.info("JOB_STATUS::Loading mash results...")
         if mashresult:
             pass
-        elif not mashresult and os.path.exists(os.path.join(resultdir,"reflist.json")):
-            with open(os.path.join(resultdir,"reflist.json")) as fil:
+        elif os.path.exists(os.path.join(resultdir,"reflist.json")):
+            with open(os.path.join(resultdir,"reflist.json"),"r") as fil:
                 mashresult = json.load(fil)
                 log.info("Loading mash results...")
         else:
@@ -248,14 +248,13 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
 
     #Copy reference sequence database and add query organisms
     orgdb = os.path.join(resultdir,"refquery.db")
+    if not selorgs and os.path.exists(os.path.join(resultdir,"userlist.json")):
+        with open(os.path.join(resultdir,"userlist.json"),"r") as fil:
+            selorgs = json.load(fil)
+    elif not selorgs and os.path.exists(os.path.join(resultdir,"autoOrglist.json")):
+        with open(os.path.join(resultdir,"autoOrglist.json"),"r") as fil:
+            selorgs = json.load(fil)
     if checkpoint == "w1-3":
-        if not selorgs and os.path.exists(os.path.join(resultdir,"userOrglist.json")):
-            with open(os.path.join(resultdir,"userOrglist.json"),"r") as fil:
-                selorgs = json.load(fil)
-        elif not selorgs and os.path.exists(os.path.join(resultdir,"autoOrglist.json")):
-            with open(os.path.join(resultdir,"autoOrglist.json"),"r") as fil:
-                selorgs = json.load(fil)
-
         #Clear old db if exists
         if os.path.exists(orgdb):
             os.remove(orgdb)
@@ -309,6 +308,8 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
     mlstpriority = os.path.join(resultdir,"mlstpriority.json")
     genematjson = os.path.join(resultdir,"mlstmatrix.json")
     dndsfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),"dnds.json")
+    mlstselection = []
+    delorgs = []
     if checkpoint == "w1-5":
         #getmlstgenes.findsingles(orgdb,maxgenes=500,outdir=mlstdir)
         if os.path.exists(mlstpriority) and os.path.exists(genematjson):
@@ -324,7 +325,8 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         mlstselection, delorgs = getmlstselection(resultdir,mlstpriority,maxmlst,skip=skip)
         if mlstselection:
             #Export selected genes to mlst folder
-            getgenes.writeallgenes(orgdb,mlstselection,delorgs,outdir=mlstdir)
+            log.info("JOB_STATUS:: Writing MLST genes...")
+            getgenes.writeallgenes(orgdb,mlstselection,delorgs,outdir=mlstdir,outgroups=selorgs["seloutgroups"])
             checkpoint = "w1-6"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
         else:
@@ -332,7 +334,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
 
     if checkpoint == "w1-STEP3":
-        log.info("JOB_STATUS:: Waiting for selected organisms")
+        log.info("JOB_STATUS:: Waiting for selected MLST genes")
         return "waiting"
 
     ## Align and trim all MLST genes

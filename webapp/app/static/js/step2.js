@@ -260,6 +260,7 @@ if (data["selspecies"] && data["seloutgroups"]) {
 
 function getOrgs() {
 var jobid = $('#jobinfo').val();
+console.log(jobid)
 $.ajax({
         // Your server script to process the upload
         contentType: 'application/json',
@@ -272,13 +273,6 @@ $.ajax({
         error: orgError});
 
 }
-
-
-
-
-
-
-
 
 function outgroupError(xhr,ajaxOptions,thrownError) { // communication error
 console.log(xhr,ajaxOptions,thrownError);

@@ -18,7 +18,7 @@ import os, argparse, setlog, json, pickle, sqlite3 as sql
 
 log = setlog.init(toconsole=True,level="info")
 
-def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False,genelimit=10000):
+def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False,genelimit=10000,outgroups=None):
     outdir = os.path.realpath(outdir)
     if type(glist) is not list and os.path.exists(str(glist)):
         with open(glist,"r") as fil:
@@ -65,8 +65,12 @@ def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False,genelimit=100
         #WRITE ALL RESULTS
         with open(os.path.join(outdir,gene+".fna"),"w") as nafil, open(os.path.join(outdir,gene+".faa"),"w") as aafil:
             for row in results:
-                #Translate assembly id using taxonomy table if applicable
-                orgname = taxonomy.get(row[0],row[0])
+                #Translate assembly id using taxonomy table if applicable. Defualt to user title and add [U] to title
+                orgname = taxonomy.get(row[0],"{U}--"+row[0])
+                #mark outgroups
+                if outgroups and row[0] in outgroups:
+                    orgname = "{OG}" + orgname
+
                 # if row[0] in taxonomy.keys():
                     # orgname = taxonomy[row[0]]["organism_name"]
                     # if taxonomy[row[0]]["strain"] not in orgname:
