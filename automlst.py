@@ -4,7 +4,7 @@ import copyseqsql, makeseqsql, glob, seqsql2fa, subprocess
 import multiprocessing as mp
 import makehmmsql, getgenematrix, getgenes, concatmsa
 
-def startwf2(indir,resultdir,checkpoint=False,genus="auto",model="MFP",bs=0,kf=False):
+def startwf2(indir,resultdir,checkpoint=False,genus="auto",model="MFP",bs=0,kf=False,maxmlst=100):
     """WORKFLOW 2: Get all query genomes and identify reference tree to add sequences to"""
 
 
@@ -391,7 +391,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
                 os.remove(oldfil)
 
 
-def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="GTR",bs=0,kf=False):
+def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="GTR",bs=0,kf=False,maxmlst=100):
     #Setup working directory
     if not os.path.exists(os.path.join(os.path.realpath(resultdir),"queryseqs")):
         os.makedirs(os.path.join(os.path.realpath(resultdir),"queryseqs")) #query sequence folder
@@ -424,10 +424,10 @@ def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,
     log.info('JOB_PARAMS::{"resultdir":"%s","skip":"%s","workflow":%s,"concat":"%s","model":"%s"}'%(resultdir,skip,workflow,concat,model))
     if workflow == 1:
         log.info("WORKFLOW::1")
-        return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=kf)
+        return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=kf,maxmlst=maxmlst)
     elif workflow == 2:
         log.info("WORKFLOW::2")
-        return startwf2(indir,resultdir,checkpoint=checkpoint,model=model,bs=bs,kf=kf)
+        return startwf2(indir,resultdir,checkpoint=checkpoint,model=model,bs=bs,kf=kf,maxmlst=maxmlst)
     else:
         log.error("Improper workflow specified: %s"%workflow)
         return False
@@ -445,5 +445,6 @@ if __name__ == '__main__':
     parser.add_argument("-m","--model", help="Use specific model for iqtree parameter (default: Use model finder)",default="MFP")
     parser.add_argument("-ch","--checkpoint", help="Explicitly start at checkpoint",default=False)
     parser.add_argument("-c","--cpu", help="Number of cpu cores to use",type=int, default=1)
+    parser.add_argument("-mm","--maxmlst", help="Number of cpu cores to use",type=int, default=100)
     args = parser.parse_args()
-    startjob(args.indir,args.resultdir,args.skip,refdb=args.refdb,cpu=args.cpu,concat=args.concat,model=args.model,checkpoint=args.checkpoint,bs=args.bootstrap,kf=args.keepfiles)
+    startjob(args.indir,args.resultdir,args.skip,refdb=args.refdb,cpu=args.cpu,concat=args.concat,model=args.model,checkpoint=args.checkpoint,bs=args.bootstrap,kf=args.keepfiles,maxmlst=args.maxmlst)
