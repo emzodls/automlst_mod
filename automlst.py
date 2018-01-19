@@ -130,7 +130,7 @@ def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip=""):
 
     return selection, list(delorgs)
 
-def runIQtree(outdir,infasta,partfile="",cpu=1,model="MFP",bs=0,fout="speciestree",titlesep=""):
+def runIQtree(outdir,infasta,partfile="",cpu=1,model="MFP",bs=0,fout="speciestree",titlesep="",outgroup=""):
     #If title seperator exists rename titles in file first
     if titlesep:
         tf = infasta+".renamed"
@@ -145,6 +145,13 @@ def runIQtree(outdir,infasta,partfile="",cpu=1,model="MFP",bs=0,fout="speciestre
     cmd=["iqtree-omp", "-quiet", "-nt", str(cpu), "-s", infasta, "-m", model,"-pre",os.path.join(outdir,fout)]
     if bs:
         cmd.extend(["-bb",str(bs)])
+    if outgroup:
+        #get full title of first outgroup to root tree
+        with open(infasta,"r") as ifil:
+            for line in ifil:
+                if line.startswith(">") and outgroup in line:
+                    cmd.extend(["-o", '"%s"'%line[1:].strip()])
+                    break
     if partfile:
         cmd.extend(["-spp", partfile])
     with open(os.devnull,"w") as devnull:
@@ -250,6 +257,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
 
     #Copy reference sequence database and add query organisms
     orgdb = os.path.join(resultdir,"refquery.db")
+    selorgs = {}
     if not selorgs and os.path.exists(os.path.join(resultdir,"userlist.json")):
         with open(os.path.join(resultdir,"userlist.json"),"r") as fil:
             selorgs = json.load(fil)
@@ -257,6 +265,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         with open(os.path.join(resultdir,"autoOrglist.json"),"r") as fil:
             selorgs = json.load(fil)
     if checkpoint == "w1-3":
+        log.info("JOB_STATUS:: Collating selected genomes...")
         #Clear old db if exists
         if os.path.exists(orgdb):
             os.remove(orgdb)
@@ -328,7 +337,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         if mlstselection:
             #Export selected genes to mlst folder
             log.info("JOB_STATUS:: Writing MLST genes...")
-            getgenes.writeallgenes(orgdb,mlstselection,delorgs,outdir=mlstdir,outgroups=selorgs["seloutgroups"])
+            getgenes.writeallgenes(orgdb,mlstselection,delorgs,outdir=mlstdir,outgroups=selorgs.get("seloutgroups",None))
             checkpoint = "w1-6"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
         else:
