@@ -199,6 +199,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
 
     #Parse all inputs
     if checkpoint == "w1-0":
+        log.info("JOB_STATUS::Parsing all genomes...")
         if parsegenomes.parseall(indir,queryseqs):
             checkpoint = "w1-1"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
@@ -210,6 +211,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
     #Run MASH distances
     mashresult = False
     if checkpoint == "w1-1":
+        log.info("JOB_STATUS::Running MASH ANI estimation against reference sequences...")
         mashresult = mash.getdistances(queryseqs,resultdir,cpu=cpu,maxdist=mashmxdist)
         if mashresult:
             checkpoint = "w1-2"
