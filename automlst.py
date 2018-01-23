@@ -23,10 +23,10 @@ def catTrees(flist,outfile):
                 log.warning("Tree file not found for MLST: %s"%fname)
     return outfile
 
-def runmafft(input,output,thread=1,maxit=0,localpair=False,options=""):
+def runmafft(input,output,thread=1,maxit=1000,localpair=False,options=""):
     if localpair:
         options += " --localpair"
-    cmd = "mafft --quiet --thread %d --maxiterate %d %s %s"%(thread,maxit,options,input)
+    cmd = "mafft --quiet --thread %d --localpair --maxiterate %d %s %s"%(thread,maxit,options,input)
     cmd = cmd.split()
     with open(os.devnull,"w") as devnull, open(output,"w") as outfil:
         try:
@@ -80,14 +80,14 @@ def hmmsearch(outname,hmmdb,infile,mcpu=1,cut="tc"):
 
 def buildseqdb(selorgs,queryseqs,resultdir,sourcedb):
     #Get list of all selected and outgroups
-    reflist = selorgs.get("selspecies",[])
+    reflist = list(selorgs.get("selspecies",[]))
     reflist.extend(selorgs.get("seloutgroups",[]))
 
     #Copy from reference database to query database
     seqsdb = os.path.join(resultdir,"seqs.db")
     copyseqsql.copydb(queryseqs,sourcedb,seqsdb)
 
-def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=5):
+def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=1):
     #Get user selection if exists
     usersel = os.path.join(resultdir,"userlist.json")
     autosel = os.path.join(resultdir,"autoOrglist.json")
@@ -106,7 +106,9 @@ def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=5):
 
     return selection
 
-def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip=""):
+def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip="",ignoreorgs=None):
+    if not ignoreorgs:
+        ignoreorgs = []
     usersel = os.path.join(resultdir,"usergenes.json")
     autosel = os.path.join(resultdir,"autoMlstlist.json")
     selection = False
@@ -122,15 +124,17 @@ def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip=""):
             selection = temp["selection"]
             delorgs = temp["delorgs"]
     else:
-        selection = [x["acc"] for x in mlstpriority[:maxmlst]]
-        for x in mlstpriority[:maxmlst]:
+        recs = [x for x in mlstpriority if not any([org in x["orgdel"] for org in ignoreorgs])][:maxmlst]
+        log.info(recs)
+        selection = [x["acc"] for x in recs]
+        for x in recs:
             delorgs = delorgs | set(x["orgdel"])
         with open(autosel,"w") as fil:
             json.dump({"selection":selection,"delorgs":list(delorgs)},fil)
 
     return selection, list(delorgs)
 
-def runIQtree(outdir,infasta,partfile="",cpu=1,model="MFP",bs=0,fout="speciestree",titlesep="",outgroup=""):
+def runIQtree(outdir,infasta,partfile="",cpu=1,model="GTR",bs=0,fout="speciestree",titlesep="",outgroup=""):
     #If title seperator exists rename titles in file first
     if titlesep:
         tf = infasta+".renamed"
@@ -187,7 +191,7 @@ def colphylogeny(resultdir,trimdir,cpu=1,model="MFP",bs=0):
     coltree = os.path.join(treedir,"summaryTree.tree")
     runAstral(resultdir,alltrees,coltree)
 
-def concatphylogeny(resultdir,concatfasta,partfile,cpu=1,model="MFP",bs=0):
+def concatphylogeny(resultdir,concatfasta,partfile,cpu=1,model="GTR",bs=0,outgroup=""):
     trimdir = os.path.join(resultdir,"mlst_trimmed")
     log.info("Concatenating all MLST genes")
     concatmsa.concatmsa(os.path.join(trimdir,"*.fna"),concatfasta,partfile,fsplit="|",checktype=False)
@@ -198,7 +202,7 @@ def concatphylogeny(resultdir,concatfasta,partfile,cpu=1,model="MFP",bs=0):
     runIQtree(treedir,concatfasta,partfile=partfile,cpu=cpu,fout="concatTree.tree",bs=bs,model=model)
 
 
-def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="MFP",bs=0,kf=False):
+def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="GTR",bs=0,kf=False):
     """WORKFLOW 2: Build phylogeny from scratch"""
     if not checkpoint:
         checkpoint = "w1-0"
@@ -270,14 +274,15 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         if os.path.exists(orgdb):
             os.remove(orgdb)
 
-        flist = selorgs["selspecies"]
+        flist = list(selorgs["selspecies"])
         flist.extend(selorgs["seloutgroups"])
         flist = [x for x in flist if "query" not in x.lower()]
         log.info("refdb: %s"%refdb)
         if copyseqsql.copydb(flist,refdb,orgdb):
             #get file list of query orgs and add to db
             seqlist = glob.glob(os.path.join(queryseqs,"*.fna"))
-            if makeseqsql.runlist(seqlist,orgdb,True,"",True):
+            allorgs = makeseqsql.runlist(seqlist,orgdb,True,"",True)
+            if allorgs:
                 checkpoint = "w1-4"
                 log.info("JOB_CHECKPOINT::%s"%checkpoint)
         else:
@@ -332,8 +337,10 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
                 del temp
         else:
             genemat,orgs,mlstpriority = getgenematrix.getmat(orgdb,pct=0.5,pct2=0.5,bh=True,rna=True,savefil=genematjson,prifile=mlstpriority,dndsfile=dndsfile)
-
-        mlstselection, delorgs = getmlstselection(resultdir,mlstpriority,maxmlst,skip=skip)
+        allquery = [os.path.splitext(os.path.split(x)[-1])[0].replace(" ","_") for x in glob.glob(os.path.join(resultdir,"queryseqs","*.fna"))]
+        ignoreorgs = list(selorgs.get("seloutgroups",[]))
+        ignoreorgs.extend(allquery)
+        mlstselection, delorgs = getmlstselection(resultdir,mlstpriority,maxmlst,skip=skip,ignoreorgs=ignoreorgs)
         if mlstselection:
             #Export selected genes to mlst folder
             log.info("JOB_STATUS:: Writing MLST genes...")
@@ -375,7 +382,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
             log.info("JOB_STATUS:: Running concatenated supermatrix phylogeny")
             concatfasta = os.path.join(resultdir,"concatMLST.fasta")
             partfile = os.path.join(resultdir,"nucpartition.txt")
-            concatphylogeny(resultdir, concatfasta, partfile,cpu=cpu,model=model,bs=bs)
+            concatphylogeny(resultdir, concatfasta, partfile,cpu=cpu,model=model,bs=bs,outgroup="OG--")
             checkpoint = "w1-F"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
             finishedtree = os.path.join(treedir,"concatTree.tree.treefile")
@@ -455,7 +462,7 @@ if __name__ == '__main__':
     parser.add_argument("-bs","--bootstrap", help="Bootstrap replicates (default: None)",default="")
     parser.add_argument("-cat","--concat", help="Use concatenated supermatrix to build tree",action="store_true",default=False)
     parser.add_argument("-kf","--keepfiles", help="Do not delete intermediate files after completion",action="store_true",default=False)
-    parser.add_argument("-m","--model", help="Use specific model for iqtree parameter (default: Use model finder)",default="MFP")
+    parser.add_argument("-m","--model", help="Use specific model for iqtree parameter (default: GTR)",default="GTR")
     parser.add_argument("-ch","--checkpoint", help="Explicitly start at checkpoint",default=False)
     parser.add_argument("-c","--cpu", help="Number of cpu cores to use",type=int, default=1)
     parser.add_argument("-mm","--maxmlst", help="Number of cpu cores to use",type=int, default=100)

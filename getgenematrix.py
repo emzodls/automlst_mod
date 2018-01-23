@@ -152,14 +152,14 @@ def prioritize(genemat,orgs,dndsfile="",jsonfile="",metadata="",pct=0.5,maxgenes
         with open(jsonfile,"w") as fil:
             json.dump(genelist,fil,indent=2)
 
-    log.debug("Topgenes Before re-balancing: %s"%getTopFuncs(genelist,maxgenes,exfuncs))
-    log.debug("Delete Org counts: %s"%set([x["delcount"] for x in genelist[:maxgenes]]))
+    # log.debug("Topgenes Before re-balancing: %s"%getTopFuncs(genelist,maxgenes,exfuncs))
+    # log.debug("Delete Org counts: %s"%set([x["delcount"] for x in genelist[:maxgenes]]))
 
     #Rebalance function diversity for MLST singles
     genelist = rebalancefuncs(genelist,exfuncs=exfuncs,maxgenes=maxgenes,maxiter=900,ubiq=True)
 
-    log.debug("Topgenes After re-balancing: %s"%getTopFuncs(genelist,maxgenes,exfuncs))
-    log.debug("Delete Org counts: %s"%set([x["delcount"] for x in genelist[:maxgenes]]))
+    # log.debug("Topgenes After re-balancing: %s"%getTopFuncs(genelist,maxgenes,exfuncs))
+    # log.debug("Delete Org counts: %s"%set([x["delcount"] for x in genelist[:maxgenes]]))
 
     return genelist
 
@@ -204,7 +204,7 @@ def getmat(db,pct=0.5,pct2=1.0,ev=0.1,bs=0,bh=True,rna=False,savefil="",prifile=
     if prifile:
         mlst = prioritize(countdict,orgs,jsonfile=prifile,dndsfile=dndsfile,maxgenes=maxgenes,pct=pct)
     else:
-        mlst = getsingles(genemat=countdict)
+        mlst = getsingles(genemat=countdict,pct2=pct2)
 
     return countdict,orgs,mlst
 

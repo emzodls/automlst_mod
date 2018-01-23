@@ -131,7 +131,7 @@ def reanalyzejob(jobid):
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
         joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_REANALYZE::true \n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::W1-STEP2 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Reanalyzing\n'+str(datetime.datetime.now())+' - INFO - JOB_PARAMS::'+json.dumps(paramdict)+'\n')
 
-def jsontotsv(jsonpath):
+def jsontotsv(jsonpath,jobid):
     resultdict = {}
     with open(jsonpath, 'r') as jsondict:
         fulldict = json.load(jsondict)
@@ -153,7 +153,7 @@ def jsontotsv(jsonpath):
                 if orgcomp not in resultdict:
                     resultdict[orgcomp] = ""
                 resultdict[orgcomp] = {"orgname":currorg["orgname"], "strain":currorg["strain"], "id":currorg["id"], "queryname":currquery,"pval":currp, "dist":currd}
-    with open(os.path.join(app.config['RESULTS_FOLDER'],'reftext.txt'),'wb') as csvfile:
+    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'reftext.txt'),'wb') as csvfile:
         csvwriter = csv.writer(csvfile,delimiter="\t")
         for resultval in resultdict.values():
             csvwriter.writerow([resultval["orgname"],resultval["strain"],resultval["id"],resultval["queryname"],resultval["pval"],resultval["dist"]])

@@ -156,7 +156,7 @@ class AmlstDaemon(Daemon):
                         ## Get job options
                         workflow = int(jobargs.get("workflow",0))
                         skip = jobargs.get("skip","")
-                        model = jobargs.get("model","MFP")
+                        model = jobargs.get("model","GTR")
                         bs = jobargs.get("bootstr","")
                         mode = jobargs.get("mode","concatenated")
                         concat = True

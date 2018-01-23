@@ -104,14 +104,14 @@ def downloadorgs(jobid):
     format = request.args.get('format','json')
     resultdir = os.path.join(app.config['RESULTS_FOLDER'],jobid)
     if format == 'json':
-        return send_from_directory(resultdir,'reflist.json',as_attachment=True)
+        return send_from_directory(resultdir,jobid,'reflist.json',as_attachment=True)
     elif format == 'txt':
-        if os.path.exists(os.path.join(resultdir,'reftext.txt')):
-            return send_from_directory(resultdir,'reftext.txt',as_attachment=True)
+        if os.path.exists(os.path.join(resultdir,jobid,'reftext.txt')):
+            return send_from_directory(resultdir,jobid,'reftext.txt',as_attachment=True)
         else:
-            jsonpath = os.path.join(resultdir,'reflist.json')
-            routines.jsontotsv(jsonpath)
-            return send_from_directory(resultdir,'reftext.txt',as_attachment=True)
+            jsonpath = os.path.join(resultdir,jobid,'reflist.json')
+            routines.jsontotsv(jsonpath,jobid)
+            return send_from_directory(resultdir,jobid,'reftext.txt',as_attachment=True)
 
 @app.route('/results2/<jobid>/refs')
 def getrefs(jobid):
@@ -252,6 +252,7 @@ def genein(jobid):
         json.dump({"genes":genes,"mode":radioval,"remove":rmorgs},usergenes)
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
         joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Resuming job...\n')
+        joblog.write(str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::w1-5\n')
     return redirect('/results/'+jobid+'/loading?laststep=step3')
 
 @app.route('/jobstatus/<jobid>')

@@ -92,6 +92,7 @@ def runlist(finput,ofil,transonly=False,orgname=False,inc=False):
 
         # ex4istingrecs=set(str(x[0])+"@"+str(x[1]) for x in csr.execute("SELECT orgname,gene FROM Seqs"))
         #read each file
+        allorgs = []
         for nr,fname in enumerate(flist):
             recs=[]
             temp=None
@@ -100,7 +101,8 @@ def runlist(finput,ofil,transonly=False,orgname=False,inc=False):
             org,ext = os.path.splitext(fn)
             if orgname:
                 org = orgname
-
+            org = org.replace(" ","_")
+            allorgs.append(org)
             #skip .faa files, test type for gbk or fasta
             if ext.lower()==".faa":
                 continue
@@ -196,7 +198,7 @@ def runlist(finput,ofil,transonly=False,orgname=False,inc=False):
         except exc.OperationalError:
             log.info("No index present")
         csr.close()
-        return True
+        return allorgs
     else:
         log.error("No reccords found")
         return False
