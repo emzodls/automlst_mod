@@ -156,19 +156,20 @@ class AmlstDaemon(Daemon):
                         ## Get job options
                         workflow = int(jobargs.get("workflow",0))
                         skip = jobargs.get("skip","")
-                        model = jobargs.get("model","GTR")
+                        model = jobargs.get("modelfind","GTR+I")
                         bs = jobargs.get("bootstr","")
                         mode = jobargs.get("mode","concatenated")
                         concat = True
                         if mode != "concatenated":
                             concat = False
                         refdb = self.config.get("REFDB",False)
+                        keepfiles = self.config.get("KEEPFILES",False)
                         cpu = int(self.config.get("MCPU",1))
 
                         self.log.info("ARGS: workflow=%s skip=%s concat=%s model=%s refdb=%s cpu=%s"%(workflow,skip,concat,model,refdb,cpu))
 
                         ## Do the job
-                        exitstatus = automlst.startjob(genomes,resultdir,skip=skip,checkpoint=False,workflow=workflow,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs)
+                        exitstatus = automlst.startjob(genomes,resultdir,skip=skip,checkpoint=False,workflow=workflow,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=keepfiles)
 
                         self.runningjob = False
                         self.redis.lrem("AMLSTRQ",jobid)

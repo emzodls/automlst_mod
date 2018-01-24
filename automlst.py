@@ -3,8 +3,10 @@ import os, json, argparse, setlog, parsegenomes, mash, shutil
 import copyseqsql, makeseqsql, glob, seqsql2fa, subprocess
 import multiprocessing as mp
 import makehmmsql, getgenematrix, getgenes, concatmsa
+import numpy as np
+from scipy.cluster.vq import kmeans2
 
-def startwf2(indir,resultdir,checkpoint=False,genus="auto",model="MFP",bs=0,kf=False,maxmlst=100):
+def startwf2(indir,resultdir,checkpoint=False,genus="auto",model="GTR+I",bs=0,kf=False,maxmlst=100):
     """WORKFLOW 2: Get all query genomes and identify reference tree to add sequences to"""
 
 
@@ -23,27 +25,36 @@ def catTrees(flist,outfile):
                 log.warning("Tree file not found for MLST: %s"%fname)
     return outfile
 
-def runmafft(input,output,thread=1,maxit=1000,localpair=False,options=""):
+def runmafft(finput,output,thread=1,maxit=300,localpair=False,options="",rename=""):
     if localpair:
         options += " --localpair"
-    cmd = "mafft --quiet --thread %d --localpair --maxiterate %d %s %s"%(thread,maxit,options,input)
+    if rename:
+        #Rename fasta headers by ignoring everything after "rename" character
+        with open(finput,"r") as infil, open(finput+".renamed","w") as ofil:
+            for line in infil:
+                if line.startswith(">") and rename in line:
+                    ofil.write(line.strip().split(rename)[0]+"\n")
+                else:
+                    ofil.write(line)
+        finput = finput+".renamed"
+    cmd = "mafft --quiet --thread %d --localpair --treeout --maxiterate %d %s %s"%(thread,maxit,options,finput)
     cmd = cmd.split()
     with open(os.devnull,"w") as devnull, open(output,"w") as outfil:
         try:
             subprocess.call(cmd, stdout=outfil, stderr=devnull)
             log.info("Finished alignment %s"%output)
         except Exception as e:
-            log.error("Failed to run mafft %s (%s)"%(input,e))
+            log.error("Failed to run mafft %s (%s)"%(finput,e))
 
-def runtrimal(input,output,method="automated1"):
-    cmd = "trimal -in %s -out %s -%s"%(input,output,method)
+def runtrimal(finput,output,method="automated1"):
+    cmd = "trimal -in %s -out %s -%s"%(finput,output,method)
     cmd = cmd.split()
     with open(os.devnull,"w") as devnull:
         try:
             subprocess.call(cmd, stdout=devnull, stderr=devnull)
             log.info("Finished trimming %s"%output)
         except Exception as e:
-            log.error("Failed to run trimall %s (%s)"%(input,e))
+            log.error("Failed to run trimall %s (%s)"%(finput,e))
 
 def processmlst(indir,aligndir,cpu=1,parallel=True,trim=False):
     flist = glob.glob(os.path.join(indir,"*.fna"))
@@ -57,7 +68,7 @@ def processmlst(indir,aligndir,cpu=1,parallel=True,trim=False):
             if trim:
                 pool.apply_async(runtrimal, args=(filename, os.path.join(aligndir,fname)))
             else:
-                pool.apply_async(runmafft, args=(filename, os.path.join(aligndir,fname)))
+                pool.apply_async(runmafft, (filename, os.path.join(aligndir,fname)),dict(rename="|"))
         pool.close()
         pool.join()
     else:
@@ -66,7 +77,7 @@ def processmlst(indir,aligndir,cpu=1,parallel=True,trim=False):
             if trim:
                 runtrimal(filename, os.path.join(aligndir,fname))
             else:
-                runmafft(filename, os.path.join(aligndir,fname),thread=cpu)
+                runmafft(filename, os.path.join(aligndir,fname),thread=cpu,rename="|")
 
 def hmmsearch(outname,hmmdb,infile,mcpu=1,cut="tc"):
     log.info("Searching sequences against hmmdb: %s"%hmmdb)
@@ -134,7 +145,7 @@ def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip="",ignoreorgs=None)
 
     return selection, list(delorgs)
 
-def runIQtree(outdir,infasta,partfile="",cpu=1,model="GTR",bs=0,fout="speciestree",titlesep="",outgroup=""):
+def runIQtree(outdir,infasta,partfile="",cpu=1,model="GTR",bs=0,fout="speciestree",titlesep="",outgroup="OG--"):
     #If title seperator exists rename titles in file first
     if titlesep:
         tf = infasta+".renamed"
@@ -146,7 +157,7 @@ def runIQtree(outdir,infasta,partfile="",cpu=1,model="GTR",bs=0,fout="speciestre
                 ofil.write(lineout+"\n")
         infasta = tf
     log.info("Building tree: model=%s, bootstrap=%s, file=%s"%(model,bs,fout))
-    cmd=["iqtree-omp", "-quiet", "-nt", str(cpu), "-s", infasta, "-m", model,"-pre",os.path.join(outdir,fout)]
+    cmd=["iqtree", "-quiet", "-nt", str(cpu), "-s", infasta, "-m", model,"-pre",os.path.join(outdir,fout)]
     if bs:
         cmd.extend(["-bb",str(bs)])
     if outgroup:
@@ -154,7 +165,7 @@ def runIQtree(outdir,infasta,partfile="",cpu=1,model="GTR",bs=0,fout="speciestre
         with open(infasta,"r") as ifil:
             for line in ifil:
                 if line.startswith(">") and outgroup in line:
-                    cmd.extend(["-o", '"%s"'%line[1:].strip()])
+                    cmd.extend(["-o", "%s"%line[1:].strip()])
                     break
     if partfile:
         cmd.extend(["-spp", partfile])
@@ -201,6 +212,44 @@ def concatphylogeny(resultdir,concatfasta,partfile,cpu=1,model="GTR",bs=0,outgro
         os.makedirs(treedir)
     runIQtree(treedir,concatfasta,partfile=partfile,cpu=cpu,fout="concatTree.tree",bs=bs,model=model)
 
+def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
+    """Additional screen for outlier genes with highly discordant parsimony trees"""
+    guidetrees = glob.glob(os.path.join(mlstdir,"*.tree"))
+    #combine all to tree file
+    hkgenes = []
+    alltrees = os.path.join(aligndir,"guidetrees.tree")
+    with open(alltrees,"w") as gtfil:
+        for fname in guidetrees:
+            with open(fname,"r") as tfil:
+                hkgenes.append(os.path.splitext(fname))
+                gtfil.write("".join([x.strip() for x in tfil])+";\n")
+    #Run robinson foulds distance calculation
+    cmd = ["iqtree","-nt",str(cpu),"-rf_all",alltrees]
+    with open(os.devnull,"w") as devnull:
+        subprocess.call(cmd,stdout=devnull,stderr=devnull)
+
+    #Read distance matrix and store median values for each gene
+    treedists = []
+    with open(alltrees+".rfdist","r") as fil:
+        line = fil.next()
+        for line in fil:
+            temp = np.median([int(x) for x in line.strip().split()[1:] if int(x)>0])
+            treedists.append(temp)
+
+    #segment tress into 2 partitions using k-means
+    km,kmgroup = kmeans2(np.array(treedists),2)
+    #Ensure group with highest distance is marked as group 1, group 0 is highest group
+    if km[0] > km[1]:
+        kmgroup = np.ones(len(kmgroup))-kmgroup
+    #get hkgenes with highest group designation
+    hkhigh = sorted(np.array(hkgenes)[kmgroup], key=lambda x: treedists[hkgenes.index(x)])
+
+    #if lowest group is under min genes remove genes from highest group
+    mindiff = mingenes - (len(hkgenes)-len(hkhigh))
+    if mindiff > 0:
+        hkhigh = hkhigh[mindiff+1:]
+
+    return hkhigh
 
 def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="GTR",bs=0,kf=False):
     """WORKFLOW 2: Build phylogeny from scratch"""
@@ -364,6 +413,11 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         log.info("JOB_PROGRESS::45/100")
         #align all
         processmlst(mlstdir,aligndir,cpu=cpu)
+        #Extra screen of MLST genes to remove outliers based on starting tree distance
+        log.info("JOB_STATUS:: Screening for inconsistent MLST genes")
+        log.info("JOB_PROGRESS::50/100")
+        excludemlst = screenmlst(mlstdir,aligndir,cpu=cpu)
+        log.info("JOB_STATUS:: Excluded MLST genes: %s"%excludemlst)
         #trim all
         log.info("JOB_STATUS:: Trimming alignments")
         log.info("JOB_PROGRESS::55/100")
@@ -411,7 +465,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
                 os.remove(oldfil)
 
 
-def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="GTR",bs=0,kf=False,maxmlst=100):
+def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="GTR+I",bs=0,kf=False,maxmlst=100):
     #Setup working directory
     if not os.path.exists(os.path.join(os.path.realpath(resultdir),"queryseqs")):
         os.makedirs(os.path.join(os.path.realpath(resultdir),"queryseqs")) #query sequence folder

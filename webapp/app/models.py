@@ -11,6 +11,6 @@ class automlstjob(object):
         self.skip = kwargs.get("skip")
         self.bootstr=kwargs.get("bootstr",0)
         self.mode=kwargs.get("mode","concatenated")
-        self.modelfind=kwargs.get("modelfind","GTR")
+        self.modelfind=kwargs.get("modelfind","GTR+I")
     def getdict(self):
         return self.__dict__
