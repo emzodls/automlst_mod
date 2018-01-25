@@ -97,6 +97,10 @@ def getjobstatus(jobid):
     paramdict = {}
     if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log')):
         with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'), 'r') as infile:
+            #Get align progress
+            mlstfound = 0
+            mlstaligned = 0
+
             for line in infile:
                 if 'JOB_STATUS' in line:
                     statlist = line.strip().split('::')
@@ -117,6 +121,13 @@ def getjobstatus(jobid):
                 elif 'JOB_PARAMS' in line:
                     paramlist = line.strip().split('::')
                     paramdict = json.loads(paramlist[1])
+                elif 'Writing genes:' in line:
+                    mlstfound = line[line.find("Writing genes:"):].count(",")+1
+                elif "Finished alignment" in line:
+                    mlstaligned += 1
+
+            if mlstfound > 0 and mlstaligned > 0:
+                jobstatus += " (%s/%s complete)"%(mlstaligned,mlstfound)
     jobstatdict = {"progress": percent,"status":jobstatus, "mash":mashstatus, "checkpoint": checkpoint, "workflow": workflow, "params":paramdict}
     return jobstatdict
 

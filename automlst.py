@@ -256,7 +256,7 @@ def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
 
     #Mask screened MLST genes
     for hk in hkhigh:
-        fname = os.path.join(aligndir,fname,".fna")
+        fname = os.path.join(aligndir,fname+".fna")
         os.rename(fname,fname+".removed")
 
     return hkhigh
@@ -286,7 +286,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         if mashresult:
             checkpoint = "w1-2"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
-            log.info("JOB_PROGRESS::15/100")
+            log.info("JOB_PROGRESS::10/100")
         else:
             log.error("MASH distance failed")
             return False
@@ -309,7 +309,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         if selorgs:
             checkpoint = "w1-3"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
-            log.info("JOB_PROGRESS::25/100")
+            log.info("JOB_PROGRESS::15/100")
         else:
             checkpoint = "w1-STEP2"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
@@ -360,7 +360,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
 
         #Run HMM searches
         log.info("JOB_STATUS:: Searching for MLST genes in query sequences...")
-        log.info("JOB_PROGRESS::35/100")
+        log.info("JOB_PROGRESS::25/100")
         if not hmmdb:
             hmmdb = os.path.join(os.path.dirname(os.path.realpath(__file__)),"reducedcore.hmm")
         if not rnadb:
@@ -420,17 +420,17 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
 
     if checkpoint == "w1-6":
         log.info("JOB_STATUS:: Aligning MLST genes")
-        log.info("JOB_PROGRESS::45/100")
+        log.info("JOB_PROGRESS::30/100")
         #align all
         processmlst(mlstdir,aligndir,cpu=cpu)
         #Extra screen of MLST genes to remove outliers based on starting tree distance
         log.info("JOB_STATUS:: Screening for inconsistent MLST genes")
-        log.info("JOB_PROGRESS::50/100")
+        log.info("JOB_PROGRESS::55/100")
         excludemlst = screenmlst(mlstdir,aligndir,cpu=cpu)
         log.info("JOB_STATUS:: Excluded MLST genes: %s"%excludemlst)
         #trim all
         log.info("JOB_STATUS:: Trimming alignments")
-        log.info("JOB_PROGRESS::55/100")
+        log.info("JOB_PROGRESS::65/100")
         processmlst(aligndir,trimdir,cpu=cpu,trim=True)
 
         checkpoint = "w1-7"
@@ -440,7 +440,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
     finishedtree = finaltree = ""
     #Build trees
     if checkpoint == "w1-7":
-        log.info("JOB_PROGRESS::70/100")
+        log.info("JOB_PROGRESS::75/100")
         finaltree = os.path.join(resultdir,"final.tree")
         if concat:
             log.info("JOB_STATUS:: Running concatenated supermatrix phylogeny")
