@@ -29,6 +29,9 @@ if (data["progress"] == 100) {
     $('#viewreport').removeClass("hidden");
     clearInterval(timer2);
 }
+else if (data["progress"] >= 30) {
+    $(".steps").removeClass("steps-disabled")
+}
 }
 }
 

@@ -105,6 +105,8 @@ def getjobstatus(jobid):
                 if 'JOB_STATUS' in line:
                     statlist = line.strip().split('::')
                     jobstatus = statlist[1]
+                    if "Aligning MLST genes" in jobstatus:
+                        mlstaligned = 0
                 elif 'JOB_PROGRESS' in line:
                     proglist = line.strip().split('::')
                     fraction = str(proglist[1]).split('/')
@@ -125,9 +127,12 @@ def getjobstatus(jobid):
                     mlstfound = line[line.find("Writing genes:"):].count(",")+1
                 elif "Finished alignment" in line:
                     mlstaligned += 1
-
-            if mlstfound > 0 and mlstaligned > 0:
+            if mlstfound > 0 and mlstaligned > 0 and mlstfound != mlstaligned:
                 jobstatus += " (%s/%s complete)"%(mlstaligned,mlstfound)
+                # total percent is pct * portion extra
+                pct = float(mlstaligned)/mlstfound
+                percent = percent + (pct * 25)
+
     jobstatdict = {"progress": percent,"status":jobstatus, "mash":mashstatus, "checkpoint": checkpoint, "workflow": workflow, "params":paramdict}
     return jobstatdict
 

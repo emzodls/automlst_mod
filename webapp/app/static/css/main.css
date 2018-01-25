@@ -424,9 +424,10 @@ tr.shown td.details-control {
 }
 
 /* Links for analyze pages */
-a.steps {
+.steps {
     font-size:24px;
     font-weight:500;
+    color:#10006d;
 }
 
 .steps-disabled {

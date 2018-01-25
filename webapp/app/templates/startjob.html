@@ -2,8 +2,8 @@
 {% block mainbody %}
 
 <div class="container" style="padding-top:40px">
-    <h2>{{ jobid }}</h2>
-    <a href="#" class="steps">Step 1 <small>Calculating closest organism</small> &raquo;</a> <span class="steps-disabled">Step 2  &raquo;</span> <span class="steps-disabled">Step 3 &raquo;</span> <span class="steps-disabled">Results</span>
+    <h2>Job ID: {{ jobid }}</h2>
+    <span class="steps">Step 1 &raquo;</span> <span class="steps steps-disabled">Step 2  &raquo;</span> <span class="steps steps-disabled">Step 3 &raquo;</span> <span class="steps-disabled">Results</span>
     <hr>
      <div class="row">
         <div class="col-md-2">
@@ -18,7 +18,7 @@
             <h4>Status</h4>
         </div>
         <div class="col-md-10">
-            <p style="margin-top:10px" id="currentstatus"><b>Calculating closest organism (Step 1)</b></p>
+            <p style="margin-top:10px" id="currentstatus"><b>Waiting in queue...</b></p>
         </div>
     </div>
     <hr>

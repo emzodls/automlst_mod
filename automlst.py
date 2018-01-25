@@ -256,7 +256,7 @@ def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
 
     #Mask screened MLST genes
     for hk in hkhigh:
-        fname = os.path.join(aligndir,fname+".fna")
+        fname = os.path.join(aligndir,hk+".fna")
         os.rename(fname,fname+".removed")
 
     return hkhigh
