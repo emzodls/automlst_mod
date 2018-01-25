@@ -221,7 +221,9 @@ def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
     with open(alltrees,"w") as gtfil:
         for fname in guidetrees:
             with open(fname,"r") as tfil:
-                hkgenes.append(os.path.splitext(fname))
+                hk = os.path.split(fname)[-1]
+                hk = hk[:hk.find(".")]
+                hkgenes.append(hk)
                 gtfil.write("".join([x.strip() for x in tfil])+";\n")
     #Run robinson foulds distance calculation
     cmd = ["iqtree","-nt",str(cpu),"-rf_all",alltrees]
@@ -241,13 +243,21 @@ def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
     #Ensure group with highest distance is marked as group 1, group 0 is highest group
     if km[0] > km[1]:
         kmgroup = np.ones(len(kmgroup))-kmgroup
+    inds = [i for i,x in enumerate(kmgroup) if x>0]
     #get hkgenes with highest group designation
-    hkhigh = sorted(np.array(hkgenes)[kmgroup], key=lambda x: treedists[hkgenes.index(x)])
+    # return kmgroup,hkgenes,treedists
+
+    hkhigh = sorted(np.array(hkgenes)[inds], key=lambda x: treedists[hkgenes.index(x)])
 
     #if lowest group is under min genes remove genes from highest group
     mindiff = mingenes - (len(hkgenes)-len(hkhigh))
     if mindiff > 0:
         hkhigh = hkhigh[mindiff+1:]
+
+    #Mask screened MLST genes
+    for hk in hkhigh:
+        fname = os.path.join(aligndir,fname,".fna")
+        os.rename(fname,fname+".removed")
 
     return hkhigh
 
