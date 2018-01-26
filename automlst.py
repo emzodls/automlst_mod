@@ -204,7 +204,7 @@ def colphylogeny(resultdir,trimdir,cpu=1,model="MFP",bs=0):
 def concatphylogeny(resultdir,concatfasta,partfile,cpu=1,model="GTR",bs=0,outgroup=""):
     trimdir = os.path.join(resultdir,"mlst_trimmed")
     log.info("Concatenating all MLST genes")
-    concatmsa.concatmsa(os.path.join(trimdir,"*.fna"),concatfasta,partfile,fsplit="|",checktype=False)
+    concatmsa.concatmsa(os.path.join(trimdir,"*.fna"),concatfasta,partfile,fsplit=" ",checktype=False)
     #Build tree from concatenated fasta
     treedir = os.path.join(resultdir,"trees")
     if not os.path.exists(treedir):
