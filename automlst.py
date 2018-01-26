@@ -136,7 +136,6 @@ def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip="",ignoreorgs=None)
             delorgs = temp["delorgs"]
     else:
         recs = [x for x in mlstpriority if not any([org in x["orgdel"] for org in ignoreorgs])][:maxmlst]
-        log.info(recs)
         selection = [x["acc"] for x in recs]
         for x in recs:
             delorgs = delorgs | set(x["orgdel"])

@@ -204,6 +204,8 @@ def getOrgs(jobid):
     return jsonify({"error":"No List found."})
 
 @app.route('/results/<jobid>/step2/orgin', methods=['POST'])
+@app.route('/results/<jobid>/reanalyze/orgin', methods=['POST'])
+@app.route('/results/<jobid>/orgin', methods=['POST'])
 def orgin(jobid):
     species = request.form.getlist('specieslist')
     outgroups = request.form.getlist('outgrlist')
@@ -212,6 +214,7 @@ def orgin(jobid):
         json.dump({"selspecies":species, "seloutgroups":outgroups},userfile)
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
         joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::w1-3 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Resuming job...\n')
+    routines.readdjob(jobid)
     return redirect('/results/'+jobid+'/loading?laststep=step2') # when is checkpoint set? Might get user stuck in a loop of submitting/getting redirected
 
 @app.route('/results/<jobid>/step2/outgroups', methods=['GET'])
@@ -253,6 +256,7 @@ def genein(jobid):
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
         joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Resuming job...\n')
         joblog.write(str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::w1-5\n')
+    routines.readdjob(jobid)
     return redirect('/results/'+jobid+'/loading?laststep=step3')
 
 @app.route('/jobstatus/<jobid>')

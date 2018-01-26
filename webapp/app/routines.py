@@ -74,14 +74,21 @@ def getinfile():
         ufile.save(filename)
     return filename
 
+def readdjob(jobid):
+    rddb = getdb()
+    if rddb:
+        rddb.lrem("AMLSTWQ","%s"%jobid,1)
+        rddb.lpush("AMLSTSQ","%s"%jobid,1)
+
 def addjob(**kwargs):
     rddb = getdb()
     automlstjob = models.automlstjob(**kwargs)
     if rddb:
         rddb.hmset("automlstjob:%s"%automlstjob.id, automlstjob.getdict())
-        rddb.lpush("AMLSTSQ",automlstjob.id)
+        rddb.rpush("AMLSTSQ",automlstjob.id)
         # make a results directory?
     return automlstjob
+
 def updatejob(jobid,newref):
     rddb = getdb()
     if rddb:
@@ -138,14 +145,31 @@ def getjobstatus(jobid):
 
 def reanalyzejob(jobid):
     paramdict={}
+    rddb = getdb()
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'r') as jobread:
         for line in jobread:
             if 'JOB_PARAMS' in line:
                 paramlist = line.strip().split('::')
                 paramdict = json.loads(paramlist[1])
+                #Clear Skip options
+                paramdict["skip"] = ""
+                if rddb:
+                    rddb.hmset("automlstjob:%s"%jobid,{"skip":""})
     paramdict["skip"]=[]
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
-        joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_REANALYZE::true \n'+str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::W1-STEP2 \n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Reanalyzing\n'+str(datetime.datetime.now())+' - INFO - JOB_PARAMS::'+json.dumps(paramdict)+'\n')
+        joblog.write("\n"+str(datetime.datetime.now())+" - INFO - JOB_REANALYZE::true \n")
+        joblog.write(str(datetime.datetime.now())+" - INFO - JOB_CHECKPOINT::W1-STEP2 \n")
+        joblog.write(str(datetime.datetime.now())+"- INFO - JOB_STATUS::Reanalyzing\n")
+        joblog.write(str(datetime.datetime.now())+"- INFO - JOB_PROGRESS::15/100\n")
+        joblog.write(str(datetime.datetime.now())+" - INFO - JOB_PARAMS::"+json.dumps(paramdict)+"\n")
+    #Reset to Step2 state, remove all files except keepfiles
+    keepfiles = ["automlst.log","mash_distances.txt","queryflist_hAPYqZ.txt","queryseqs","reflist.json"]
+    jobdir = os.path.join(app.config['RESULTS_FOLDER'],jobid)
+    oldfiles = tempfile.mkdtemp(prefix="old_",dir=jobdir)
+    keepfiles.append(os.path.split(oldfiles)[1])
+    for fname in os.listdir(jobdir):
+        if fname not in keepfiles:
+            os.rename(os.path.join(jobdir,fname),os.path.join(oldfiles,fname))
 
 def jsontotsv(jsonpath,jobid):
     resultdict = {}
