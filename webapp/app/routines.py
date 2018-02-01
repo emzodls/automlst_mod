@@ -77,8 +77,9 @@ def getinfile():
 def readdjob(jobid):
     rddb = getdb()
     if rddb:
-        rddb.lrem("AMLSTWQ","%s"%jobid,1)
-        rddb.lpush("AMLSTSQ","%s"%jobid,1)
+        if rddb.keys("automlstjob:%s"%jobid) and os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid)):
+            rddb.lrem("AMLSTWQ","%s"%jobid,1)
+            rddb.lpush("AMLSTSQ","%s"%jobid,1)
 
 def addjob(**kwargs):
     rddb = getdb()

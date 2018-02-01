@@ -102,6 +102,9 @@ def run(fname,ofil,ev=1e-4,bs=0.0,rna=False,filt2=None):
                         recs[seqid] = []
                     recs[seqid].append([x[3],org,int(seqid),int(x[15]),int(x[16]),int(x[5]),int(x[19]),int(x[20]),int(x[2]),float(x[6]),float(x[7]),float(x[8]),float(x[13]),0,0,0])
 
+        if not len(recs.keys()):
+            log.warning("No %s were found"%tabletitle)
+            return False
         #Mark Best Hits in hmm search
         recs = markbest(recs)
         #Calculate gene and hmm coverage
@@ -146,7 +149,8 @@ def run(fname,ofil,ev=1e-4,bs=0.0,rna=False,filt2=None):
     #     log.error("Aborting coverage calculation, Error:%s"%ex)
 
     csr.close()
-            
+    return True
+
 # Commandline Execution
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Combine hmmresults into single sql db""")

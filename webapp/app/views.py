@@ -187,7 +187,7 @@ def getOrgs(jobid):
             refdict = json.load(reffile)
             userdict = json.load(userfile)
             tempdict = [ref for ref in refdict["reforgs"] if ref["id"] in userdict["selspecies"] and not ref in refdict["reforgs"][0:(orgstart+500)]]
-            refdict["reforgs"] = refdict["reforgs"][orgstart:(orgstart + 500)]
+            refdict["reforgs"] = refdict["reforgs"][orgstart:(orgstart + 200)]
             refdict["outgroups"] = [rec for rec in refdict["outgroups"] if
                                     str(rec["phylid"]) != "N/A" and str(rec["familyid"]) != "N/A" and str(
                                         rec["orderid"]) != "N/A" and str(rec["genusid"]) != "N/A"]
@@ -198,7 +198,7 @@ def getOrgs(jobid):
     elif os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid,'reflist.json')):
         with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'reflist.json'),'r') as firstref:
             refdict = json.load(firstref)
-            refdict["reforgs"] = refdict["reforgs"][orgstart:(orgstart+500)]
+            refdict["reforgs"] = refdict["reforgs"][orgstart:(orgstart+200)]
             refdict["outgroups"] = [rec for rec in refdict["outgroups"] if str(rec["phylid"]) != "N/A" and str(rec["familyid"]) != "N/A" and str(rec["orderid"]) != "N/A" and str(rec["genusid"]) != "N/A"]
             return jsonify(refdict)
     return jsonify({"error":"No List found."})
@@ -252,10 +252,11 @@ def genein(jobid):
     radioval = request.form.get('optradio')
     rmorgs = request.form.get('removeorgs','NONE')
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'usergenes.json'),'w') as usergenes:
-        json.dump({"genes":genes,"mode":radioval,"remove":rmorgs},usergenes)
+        json.dump({"selection":genes,"mode":radioval,"delorgs":rmorgs},usergenes)
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
         joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Resuming job...\n')
         joblog.write(str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::w1-5\n')
+    print jobid
     routines.readdjob(jobid)
     return redirect('/results/'+jobid+'/loading?laststep=step3')
 

@@ -57,6 +57,12 @@ def parse(mashresult,taxdb="",maxdist=0.5,TStol=0.05):
         for qorg in recs:
             # Typestrain genome distances are allowed to be -(tolerance) larger for prioritization
             recs[qorg] = sorted(recs[qorg], key=lambda row: row[2]-TStol if row[-1] else row[2])
+    #Rewrite mash distance text file:
+    with open(mashresult,"w") as fil:
+        fil.write("#Query_org\tReference_assembly\tRef_name\tMASH_distance\tEstimated_ANI\tP-value\tGenus\tOrder\tType_strain\n")
+        for qorg,reclist in recs.items():
+            for rec in reclist:
+                fil.write("%s\t%s\t%s\t%.4f\t%.4f\t%.4f\t%s\t%s\t%s\n"%(qorg,rec[0],rec[1].replace(" ","_"),rec[2],1.0-rec[2],rec[3],rec[5],rec[9],rec[-1]))
     return recs
 
 lastid = 0
@@ -72,27 +78,27 @@ def getlineage(recs):
 
 def getcommongroup(lineage):
     groups = ["genus","family","order","phyl"]
-    allids = {}
+    #allids = {}
     allgroup = {}
-    common = [False,allgroup.keys(),allgroup.values()]
+    common = [False,"",""]
     for group in groups:
-        allgroup = {rec[group+"id"]:rec[group+"name"] for org,rec in lineage.items()}
+        allgroup = {str(rec[group+"id"]):rec[group+"name"] for org,rec in lineage.items()}
         if len(allgroup.keys())==1 and not common[0]:
             common = [group,allgroup.keys()[0],allgroup.values()[0]]
-        allids[group] = allgroup.keys()
-    return common, allids
+        #allids[group] = allgroup.keys()
+    return common
 
-def getoutgrouporgs(common,refrecs):
+def getoutgrouporgs(common,refrecs,glimit=100):
     group = "phyl" #default to phyl scope
     ingroupset = set()
     if common[0]:
         group = common[0]
         ingroupset.add(common[1])
     else:
-        ingroupset.update(common[1])
-
+        ingroupset.add(common[1])
     #Filter sorted reference list to remove ingroups
-    return [rec for rec in refrecs if rec[group+"id"] not in ingroupset]
+    filtorgs = [rec for rec in refrecs if str(rec[group+"id"]) not in ingroupset][:glimit]
+    return filtorgs
 
 def getrefrecs(recs,top=list()):
     #reads distances from refs and outputs sorted list of reference organisms
@@ -119,7 +125,7 @@ def getrefrecs(recs,top=list()):
         refrecs[id]["pval"] = mean(refrecs[id]["plist"])
         refrecs[id]["top"] = 0
         if id in top:
-            refrecs[id]["top"] = 1
+            refrecs[id]["top"] = -1
     return refrecs, orglist
 
 def getalloutgroups(allids,refrecs, glimit=1000):
@@ -148,7 +154,7 @@ def getnearestrefs(recs,NOlimit=25):
     toprefids = list(toprefids)
     return toprefids[:NOlimit]
 
-def getdistances(indir,outdir,reffile="",cpu=1,limit=50,outputfile="",TStol=0.05,NOlimit=25,OGlimit=100,maxdist=0.5):
+def getdistances(indir,outdir,reffile="",cpu=1,limit=5000,outputfile="",TStol=0.05,NOlimit=25,OGlimit=1000,maxdist=0.5,maxorg=50):
     status = False
     if not reffile or not os.path.exists(reffile):
         reffile = os.path.join(os.path.dirname(os.path.realpath(__file__)),"refseq.msh")
@@ -169,13 +175,15 @@ def getdistances(indir,outdir,reffile="",cpu=1,limit=50,outputfile="",TStol=0.05
         topids = getnearestrefs(recs,NOlimit=NOlimit)
         refrecs, orglist = getrefrecs(recs,topids)
 
-        # Sort by nearest relative to query first, mean distance to all (TypeStrains are prefered within tolerance)
-        refrecs = sorted(refrecs.values(), key=lambda x: (x["top"]*-1,x["dist"]-TStol if x["typestrain"] else x["dist"]))
-
-        #Get query organism lineage by closest hit lineage
+        #Get query organism lineage by closest hit lineage and calculate common rank via query org ranks
         orgrecs = getlineage(recs)
-        commonrank, allids = getcommongroup(orgrecs)
-        OGorgs = getalloutgroups(allids,refrecs,glimit=OGlimit)
+        commonrank = getcommongroup(orgrecs)
+        log.debug("common rank:%s"%commonrank)
+
+        # Resort by nearest relative to query first (top hits), inclusion in common rank, mean distance to all (TypeStrains are preferred within tolerance)
+        refrecs = sorted(refrecs.values(), key=lambda x: (x["top"],-1*int(commonrank[1] in str(x[commonrank[0]+"id"])),x["dist"]-TStol if x["typestrain"] else x["dist"]))
+
+        OGorgs = getoutgrouporgs(commonrank,refrecs,glimit=OGlimit)
 
         with open(os.path.join(outdir,"reflist.json"),"w") as fil:
             result = {"reforgs":refrecs[:limit],"queryorgs":orgrecs.values(),"orglist":orglist,"commonrank":commonrank,"outgroups":OGorgs}

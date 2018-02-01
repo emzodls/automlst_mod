@@ -63,14 +63,16 @@ def processmlst(indir,aligndir,cpu=1,parallel=True,trim=False):
 
     if cpu > 1 and parallel:
         pool = mp.Pool(cpu)
-        for filename in flist:
-            fname = os.path.split(filename)[-1]
-            if trim:
-                pool.apply_async(runtrimal, args=(filename, os.path.join(aligndir,fname)))
-            else:
-                pool.apply_async(runmafft, (filename, os.path.join(aligndir,fname)),dict(rename="|"))
-        pool.close()
-        pool.join()
+        try:
+            for filename in flist:
+                fname = os.path.split(filename)[-1]
+                if trim:
+                    pool.apply_async(runtrimal, args=(filename, os.path.join(aligndir,fname)))
+                else:
+                    pool.apply_async(runmafft, (filename, os.path.join(aligndir,fname)),dict(rename="|"))
+        finally:
+            pool.close()
+            pool.join()
     else:
         for filename in flist:
             fname = os.path.split(filename)[-1]
@@ -98,7 +100,7 @@ def buildseqdb(selorgs,queryseqs,resultdir,sourcedb):
     seqsdb = os.path.join(resultdir,"seqs.db")
     copyseqsql.copydb(queryseqs,sourcedb,seqsdb)
 
-def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=1):
+def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=1,minorgs=25):
     #Get user selection if exists
     usersel = os.path.join(resultdir,"userlist.json")
     autosel = os.path.join(resultdir,"autoOrglist.json")
@@ -110,8 +112,13 @@ def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=1):
         with open(autosel,"r") as fil:
             selection = json.load(fil)
     elif "skip2" in skip:
-        selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])][:IGlimit],
-                     "seloutgroups":[x.get("id","") for x in mashresult.get("outgroups",[])][:OGlimit]}
+        commonrank = mashresult.get("commonrank",["phyl","",""])
+        selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])[:IGlimit] if str(x.get(commonrank[0]+"id","")) in str(commonrank[1])],
+                     "seloutgroups":[x.get("id","") for x in mashresult.get("outgroups",[])[:OGlimit]]}
+        if not len(selection["selspecies"]) > minorgs:
+            selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])[:minorgs]],
+                     "seloutgroups":[x.get("id","") for x in mashresult.get("outgroups",[])[:OGlimit]]}
+
         with open(autosel,"w") as fil:
             json.dump(selection,fil)
 
@@ -123,26 +130,31 @@ def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip="",ignoreorgs=None)
     usersel = os.path.join(resultdir,"usergenes.json")
     autosel = os.path.join(resultdir,"autoMlstlist.json")
     selection = False
+    concat = True
     delorgs = set()
     if os.path.exists(usersel) and not "skip3" in skip:
         with open(usersel,"r") as fil:
             temp = json.load(fil)
             selection = temp["selection"]
             delorgs = temp["delorgs"]
-    elif os.path.exists(autosel):
-        with open(autosel,"r") as fil:
-            temp = json.load(fil)
-            selection = temp["selection"]
-            delorgs = temp["delorgs"]
-    else:
-        recs = [x for x in mlstpriority if not any([org in x["orgdel"] for org in ignoreorgs])][:maxmlst]
-        selection = [x["acc"] for x in recs]
-        for x in recs:
-            delorgs = delorgs | set(x["orgdel"])
-        with open(autosel,"w") as fil:
-            json.dump({"selection":selection,"delorgs":list(delorgs)},fil)
+            concat = temp.get("mode","concatenated")
+            if concat != "concatenated":
+                concat = False
+    if "skip3" in skip:
+        if os.path.exists(autosel):
+            with open(autosel,"r") as fil:
+                temp = json.load(fil)
+                selection = temp["selection"]
+                delorgs = temp["delorgs"]
+        else:
+            recs = [x for x in mlstpriority if not any([org in x["orgdel"] for org in ignoreorgs])][:maxmlst]
+            selection = [x["acc"] for x in recs]
+            for x in recs:
+                delorgs = delorgs | set(x["orgdel"])
+            with open(autosel,"w") as fil:
+                json.dump({"selection":selection,"delorgs":list(delorgs)},fil)
 
-    return selection, list(delorgs)
+    return selection, list(delorgs), concat
 
 def runIQtree(outdir,infasta,partfile="",cpu=1,model="GTR",bs=0,fout="speciestree",titlesep="",outgroup="OG--"):
     #If title seperator exists rename titles in file first
@@ -187,10 +199,12 @@ def colphylogeny(resultdir,trimdir,cpu=1,model="MFP",bs=0):
     #build all trees
     if cpu > 1:
         pool = mp.Pool(cpu)
-        for filename in flist:
-            pool.apply_async(runIQtree, (treedir, filename), dict(model=model,bs=bs,fout=os.path.split(filename)[-1],titlesep="|"))
-        pool.close()
-        pool.join()
+        try:
+            for filename in flist:
+                pool.apply_async(runIQtree, (treedir, filename), dict(model=model,bs=bs,fout=os.path.split(filename)[-1],titlesep="|"))
+        finally:
+            pool.close()
+            pool.join()
     else:
         for filename in flist:
             runIQtree(treedir, filename, fout=os.path.split(filename)[-1], bs=bs, model=model, titlesep="|")
@@ -260,7 +274,7 @@ def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
 
     return hkhigh
 
-def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="GTR",bs=0,kf=False):
+def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="GTR",bs=0,kf=False,maxorg=50):
     """WORKFLOW 2: Build phylogeny from scratch"""
     if not checkpoint:
         checkpoint = "w1-0"
@@ -304,7 +318,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
             log.error("No Mash results to process")
             return False
 
-        selorgs = getorgs(resultdir,mashresult,skip=skip)
+        selorgs = getorgs(resultdir,mashresult,skip=skip,IGlimit=maxorg,minorgs=25)
         if selorgs:
             checkpoint = "w1-3"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
@@ -369,9 +383,12 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
 
         #Add HMMresults to refdb and cleanup unused seqs
         log.info("Adding query HMM results to database")
-        makehmmsql.run(aaseqs+".domhr",orgdb)
+        status = makehmmsql.run(aaseqs+".domhr",orgdb)
+        if not status:
+            #If no genes were found report error
+            log.error("No MLST genes could be found. Stop processing")
         log.info("Adding query RNA results to database")
-        makehmmsql.run(naseqs+".domhr",orgdb,rna=True)
+        status = makehmmsql.run(naseqs+".domhr",orgdb,rna=True)
         os.remove(aaseqs)
         os.remove(naseqs)
         checkpoint = "w1-5"
@@ -398,7 +415,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         allquery = [os.path.splitext(os.path.split(x)[-1])[0].replace(" ","_") for x in glob.glob(os.path.join(resultdir,"queryseqs","*.fna"))]
         ignoreorgs = list(selorgs.get("seloutgroups",[]))
         ignoreorgs.extend(allquery)
-        mlstselection, delorgs = getmlstselection(resultdir,mlstpriority,maxmlst,skip=skip,ignoreorgs=ignoreorgs)
+        mlstselection, delorgs, concat = getmlstselection(resultdir,mlstpriority,maxmlst,skip=skip,ignoreorgs=ignoreorgs)
         if mlstselection:
             #Export selected genes to mlst folder
             log.info("JOB_STATUS:: Writing MLST genes...")
@@ -474,7 +491,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
                 os.remove(oldfil)
 
 
-def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="GTR+I",bs=0,kf=False,maxmlst=100):
+def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="GTR+I",bs=0,kf=False,maxmlst=100,maxorg=50):
     #Setup working directory
     if not os.path.exists(os.path.join(os.path.realpath(resultdir),"queryseqs")):
         os.makedirs(os.path.join(os.path.realpath(resultdir),"queryseqs")) #query sequence folder
@@ -507,7 +524,7 @@ def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,
     log.info('JOB_PARAMS::{"resultdir":"%s","skip":"%s","workflow":%s,"concat":"%s","model":"%s"}'%(resultdir,skip,workflow,concat,model))
     if workflow == 1:
         log.info("WORKFLOW::1")
-        return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=kf,maxmlst=maxmlst)
+        return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=kf,maxmlst=maxmlst,maxorg=maxorg)
     elif workflow == 2:
         log.info("WORKFLOW::2")
         return startwf2(indir,resultdir,checkpoint=checkpoint,model=model,bs=bs,kf=kf,maxmlst=maxmlst)
@@ -528,6 +545,7 @@ if __name__ == '__main__':
     parser.add_argument("-m","--model", help="Use specific model for iqtree parameter (default: GTR)",default="GTR")
     parser.add_argument("-ch","--checkpoint", help="Explicitly start at checkpoint",default=False)
     parser.add_argument("-c","--cpu", help="Number of cpu cores to use",type=int, default=1)
-    parser.add_argument("-mm","--maxmlst", help="Number of cpu cores to use",type=int, default=100)
+    parser.add_argument("-mm","--maxmlst", help="Maximum number of MLST genes to use (default:100)",type=int, default=100)
+    parser.add_argument("-mo","--maxorg", help="Maximum number of organisms to use (default:50)",type=int, default=50)
     args = parser.parse_args()
     startjob(args.indir,args.resultdir,args.skip,refdb=args.refdb,cpu=args.cpu,concat=args.concat,model=args.model,checkpoint=args.checkpoint,bs=args.bootstrap,kf=args.keepfiles,maxmlst=args.maxmlst)
