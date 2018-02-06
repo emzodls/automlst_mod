@@ -181,7 +181,7 @@ def getdistances(indir,outdir,reffile="",cpu=1,limit=5000,outputfile="",TStol=0.
         log.debug("common rank:%s"%commonrank)
 
         # Resort by nearest relative to query first (top hits), inclusion in common rank, mean distance to all (TypeStrains are preferred within tolerance)
-        refrecs = sorted(refrecs.values(), key=lambda x: (x["top"],-1*int(commonrank[1] in str(x[commonrank[0]+"id"])),x["dist"]-TStol if x["typestrain"] else x["dist"]))
+        refrecs = sorted(refrecs.values(), key=lambda x: (x["top"],-1*int(commonrank[1] in str(x[commonrank[0]+"id"])) if commonrank[0] else 0,x["dist"]-TStol if x["typestrain"] else x["dist"]))
 
         OGorgs = getoutgrouporgs(commonrank,refrecs,glimit=OGlimit)
 

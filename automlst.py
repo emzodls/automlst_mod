@@ -113,7 +113,11 @@ def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=1,minorgs=25):
             selection = json.load(fil)
     elif "skip2" in skip:
         commonrank = mashresult.get("commonrank",["phyl","",""])
-        selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])[:IGlimit] if str(x.get(commonrank[0]+"id","")) in str(commonrank[1])],
+        if commonrank[0]:
+            selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])[:IGlimit] if str(x.get(commonrank[0]+"id","")) in str(commonrank[1])],
+                     "seloutgroups":[x.get("id","") for x in mashresult.get("outgroups",[])[:OGlimit]]}
+        else:
+            selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])[:IGlimit]],
                      "seloutgroups":[x.get("id","") for x in mashresult.get("outgroups",[])[:OGlimit]]}
         if not len(selection["selspecies"]) > minorgs:
             selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])[:minorgs]],

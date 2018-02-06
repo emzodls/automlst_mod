@@ -1,5 +1,5 @@
 function maxSeqs() {
-if ($("#upfiles > option").length >= 10) {
+if ($("#upfiles > option").length >= 20) {
             $("#seqbtn").addClass("disabled");
             $("#ncbibtn").addClass("disabled");
             $("#seqwarn").removeClass("hidden");
