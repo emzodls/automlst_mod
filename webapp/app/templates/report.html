@@ -22,22 +22,27 @@
     <hr>
     <!-- Add tree here -->
     <div id="sizebtns" style="display:none">
-            <button type="button" class="btn btn-primary" aria-label="Increase tree height" data-toggle="tooltip" title="Increase tree height" onclick="resizeTree('upV')"><span class="glyphicon glyphicon-plus"></span></button>
+            <!--<button type="button" class="btn btn-primary" aria-label="Increase tree height" data-toggle="tooltip" title="Increase tree height" onclick="resizeTree('upV')"><span class="glyphicon glyphicon-plus"></span></button>
             <span class="glyphicon glyphicon-resize-vertical" style="font-size:25px;vertical-align:middle"></span>
             <button type="button" class="btn btn-primary" aria-label="Decrease tree height" data-toggle="tooltip" title="Decrease tree height" onclick="resizeTree('downV')"><span class="glyphicon glyphicon-minus"></span></button>
-            <span style="display:block; padding:2px"></span>
+            <span style="display:block; padding:2px"></span> -->
              <button type="button" class="btn btn-primary" aria-label="Increase tree width" data-toggle="tooltip" data-placement="bottom" title="Increase tree width" onclick="resizeTree('upH')"><span class="glyphicon glyphicon-plus"></span></button>
             <span class="glyphicon glyphicon-resize-horizontal" style="font-size:25px;vertical-align:middle"></span>
             <button type="button" class="btn btn-primary" aria-label="Decrease tree width" data-toggle="tooltip" data-placement="bottom" title="Decrease tree width" onclick="resizeTree('downH')"><span class="glyphicon glyphicon-minus"></span></button>
-        </div>
+
+    </div>
     <div id="svgCanvas">
+
             <img src="/static/images/Socotra_dragon_tree.jpeg" alt="loading screen" class="thumbnail" style="width:50%;margin:auto">
         <div class="progress">
             <div class="progress-bar progress-bar-striped active" aria-valuetext="Loading" style="width:100%"></div>
         </div>
         <p style="text-align:center"><b>Loading tree...</b></p>
     </div>
-
+<div id="searchdiv" style="display:none">
+    <label for="searchtree">Search organisms:</label>
+        <input type="text" id="searchtree" placeholder="Search..." oninput="searchTree(this.value);">
+</div>
     <!-- <button type="button" class="btn btn-primary" onclick="drawTree('{{ jobid }}')" style="margin-top:20px">Click</button> -->
     <hr>
          <div class="btn-group">
@@ -45,8 +50,9 @@
         <ul class="dropdown-menu" role="menu">
             <li><a href="/results/{{ jobid }}/tree?format=newick">Download Newick file</a></li>
             <!-- <li><a href="/results/{{ jobid }}/tree?format=nexml">Download NeXML file</a></li>
-            <li><a href="/results/{{ jobid }}/tree?format=phyloxml">Download PhyloXML file</a></li>-->
-            <li id="downlink"><a id="imgdownl" href="#" target="_blank">Download svg image</a></li>
+            <li><a href="/results/{{ jobid }}/tree?format=phyloxml">Download PhyloXML file</a></li>
+            <li id="downlink"><a id="imgdownl" href="#" target="_blank">Download svg image</a></li>-->
+            <li id="pnglink"><a id="pngdownl" href="#" target="_blank" onclick="downloadPng();">Download png image</a></li>
         </ul>
         </div>
     <!-- <a href="/results/{{ jobid }}/tree?format=newick" class="btn btn-primary" role="button" style="width:200px" id="treedownl" name="treedownl"><span class="glyphicon glyphicon-download-alt"></span> Download tree</a> -->
@@ -73,5 +79,8 @@ $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();
 });
 </script>
-    <script src="/static/js/report.js"></script>
+<script src="https://d3js.org/d3.v3.min.js"  charset="utf-8"></script>
+<script src="https://cdn.rawgit.com/tntvis/tnt.utils/master/build/tnt.utils.js"></script>
+<script src="http://tntvis.github.io/tnt.tree/build/tnt.tree.min.js" charset="utf-8"></script>
+    <script src="/static/js/report-tnt.js"></script>
 {% endblock %}

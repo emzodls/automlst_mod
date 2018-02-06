@@ -11,8 +11,9 @@ phylocanvas = new Smits.PhyloCanvas(
 				);
 				/* var canvasHeight = parseInt($('svg').attr("height"));
 				var canvasWidth = parseInt($('svg').attr("width")); */
-				$('tspan:contains([U])').attr("fill","#0000ff");
-				$('tspan:contains([T])').attr("fill","#1f7a1f");
+				$('tspan:contains(QS--)').attr("fill","#0000ff");
+				$('tspan:contains(TS--)').attr("fill","#1f7a1f");
+				$('tspan:contains(OG--)').attr("fill", '#cc3300');
 /*				$('tspan').each(function(objindex,obj) {
 				console.log($(obj));
 				console.log(Object.keys($(obj)));
@@ -30,11 +31,12 @@ phylocanvas = new Smits.PhyloCanvas(
 function repairSize() {
 var canvasHeight = parseInt($('svg').attr("height"));
 var canvasWidth = parseInt($('svg').attr("width"));
+console.log(canvasWidth);
 $('text:has(tspan)').each(function(objindex, obj) {
     var textHeight = parseInt($(this).attr("y"));
-    var textY = parseInt($(this).attr("x"));
+    var textX = parseInt($(this).attr("x"));
     var textLength = $(this).children("tspan").text().length;
-    var textWidth = textY + (7*textLength);
+    var textWidth = textX + (7*textLength);
     if (textHeight > canvasHeight) {
         console.log(textHeight);
         $('svg').attr("height",textHeight +10);
@@ -64,7 +66,16 @@ if (resizeDir == "upV") {
     } else if (resizeDir == "downH") {
     renderTree(dataObject,canvasWidth - 100, canvasHeight);
     }
-    repairSize();
+    $('text:has(tspan)').each(function(objindex, obj) {
+        var textHeight = parseInt($(this).attr("y"));
+        var textX = parseInt($(this).attr("x"));
+        var textLength = $(this).children("tspan").text().length;
+        var textWidth = textX + (7*textLength);
+        if (textWidth > canvasWidth) {
+            console.log(textWidth);
+            repairSize();
+            }
+        });
 }
 
 function treeSuccess(data,textStatus,xhr) {
