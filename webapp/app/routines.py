@@ -199,6 +199,18 @@ def jsontotsv(jsonpath,jobid):
         for resultval in resultdict.values():
             csvwriter.writerow([resultval["orgname"],resultval["strain"],resultval["id"],resultval["queryname"],resultval["pval"],resultval["dist"]])
 
+def tsvtojson(tsvpath):
+    jsondict = {}
+    linelist = []
+    with open(tsvpath, 'r') as tsvsource:
+        header = tsvsource.next()
+        for line in tsvsource:
+            linedata = line.strip().split("\t")
+            linelist.append(linedata)
+    jsondict["data"] = linelist
+    return jsondict
+
+
 def sendnotifymail(msg="",jobid="",to=""):
     try:
         if not msg:
