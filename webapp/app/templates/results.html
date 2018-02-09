@@ -15,6 +15,20 @@
       </div>
 
     </div>
+                {% if lastresults %}
+              <div class="row">
+                  <div class="col-sm-2">
+                        <h4>Recent Jobs</h4>
+                  </div>
+                  <div class="col-sm-10">
+                      {% for result in lastresults %}
+                        <h4><a href="/results/{{ result[0] }}" data-toggle="tooltip" data-placement="right" title="{{ result[1] }}">{{ result[1] }}</a></h4>
+
+                      {% endfor %}
+                  </div>
+            </div>
+
+            {% endif %}
                 </form>
         </div>
 </div>

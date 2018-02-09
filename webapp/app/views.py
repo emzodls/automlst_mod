@@ -19,7 +19,8 @@ def about():
 
 @app.route('/results')
 def results():
-    return render_template("results.html")
+    lastresult = routines.getlastresults()
+    return render_template("results.html",lastresults=lastresult)
 
 @app.route('/download')
 def amlstdownl():
@@ -43,30 +44,31 @@ def showstep(jobid,step):
     paramdict = jobinfo.get("params")
     #skips = paramdict.get("skip",[])
     laststep = request.args.get('laststep','NONE')
+    jobname = routines.findjobinfo(jobid)
     if step == "loading":
         if jobinfo["workflow"] == "1" or jobinfo["workflow"] == 0:
             if laststep == "step2" or laststep == "step3":
-                return render_template("startjob.html", jobid=jobid, laststep=laststep)
+                return render_template("startjob.html", jobid=jobid, jobname=jobname[1], laststep=laststep)
             else:
-                return render_template("startjob.html", jobid=jobid)
+                return render_template("startjob.html", jobid=jobid,jobname=jobname[1])
         else:
-            return render_template("startjob2.html", jobid=jobid)
+            return render_template("startjob2.html", jobid=jobid,jobname=jobname[1])
     elif step == "step2":
         if jobinfo["checkpoint"].upper() == "W1-STEP2":
-            return render_template("step2.html",jobid=jobid)
+            return render_template("step2.html",jobid=jobid,jobname=jobname[1])
         else:
             return redirect('/results/'+jobid+'/loading')
     elif step == "step3":
         if jobinfo["checkpoint"].upper() == "W1-STEP3":
-            return render_template("step3.html",jobid=jobid)
+            return render_template("step3.html",jobid=jobid,jobname=jobname[1])
         else:
             return redirect('/results/'+jobid+'/loading')
     elif step == "report":
         if jobinfo["checkpoint"].upper() == "W1-F":
             if jobinfo["workflow"] == "1":
-                return render_template("report.html",jobid=jobid)
+                return render_template("report.html",jobid=jobid,jobname=jobname[1])
             else:
-                return render_template("report.html",jobid=jobid,workflow=2)
+                return render_template("report.html",jobid=jobid, jobname=jobname[1],workflow=2)
         else:
             return redirect('/results/'+jobid+'/loading')
 
@@ -74,7 +76,8 @@ def showstep(jobid,step):
 @app.route('/results/<jobid>/reanalyze')
 def reanalyze(jobid):
     routines.reanalyzejob(jobid)
-    return render_template("step2.html", jobid=jobid)
+    jobname = routines.findjobinfo(jobid)
+    return render_template("step2.html", jobid=jobid,jobname=jobname[1])
 
 @app.route('/results/<jobid>/tree', methods=['GET'])
 def getTree(jobid):
@@ -168,6 +171,7 @@ def startjob():
     jobdict = {"jobid": jobid, "workflow": request.form.get("workflow"), "genomes": request.form.getlist('upfiles'),
               "reference": request.form.get('genusselect','NA')}
     os.mkdir(os.path.join(app.config['RESULTS_FOLDER'],jobid))
+    resp = make_response(redirect('/results/' + jobid + '/loading'))
     email = request.form.get('email', False)
     if email:
         # Run threaded so mail server resp does not block process
@@ -177,18 +181,32 @@ def startjob():
 
         mailer = threading.Thread(name='mail_sender', target=sendmail, args=("", jobid, email))
         mailer.start()
+    keeplink = request.form.get('keeplink',False)
+    if keeplink and keeplink.lower() != "false":
+        lastresult = request.cookies.get('automlst.lastresult')
+        if lastresult and jobid not in lastresult:
+            lastresult += ";%s"%jobid
+        else:
+            lastresult = jobid
+        resp.set_cookie('automlst.lastresult',lastresult)
+    validchars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 _-()"
+    jobtitle = request.form.get('jobname', False)
+    jobtitle = ''.join([c for c in str(jobtitle[:30]) if c in validchars])
+    if jobtitle and len(jobtitle):
+        with open(os.path.join(app.config['RESULTS_FOLDER'], jobid, "jobtitle.txt"), "w") as namefile:
+            namefile.write(jobtitle + "\n")
     if request.form.get("workflow") == "1":
-        print jobid
+        #print jobid
         automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0), mode=request.form.get('optradio',"concatenated"),modelfind=request.form.get("modelfinder","GTR"))
         #with open(os.path.join(app.config['RESULTS_FOLDER'],'examplein.json'),'w') as uploadfile:
         #    json.dump(jobdict,uploadfile)
         return redirect('/results/'+jobid)
     elif request.form.get("workflow") == "2":
-        print jobid
+        #print jobid
         automlstjob = routines.addjob(id=jobid, workflow=request.form.get("workflow"),
                                       genomes=request.form.getlist('upfiles'),
                                       reference=request.form.get('genusselect', 'NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0),mode=request.form.get('optradio',"concatenated"))
-        return redirect('/results/' + jobid + '/loading')
+        return resp
     else:
         flash('Invalid workflow')
         return redirect('/analyze')
@@ -289,6 +307,10 @@ def showmash(jobid):
             json.dump(jsondata,jsonfile)
         jsondata["data"] = [rec for rec in jsondata["data"] if float(rec[4])>=0.7]
         return jsonify(jsondata)
+    else:
+        nodata = {}
+        nodata["data"] = []
+        return jsonify(nodata)
 
 @app.route('/jobstatus/<jobid>')
 @app.route('/jobstatus/<jobid>/')

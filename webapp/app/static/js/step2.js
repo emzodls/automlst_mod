@@ -31,10 +31,10 @@ function outgrSearch() {
         }
     });
 }
-var speciesTimer = 1000;
-var speciesStarted = false;
+var speciesTimer = 0;
+//var speciesStarted = false;
 
-function speciesQueue() {
+/*function speciesQueue() {
     //console.log('SQ running');
     if (speciesTimer <= 0) {
         speciesSearch();
@@ -43,20 +43,18 @@ function speciesQueue() {
         speciesTimer -= 100;
         setTimeout(speciesQueue, 100);
     }
+}*/
+function speciesStart() {
+clearTimeout(speciesTimer);
+speciesTimer = setTimeout(speciesSearch, 1000);
 }
+
 $(document).ready(function() {
-$('#speciessearch').on("keyup", function() {
-    //console.log('Search running');
-    speciesTimer = 1000;
-    if (speciesStarted == false) {
-        speciesQueue();
-        speciesStarted = true;
-    }
-});
+$('#speciessearch').on("keyup", speciesStart);
 });
 
-var outgrTimer = 1000;
-var outgrStarted = false;
+var outgrTimer = 0;
+/*var outgrStarted = false;
 
 function outgrQueue() {
     if (outgrTimer <= 0) {
@@ -66,15 +64,15 @@ function outgrQueue() {
         outgrTimer -= 100;
         setTimeout(outgrQueue, 100);
     }
+}*/
+
+function outgrStart() {
+clearTimeout(outgrTimer);
+outgrTimer = setTimeout(outgrSearch, 1000);
 }
+
 $(document).ready(function() {
-$('#outgroupsearch').on("keyup", function() {
-    outgrTimer = 1000;
-    if (outgrStarted == false) {
-        outgrQueue();
-        outgrStarted = true;
-    }
-});
+$('#outgroupsearch').on("keyup",outgrStart);
 });
 
 

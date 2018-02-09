@@ -222,3 +222,18 @@ def sendnotifymail(msg="",jobid="",to=""):
     except Exception as e:
         print "Warning: Email not sent, check email configuration"
         print e
+
+def findjobinfo(jobid):
+    jobtitle = [jobid,jobid]
+    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid,'jobtitle.txt')):
+        with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'jobtitle.txt'),'r') as namefile:
+            jobtitle[1] = namefile.next().strip()
+    return jobtitle
+
+def getlastresults():
+    lastresult = request.cookies.get('automlst.lastresult', False)
+    if lastresult:
+        lastresult = lastresult.split(";")
+        lastresult.reverse()
+        lastresult = [findjobinfo(x) for x in lastresult]
+    return lastresult

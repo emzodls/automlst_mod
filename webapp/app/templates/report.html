@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 {% block mainbody %}
 <div class="container" style="padding-top:40px">
-<h2>Job ID: {{ jobid }}</h2>
+<h2>Job: {{ jobname }}</h2>
 <h3 class="page-header" style="margin-top:0px">Results</h3>
     <div class="row">
         <div class="col-md-2">
@@ -43,7 +43,7 @@
     </div>
 <div id="searchdiv" style="display:none">
     <label for="searchtree">Search organisms:</label>
-        <input type="text" id="searchtree" placeholder="Search..." oninput="searchTree(this.value);">
+        <input type="text" id="searchtree" placeholder="Search...">
 </div>
     <!-- <button type="button" class="btn btn-primary" onclick="drawTree('{{ jobid }}')" style="margin-top:20px">Click</button> -->
     <hr>

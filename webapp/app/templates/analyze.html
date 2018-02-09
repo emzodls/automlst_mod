@@ -87,13 +87,27 @@
             <button type="button" class="btn btn-primary" id="seqbtn" onclick="uploadSequence('seqfile')"><span class="glyphicon glyphicon-plus"></span> Upload</button>
         </div>
         </div>
-        <div class="form-group row">
+
+        <h2 class="h4alike">Options</h2>
+                <div class="form-group row">
             <label class="control-label col-md-2" for="email">Enter email address (optional)</label>
 
             <div class="col-md-8">
                 <input type="text" class="form-control" name="email" id="email" placeholder="(Optional)">
             </div>
         </div>
+        <div class="form-group row">
+            <label class="control-label col-md-2" for="jobname">Enter job title (optional)</label>
+            <div class="col-md-8">
+                <input type="text" class="form-control" name="jobname" id="jobname" placeholder="(Optional">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-2">Something something saving data</label>
+        <div class="checkbox col-md-10">
+            <label data-toggle="tooltip" data-placement="right" title="By selecting this you consent to our use of cookies. For more information see the Help page"><input type="checkbox" value="keeplink" id="keeplink" name="keeplink">Save link in cookies (viewable on results page under "last results")</label>
+        </div>
+            </div>
 <!-- if file fails/ID not found, unhide warning -->
         <div class="alert alert-success hidden" id="uploadsuccess">Upload successful</div>
         <div class="alert alert-danger hidden" id="uploadwarning"><strong>Error:</strong> Upload failed</div>

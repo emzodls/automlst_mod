@@ -35,12 +35,16 @@
                             <span class="fa fa-anchor solo" style="padding-left:15px">Tree</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="#cookies" data-scroll>
+                            <span class="fa fa-anchor solo">Cookies</span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </div>
 <div id="page-content-wrapper">
 <div class="page-content inset container-fluid">
-    <!-- pretty up screenshots - too blurry -->
     <div class="row">
         <div class="col-md-12">
     <h2 class="page-header" id="query">Selecting a workflow</h2>
@@ -222,26 +226,31 @@
         <img src="/static/images/help/2018-02-06-toggletree.png" alt="tree options" class="img-responsive" style="border:1px solid #cccccc;">
         <br />
         <div class="col-md-6">
-        <img src="/static/images/help/2018-02-06-treeunscaled.png" alt="tree with unscaled branches" class="img-responsive" style="border:1px solid #cccccc;">
+        <img src="/static/images/help/2018-02-09-treenew-labeled.png" alt="tree with unscaled branches" class="img-responsive" style="border:1px solid #cccccc;">
             </div>
         <div class="col-md-6">
-        <img src="/static/images/help/2018-02-06-treescaled.png" alt="tree with scaled branches" class="img-responsive" style="border:1px solid #cccccc;">
+        <img src="/static/images/help/2018-02-09-treescaled.png" alt="tree with scaled branches" class="img-responsive" style="border:1px solid #cccccc;">
         </div>
         <br />
-        <img src="/static/images/help/2018-02-06-downloads.png" alt="download options" class="img-responsive" style="border:1px solid #cccccc;">
+        <br />
+        <img src="/static/images/help/2018-02-09-downloads.png" alt="download options" class="img-responsive" style="border:1px solid #cccccc;">
     </div>
     <div class="col-md-4">
         <p>Some explanation of the tree. <br />
-        User-submitted sequences are prefixed with the abbreviation "QS" and highlighted in blue. <br />
-        Outgroups are prefixed with the abbreviation "OG" and highlighted in red. <br />
-        Type strains are prefixed with the abbreviation "TS" and highlighted in green. <br />
+        User-submitted sequences are prefixed with the abbreviation "QS"; their respective nodes are colored blue. <br />
+        Outgroups are prefixed with the abbreviation "OG";their respective nodes are colored red. <br />
+        Type strains are prefixed with the abbreviation "TS"; their respective nodes are colored green. <br />
         It is also possible to search for organisms in the tree; the nodes of organisms matching the search terms are
-            highlighted in red. <br />
+            highlighted in cyan. <br />
+        All organisms in the reference database have also been grouped by their pairwise <abbr title="average nucleotide identity">ANI</abbr>
+            as approximated by Mash; see the <a href="/about">About page</a> for details. These groupings are visualized
+            by label color (note that label colors may be repeated). Additionally, autoMLST's group identifications are
+            appended to the name. <br />
         Several details about tree visualization may be changed by the user:</p>
         <ol>
             <li>The tree can be resized horizontally in steps of 100 pixels.</li>
-            <li>The tree may be displayed in two different ways: with unscaled branch lengths, as a rectangular cladogram (3a),
-                or with scaled branch lengths, as a rectangular phylogram (3b).
+            <li>The tree may be displayed in two different ways: with unscaled branch lengths, as a rectangular cladogram (2a),
+                or with scaled branch lengths, as a rectangular phylogram (2b).
             </li>
 
         </ol>
@@ -251,8 +260,8 @@
             <a href="/about">About page</a>.
         </p>
         <p>Additional information is also available:</p>
-        <ol start="4">
-            <li>Users may download the tree in Newick format, the alignment from which it was constructed, the list of
+        <ol start="3">
+            <li>Users may download the tree in Newick format (without colors), the alignment from which it was constructed, the list of
             genes used in the <abbr title="multilocus sequence analysis">MLSA</abbr>, the list of organisms used, or
                 the full list of estimated <abbr title="average nucleotide identities">ANIs</abbr> between their
                 organisms and the reference organisms.</li>
@@ -264,6 +273,13 @@
         after the initial sequences have been submitted.</p> -->
     </div>
         </div>
+    <h2 class="page-header" id="cookies">Cookies</h2>
+    <div>
+        <p>Users may choose to store the link to a job they submit in their last results (accessible on the results page).
+            This is done via cookies; selecting the option to store the link means you consent to autoMLST's use of
+        cookies for this. Cookies are only stored for the purpose of remembering the job numbers of the jobs submitted
+        by the user; all that is stored is the job number.</p>
+    </div>
 </div>
 </div>
 </div>
