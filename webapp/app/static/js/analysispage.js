@@ -3,10 +3,16 @@ if ($("#upfiles > option").length >= 20) {
             $("#seqbtn").addClass("disabled");
             $("#ncbibtn").addClass("disabled");
             $("#seqwarn").removeClass("hidden");
+            if ($("#upfiles > option").length >= 21) {
+            $('#submitjob').addClass("disabled");
+            } else {
+            $('#submitjob').removeClass("disabled");
+            }
             return false;
         } else {
             $("#seqbtn").removeClass("disabled");
             $("#ncbibtn").removeClass("disabled");
+            $('#submitjob').removeClass("disabled");
             $("#seqwarn").addClass("hidden");
             return true;
         }
@@ -19,7 +25,7 @@ if ($("#uploadprog").attr("value") == $("#uploadprog").attr("max")) {
 
 function uploadSuccess(data,textStatus,xhr) { //communication success
 var data = JSON.parse(data);
-console.log(data["filename"]);
+console.log(data);
 $("#seqbtn").removeClass("disabled");
 $("#ncbibtn").removeClass("disabled");
 $("#ncbiload").addClass("hidden");
@@ -31,7 +37,9 @@ if (data["filename"] == false) {
         $("#uploadprog").attr("value",100);
         console.log($("#uploadprog").attr("value"));
         }
-    $("#upfiles").prepend("<option value='"+data["filename"]+"' class='"+hashCode(data["filename"])+" picked'>"+data["name"]+"</option>");
+    for (var fileNumber = 0; fileNumber < data["filename"].length; fileNumber++) {
+    $("#upfiles").prepend("<option value='"+data["filename"][fileNumber]+"' class='"+hashCode(data["filename"][fileNumber])+" picked'>"+data["name"][fileNumber]+"</option>");
+    }
     maxSeqs();
     $("#uploadsuccess").removeClass("hidden");
     }
@@ -83,6 +91,7 @@ var uploadForm = {
             return myXhr;
         }*/
 };
+console.log(uploadForm.data);
 if (filesrc == 'ncbi') {
     $('#ncbiload').removeClass("hidden");
     $('progress').addClass("hidden");

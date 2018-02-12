@@ -5,6 +5,7 @@ $('#deletewarning').addClass('hidden');
 $('#todelete').empty();
 $('#mlstlist > option').each(function() {
     if ($(this).data("del")) {
+        $(this).css({"background-color":"#fcf8e5"});
         var currDel = $(this).data("del").split(",");
         var i;
         for (i in currDel) {
@@ -36,7 +37,11 @@ function geneSuccess(data,textStatus,xhr) {
     for (counter=0; counter<mlstGenes.length; counter++) {
         var geneInfo = mlstGenes[counter];
         console.log(geneInfo);
+        if (geneInfo["orgdel"].length>0) {
+        $('#mlstsel').append("<option id='" + geneInfo.acc + "' data-title='"+ geneInfo.name +": "+geneInfo.desc+"' value='"+geneInfo.acc+"' data-del='"+geneInfo.orgdel +"' style='background-color:#fcf8e5'>" + geneInfo.name +": "+geneInfo.desc+"</option>");
+        } else {
         $('#mlstsel').append("<option id='" + geneInfo.acc + "' data-title='"+ geneInfo.name +": "+geneInfo.desc+"' value='"+geneInfo.acc+"' data-del='"+geneInfo.orgdel +"'>" + geneInfo.name +": "+geneInfo.desc+"</option>");
+        }
         }
      if (data["selected"]) { //currently an useless check
         loadSelected('#mlstsel','#mlstlist',selectedGenes);
@@ -71,7 +76,7 @@ $.ajax({
 
 
 function validateForm() {
-if ($('.selectablein').has('option').length>10) {
+if ($('.selectablein>option').length>10) {
 return "validated";
 } else {
 return "notvalidated";}

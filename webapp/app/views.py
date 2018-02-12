@@ -42,6 +42,7 @@ def showresults(jobid):
 def showstep(jobid,step):
     jobinfo = routines.getjobstatus(jobid)
     paramdict = jobinfo.get("params")
+    errmsgs = jobinfo.get("errors", False)
     #skips = paramdict.get("skip",[])
     laststep = request.args.get('laststep','NONE')
     jobname = routines.findjobinfo(jobid)
@@ -64,11 +65,13 @@ def showstep(jobid,step):
         else:
             return redirect('/results/'+jobid+'/loading')
     elif step == "report":
-        if jobinfo["checkpoint"].upper() == "W1-F":
+        if jobinfo["checkpoint"].upper() == "W1-F" and not errmsgs:
             if jobinfo["workflow"] == "1":
                 return render_template("report.html",jobid=jobid,jobname=jobname[1])
             else:
                 return render_template("report.html",jobid=jobid, jobname=jobname[1],workflow=2)
+        elif errmsgs:
+            return render_template("report.html",jobid=jobid,jobname=jobname[1], errmsgs = errmsgs)
         else:
             return redirect('/results/'+jobid+'/loading')
 
@@ -161,8 +164,10 @@ def analyze():
 
 @app.route('/upload', methods=['POST'])
 def upload():
+    print request.files.getlist("seqfile1")
+    #return request.files.getlist("seqfile1")
     filename = routines.getinfile()
-    name = os.path.split(filename)[-1]
+    name = [os.path.split(x)[-1] for x in filename]
     #    filename = routines.getNCBIgbk(request.form["ncbiacc1"])
     return json.dumps({"filename": filename,"name": name})
 @app.route('/startjob', methods=['POST'])

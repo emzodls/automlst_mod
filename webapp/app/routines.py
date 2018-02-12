@@ -52,7 +52,7 @@ def getNCBIgbk(acc):
 
 def getinfile():
     ufile = False
-    filename = ""
+    filename = []
     # USe empty string for FALSE due to storage as string in redis
 #    if 'asjobid' in request.form and request.form['asjobid']:
 #        if getASstatus(request.form['asjobid']):
@@ -62,16 +62,19 @@ def getinfile():
 #        else:
 #            return False,""
     if 'ncbiacc1' in request.form and request.form['ncbiacc1'] and request.form.get("filesrc") == 'ncbi':
-         filename = getNCBIgbk(request.form['ncbiacc1'])
+         filename = [getNCBIgbk(request.form['ncbiacc1'])]
          if not filename:
-             return False
+             return []
 #    elif 'asseqfile' in request.files and validatefile(request.files['asseqfile'].filename,True):
 #        ufile = request.files['asseqfile']
-    elif 'seqfile1' in request.files and validatefile(request.files['seqfile1'].filename) and request.form.get("filesrc") == 'seqfile':
-        ufile = request.files['seqfile1']
-    if ufile:
-        filename = os.path.join(tempfile.mkdtemp(dir=app.config['UPLOAD_FOLDER']), secure_filename(ufile.filename))
-        ufile.save(filename)
+    elif 'seqfile1' in request.files and request.form.get("filesrc") == 'seqfile':
+        for seqfile in request.files.getlist('seqfile1'):
+            if validatefile(seqfile.filename):
+                ufile = seqfile
+            if ufile:
+                tmp = os.path.join(tempfile.mkdtemp(dir=app.config['UPLOAD_FOLDER']), secure_filename(ufile.filename))
+                ufile.save(tmp)
+                filename.append(tmp)
     return filename
 
 def readdjob(jobid):
@@ -102,6 +105,7 @@ def getjobstatus(jobid):
     checkpoint = ""
     percent = 0
     workflow = 0
+    errorlist = []
     paramdict = {}
     if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log')):
         with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'), 'r') as infile:
@@ -135,13 +139,17 @@ def getjobstatus(jobid):
                     mlstfound = line[line.find("Writing genes:"):].count(",")+1
                 elif "Finished alignment" in line:
                     mlstaligned += 1
+                elif "ERROR" in line:
+                    errormsgline = line.strip().split(' - ')
+                    currerror = errormsgline[3]
+                    errorlist.append(currerror)
             if mlstfound > 0 and mlstaligned > 0 and mlstfound != mlstaligned:
                 jobstatus += " (%s/%s complete)"%(mlstaligned,mlstfound)
                 # total percent is pct * portion extra
                 pct = float(mlstaligned)/mlstfound
                 percent = percent + (pct * 25)
 
-    jobstatdict = {"progress": percent,"status":jobstatus, "mash":mashstatus, "checkpoint": checkpoint, "workflow": workflow, "params":paramdict}
+    jobstatdict = {"progress": percent,"status":jobstatus, "mash":mashstatus, "checkpoint": checkpoint, "workflow": workflow, "params":paramdict, "errors":errorlist}
     return jobstatdict
 
 def reanalyzejob(jobid):

@@ -21,6 +21,13 @@
     </div>
     <hr>
     <!-- Add tree here -->
+    {% if errmsgs %}
+    <div class="alert alert-danger">Error:
+            {% for errormsg in errmsgs %}
+            <p>{{ errormsg }}</p>
+            {% endfor %}
+    </div>
+    {% else %}
     <div id="sizebtns" style="display:none">
             <!--<button type="button" class="btn btn-primary" aria-label="Increase tree height" data-toggle="tooltip" title="Increase tree height" onclick="resizeTree('upV')"><span class="glyphicon glyphicon-plus"></span></button>
             <span class="glyphicon glyphicon-resize-vertical" style="font-size:25px;vertical-align:middle"></span>
@@ -45,6 +52,7 @@
     <label for="searchtree">Search organisms:</label>
         <input type="text" id="searchtree" placeholder="Search...">
 </div>
+    {% endif %}
     <!-- <button type="button" class="btn btn-primary" onclick="drawTree('{{ jobid }}')" style="margin-top:20px">Click</button> -->
     <hr>
     <h4>Most similar organisms</h4>
