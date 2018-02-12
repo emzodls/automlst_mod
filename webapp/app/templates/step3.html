@@ -48,7 +48,7 @@
                 <button type="button" class="btn btn-default" style="width:100%" onclick="addtolist('#mlstsel','#mlstlist'); refreshView('#mlstlist',100,'#mlstlimit');idSearch();findDeleted();">Add to list</button>
                 <button type="button" class="btn btn-default" style="width:100%;margin-top:2px;" onclick="removeAllFromList('#mlstlist'); refreshView('#mlstlist',100,'#mlstlimit');idSearch();findDeleted();">Remove from list</button>
                 <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="addtolist('#mlstlist','#mlstlist'); refreshView('#mlstlist',100,'#mlstlimit');idSearch();findDeleted();">Move to top</button>
-                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="resetSels('#mlstsel','#mlstlist',10); refreshView('#mlstlist',100,'#mlstlimit');idSearch();findDeleted();">Reset to default</button>
+                <button type="button" class="btn btn-default" style="width:100%;margin-top:2px" onclick="resetSels('#mlstsel','#mlstlist',100); refreshView('#mlstlist',100,'#mlstlimit');idSearch();findDeleted();">Reset to default</button>
             </div>
             <div class="form-group col-md-5">
                 <h4>Selected genes</h4>
@@ -68,8 +68,8 @@
                 <label><input type="checkbox" id="removeorgs" name="removeorgs" value="checked">Remove suggested organisms and proceed with current set</label>
             </div>
         </div>
-        <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> No MLST genes selected. Please select MLST genes before submitting.</div>
-        <div class="alert alert-danger hidden" id="mlstlimit"><strong>Too many MLST genes selected.</strong> Only the first 100 selected genes will be used.</div>
+        <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> Not enough genes selected. Please select at least ten genes before submitting.</div>
+        <div class="alert alert-danger hidden" id="mlstlimit"><strong>Too many genes selected.</strong> Only the first 100 selected genes will be used.</div>
         <hr>
         <h4>Overview</h4>
         <table class="table table-bordered table-hover" cellspacing="0" id="geneinfo" width="100%">
