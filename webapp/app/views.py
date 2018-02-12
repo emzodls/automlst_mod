@@ -282,9 +282,9 @@ def genein(jobid):
     jobid = request.form.get('jobinfo')
     genes = request.form.getlist('mlstlist')
     radioval = request.form.get('optradio')
-    rmorgs = request.form.get('removeorgs','NONE')
+    rmorgs = request.form.get('removeorgs','')
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'usergenes.json'),'w') as usergenes:
-        json.dump({"selection":genes,"mode":radioval,"delorgs":rmorgs},usergenes)
+        json.dump({"selection":genes,"mode":radioval,"delorgs":rmorgs.split(",")},usergenes)
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'automlst.log'),'a') as joblog:
         joblog.write('\n'+str(datetime.datetime.now())+' - INFO - JOB_STATUS::Resuming job...\n')
         joblog.write(str(datetime.datetime.now())+' - INFO - JOB_CHECKPOINT::w1-5\n')
@@ -342,7 +342,6 @@ def status(jobid):
         return jsonify(jobstat)
     else:
         return jsonify(jobstat)
-
 
 @app.route('/results/example/report')
 def example():

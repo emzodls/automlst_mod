@@ -128,7 +128,7 @@ def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=1,minorgs=25):
 
     return selection
 
-def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip="",ignoreorgs=None):
+def getmlstselection(resultdir,mlstpriority,maxmlst=100,minmlst=10,skip="",ignoreorgs=None):
     if not ignoreorgs:
         ignoreorgs = []
     usersel = os.path.join(resultdir,"usergenes.json")
@@ -136,7 +136,7 @@ def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip="",ignoreorgs=None)
     selection = False
     concat = True
     delorgs = set()
-    if os.path.exists(usersel) and not "skip3" in skip:
+    if os.path.exists(usersel):
         with open(usersel,"r") as fil:
             temp = json.load(fil)
             selection = temp["selection"]
@@ -144,19 +144,25 @@ def getmlstselection(resultdir,mlstpriority,maxmlst=100,skip="",ignoreorgs=None)
             concat = temp.get("mode","concatenated")
             if concat != "concatenated":
                 concat = False
-    if "skip3" in skip:
-        if os.path.exists(autosel):
-            with open(autosel,"r") as fil:
-                temp = json.load(fil)
-                selection = temp["selection"]
-                delorgs = temp["delorgs"]
+            return selection, list(delorgs), concat
+
+    if os.path.exists(autosel):
+        with open(autosel,"r") as fil:
+            temp = json.load(fil)
+            selection = temp["selection"]
+            delorgs = temp["delorgs"]
+    else:
+        minrecs = [x for x in mlstpriority if not len(x["orgdel"])]
+        log.info("MLST genes in all orgs = %s"%len(minrecs))
+        if len(minrecs) >= minmlst:
+            recs = minrecs[:maxmlst]
         else:
-            recs = [x for x in mlstpriority if not any([org in x["orgdel"] for org in ignoreorgs])][:maxmlst]
-            selection = [x["acc"] for x in recs]
-            for x in recs:
-                delorgs = delorgs | set(x["orgdel"])
-            with open(autosel,"w") as fil:
-                json.dump({"selection":selection,"delorgs":list(delorgs)},fil)
+            recs = [x for x in mlstpriority if not any([org in x["orgdel"] for org in ignoreorgs])][:minmlst]
+        selection = [x["acc"] for x in recs]
+        for x in recs:
+            delorgs = delorgs | set(x["orgdel"])
+        with open(autosel,"w") as fil:
+            json.dump({"selection":selection,"delorgs":list(delorgs)},fil)
 
     return selection, list(delorgs), concat
 
@@ -415,15 +421,15 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
                 orgs = temp["orgs"]
                 del temp
         else:
-            genemat,orgs,mlstpriority = getgenematrix.getmat(orgdb,pct=0.5,pct2=0.5,bh=True,rna=True,savefil=genematjson,prifile=mlstpriority,dndsfile=dndsfile)
+            genemat,orgs,mlstpriority = getgenematrix.getmat(orgdb,pct=0.5,pct2=1.0,bh=True,rna=True,savefil=genematjson,prifile=mlstpriority,dndsfile=dndsfile)
         allquery = [os.path.splitext(os.path.split(x)[-1])[0].replace(" ","_") for x in glob.glob(os.path.join(resultdir,"queryseqs","*.fna"))]
         ignoreorgs = list(selorgs.get("seloutgroups",[]))
         ignoreorgs.extend(allquery)
-        mlstselection, delorgs, concat = getmlstselection(resultdir,mlstpriority,maxmlst,skip=skip,ignoreorgs=ignoreorgs)
-        if mlstselection:
+        mlstselection, delorgs, concat = getmlstselection(resultdir,mlstpriority,maxmlst,ignoreorgs=ignoreorgs)
+        if "skip3" in skip.lower():
             #Export selected genes to mlst folder
             log.info("JOB_STATUS:: Writing MLST genes...")
-            getgenes.writeallgenes(orgdb,mlstselection,delorgs,outdir=mlstdir,outgroups=selorgs.get("seloutgroups",None))
+            getgenes.writeallgenes(orgdb,mlstselection,delorgs,outdir=mlstdir,outgroups=selorgs.get("seloutgroups",None),pct=0.5)
             checkpoint = "w1-6"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
         else:

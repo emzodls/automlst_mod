@@ -18,7 +18,7 @@ import os, argparse, setlog, json, pickle, sqlite3 as sql
 
 log = setlog.init(toconsole=True,level="info")
 
-def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False,genelimit=10000,outgroups=None):
+def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False,genelimit=10000,outgroups=None,pct=0.5):
     outdir = os.path.realpath(outdir)
     if type(glist) is not list and os.path.exists(str(glist)):
         with open(glist,"r") as fil:
@@ -57,7 +57,7 @@ def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False,genelimit=100
         table = "HMMhits"
         if "_rRNA" in gene:
             table = "RNAhits"
-        query = "SELECT orgname,seqid,description,naseq,aaseq FROM Seqs WHERE seqid in (SELECT seqid FROM %s WHERE flags>=1 and hmmhit=='%s')"%(table,gene)
+        query = "SELECT orgname,seqid,description,naseq,aaseq FROM Seqs WHERE seqid in (SELECT seqid FROM %s WHERE flags>=1 and hmmhit=='%s' and hmmcov >= %.4f)"%(table,gene,pct)
         if len(ignore):
             query += " AND orgname NOT IN ('%s')"%"','".join(ignore)
         results = conn.execute(query)

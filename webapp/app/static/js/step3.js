@@ -51,11 +51,8 @@ $('#mlstlist > option').each(function() {
         var currDel = $(this).data("del").split(",");
         var i;
         for (i in currDel) {
-            console.log(currDel[i]);
-            console.log(deletedList);
             if (deletedList.indexOf(currDel[i]) == -1) {
                 deletedList.push(currDel[i]);
-                console.log(deletedList);
             }
         }
     }
