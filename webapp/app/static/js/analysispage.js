@@ -149,6 +149,24 @@ if (duplicateFound == true) {
 }
 }
 
+function checkDuplicateFile() {
+var listLoadedFiles = [];
+$('#upfiles>option').each(function() {
+    listLoadedFiles.push($(this).text());
+})
+console.log(listLoadedFiles);
+var userFile = document.getElementById("seqfile1").files;
+for (var counter = 0; counter < userFile.length; counter ++) {
+    console.log("TESTING");
+    console.log(userFile[counter].name);
+    if ($.inArray(userFile[counter].name,listLoadedFiles) != -1) {
+    console.log('DUPLICATE FOUND');
+    return false;
+    }
+}
+return true;
+}
+
 function uploadSequence(filesrc) {
 clearErrors('#uploadwarning');
 clearErrors('#errorwarning');
@@ -158,10 +176,11 @@ clearErrors('#duplicatewarning');
 clearErrors('.selectablewarn');
 clearErrors('.flashes');
 $("#filesrc").val(filesrc);
-console.log($("#ncbiacc1").val());
+checkDuplicateFile();
+//console.log($("#ncbiacc1").val());
 if (filesrc == 'ncbi' && !(validateAcc())) {
     $("#accwarning").removeClass("hidden");
-} else if (filesrc == 'ncbi' && !(checkDuplicateAcc())) {
+} else if ((filesrc == 'ncbi' && !(checkDuplicateAcc())) || (filesrc == 'seqfile' && !(checkDuplicateFile()))) {
     $('#duplicatewarning').removeClass("hidden");
 }
 else {

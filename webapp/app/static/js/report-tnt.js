@@ -1,7 +1,6 @@
 var jobid = $('#jobinfo').val();
 
 function nodeFill(node) {
-if (node.is_leaf()) {
     var nodeIndex = node.node_name().search('ANIid_95');
     var nodeAni = node.node_name().slice(nodeIndex+9);
     if (nodeAni in aniTable) {
@@ -10,7 +9,7 @@ if (node.is_leaf()) {
         //console.log(nodeAni);
         return "black";
     }
-}
+
 }
 
 function strainTypeNodes(node) {
@@ -111,10 +110,10 @@ if (data != "false") {
       for (var y in sortableAni) {
       aniTable[sortableAni[y][1]] = prettyColors[y % amountColors];
       }
-      tree.label().color(function(node) {
+      /*tree.label().color(function(node) {
         return nodeFill(node);
       });
-      tree.update_nodes();
+      tree.update_nodes();*/
 
 }
 }
@@ -185,6 +184,30 @@ if (value.length) {
     });
     tree.update_nodes();
     }
+}
+
+function showAniGroups() {
+tree.label().color(function(node) {
+if (node.is_leaf()) {
+    return nodeFill(node);
+    }
+    else {
+    return 'black';
+    }
+});
+tree.update_nodes();
+}
+
+function showTypeStrains() {
+tree.label().color(function(node) {
+    return strainTypeNodes(node);
+});
+tree.update_nodes();
+}
+
+function resetColor() {
+tree.label().color('black');
+tree.update_nodes();
 }
 
 treeTimer = 0;

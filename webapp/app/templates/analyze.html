@@ -2,7 +2,7 @@
 {% block mainbody %}
 <div class="container" style="padding-top:25px;">
     <ul class="nav nav-tabs">
-        <li class="active" id="fasttab"><a data-toggle="tab" href="#fastwork" onclick="$('#workflow').val('2');">Default workflow</a> </li> <!-- active class is lost after scrolling -->
+        <li class="active" id="fasttab"><a data-toggle="tab" href="#fastwork" onclick="$('#workflow').val('2');">Accelerated workflow</a> </li> <!-- active class is lost after scrolling -->
         <li id="mtab"><a data-toggle="tab" href="#manual" onclick="$('#workflow').val('1');">Advanced workflow</a> </li>
     </ul>
     <br />
@@ -10,7 +10,7 @@
     <form action="startjob" method="post" enctype="multipart/form-data" name="sequpload" id="sequpload">
             <div class="tab-content">
             <div id="fastwork" class="tab-pane fade in active">
-                <p><b>Default Mode</b>: Automatically add your sequences to a precreated reference tree for a genus of your choice.</p>
+                <p><b>Accelerated Mode</b>: Automatically add your sequences to a precreated reference tree for a genus of your choice.</p>
                 <hr>
         <div class="form-group" id="genusform">
             <label for="genusselect">Select reference genus:</label>
@@ -79,7 +79,7 @@
         </div>
     </div>
         <div class="form-group row">
-            <label class="control-label col-md-2" for="seqfile1">Sequence</label>
+            <label class="control-label col-md-2" for="seqfile1">Sequence(s) (one genome per file)</label>
             <div class="col-md-8">
                 <input type="file" class="form-control" id="seqfile1" name="seqfile1" multiple>
             </div>
@@ -93,7 +93,7 @@
             <label class="control-label col-md-2" for="email">Enter email address (optional)</label>
 
             <div class="col-md-8">
-                <input type="text" class="form-control" name="email" id="email" placeholder="(Optional)">
+                <input type="text" class="form-control" name="email" id="email" placeholder="(Optional)" autocomplete="email">
             </div>
         </div>
         <div class="form-group row">
@@ -103,7 +103,7 @@
             </div>
         </div>
         <div class="form-group row">
-            <label class="col-md-2">Something something saving data</label>
+            <label class="col-md-2">Save links</label>
         <div class="checkbox col-md-10">
             <label data-toggle="tooltip" data-placement="right" title="By selecting this you consent to our use of cookies. For more information see the Help page"><input type="checkbox" value="keeplink" id="keeplink" name="keeplink">Save link in cookies (viewable on results page under "last results")</label>
         </div>

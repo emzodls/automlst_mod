@@ -38,7 +38,12 @@
             <button type="button" class="btn btn-primary" aria-label="Decrease tree width" data-toggle="tooltip" data-placement="top" title="Decrease tree width" onclick="resizeTree('downH')"><span class="glyphicon glyphicon-minus"></span></button>
         <span style="display:block; padding:2px"></span>
         <button type="button" class="btn btn-primary" onclick="toggleScale();" style="width:250px">Toggle scaled/unscaled branches</button>
-
+        <span style="display:block; padding:2px"></span>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" onclick="showAniGroups();" style="width:200px">Display ANI groups</button>
+            <button type="button" class="btn btn-primary" onclick="showTypeStrains();" style="width:200px">Display strain info</button>
+            <button type="button" class="btn btn-primary" onclick="resetColor();" style="width:200px">Reset colors</button>
+        </div>
     </div>
     <div id="svgCanvas">
 
