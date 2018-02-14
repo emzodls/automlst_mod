@@ -1,8 +1,8 @@
 var jobid = $('#jobinfo').val();
 
 function nodeFill(node) {
-    var nodeIndex = node.node_name().search('ANIid_95');
-    var nodeAni = node.node_name().slice(nodeIndex+9);
+    //var nodeIndex = node.node_name().search('ANIid_95');
+    var nodeAni = node.property('ANIid');
     if (nodeAni in aniTable) {
         return aniTable[nodeAni];
     } else {
@@ -10,6 +10,18 @@ function nodeFill(node) {
         return "black";
     }
 
+}
+
+function subtreeFill(node, searchId) {
+if (node.property('ANIid') == searchId) {
+    if (searchId in aniTable) {
+        return aniTable[searchId];
+    } else {
+        return "black";
+    }
+} else {
+    return "black";
+}
 }
 
 function strainTypeNodes(node) {
@@ -40,7 +52,13 @@ if (data != "false") {
      tree
      .data (tnt.tree.parse_newick(newick))
     .node_display(tree.node_display()
-            .size(4)
+            .size(function(node) {
+            if (node.is_leaf()) {
+                return 4;
+            } else {
+                return 3;
+            }
+            })
             .fill(function(node) {
             if (node.is_leaf()) {
                 return strainTypeNodes(node);
@@ -61,7 +79,12 @@ if (data != "false") {
             .scale(false)
         );
         root = tree.root();
-        //leaves = root.get_all_leaves();
+        leaves = root.get_all_leaves();
+        for (var leafNode in leaves) {
+        var nodeIndex = leaves[leafNode].node_name().search('ANIid_95');
+        var nodeAni = leaves[leafNode].node_name().slice(nodeIndex+9);
+        leaves[leafNode].property('ANIid', nodeAni); // store as property so the name won't have to be searched every time
+        }
         /*streptonodes = root.find_all(function(node) {
             return (node.node_name().toString().search('Streptomyces') != -1);
         });
@@ -70,7 +93,7 @@ if (data != "false") {
           clearInterval(timer);
       //console.log(tree.layout().width());
       var aniDict = {};
-      $('text.tnt_tree_label:contains("ANIid_95")').each(function() {
+      $('text.tnt_tree_label:contains("ANIid_95")').each(function() { // still needed, since node height can only be accessed by labels' offsets
         var aniIndex = $(this).text().search('ANIid_95');
         var aniId = $(this).text().slice(aniIndex+9).replace(/_/g, "");
         if (!(aniId in aniDict)) {
@@ -115,6 +138,19 @@ if (data != "false") {
       });
       tree.update_nodes();*/
 
+        tree.on("click", function(node) {
+            if (node.is_leaf()) {
+            var ani95 = node.property('ANIid');
+            //console.log(ani95);
+            tree.label().color(function(node) {
+                return subtreeFill(node,ani95);
+            });
+            } else {
+                tree.label().color('black')
+            }
+            tree.update_nodes();
+        });
+
 }
 }
 
@@ -158,7 +194,7 @@ function resizeTree(resizeDir) {
 }
 
 function treeColor(node,value) {
-console.log('TEST');
+//console.log('TEST');
 if (node.is_leaf()) {
     var name = node.node_name();
     if (name.toLowerCase().search(value.toLowerCase()) != -1) {
