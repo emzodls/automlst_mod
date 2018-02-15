@@ -25,7 +25,7 @@ if ($("#uploadprog").attr("value") == $("#uploadprog").attr("max")) {
 
 function uploadSuccess(data,textStatus,xhr) { //communication success
 var data = JSON.parse(data);
-console.log(data);
+//console.log(data);
 $("#seqbtn").removeClass("disabled");
 $("#ncbibtn").removeClass("disabled");
 $("#ncbiload").addClass("hidden");
@@ -35,7 +35,7 @@ if (data["filename"] == false) {
     } else {
        if ($("#filesrc").val() == 'ncbi') {
         $("#uploadprog").attr("value",100);
-        console.log($("#uploadprog").attr("value"));
+        //console.log($("#uploadprog").attr("value"));
         }
     for (var fileNumber = 0; fileNumber < data["filename"].length; fileNumber++) {
     $("#upfiles").prepend("<option value='"+data["filename"][fileNumber]+"' class='"+hashCode(data["filename"][fileNumber])+" picked'>"+data["name"][fileNumber]+"</option>");
@@ -123,7 +123,7 @@ $.ajax(uploadForm);
 function validateAcc() {
 var userAcc = $("#ncbiacc1").val();
 var allowedChars = /[A-Z0-9_]+$/i;
-console.log(allowedChars.test(userAcc));
+//console.log(allowedChars.test(userAcc));
 if (userAcc && (userAcc.search(" ") == -1) && allowedChars.test(userAcc)) { //check if userAcc is alphanumeric
     console.log('TESTING');
     return true;
@@ -154,13 +154,13 @@ var listLoadedFiles = [];
 $('#upfiles>option').each(function() {
     listLoadedFiles.push($(this).text());
 })
-console.log(listLoadedFiles);
+//console.log(listLoadedFiles);
 var userFile = document.getElementById("seqfile1").files;
 for (var counter = 0; counter < userFile.length; counter ++) {
-    console.log("TESTING");
-    console.log(userFile[counter].name);
+    //console.log("TESTING");
+    //console.log(userFile[counter].name);
     if ($.inArray(userFile[counter].name,listLoadedFiles) != -1) {
-    console.log('DUPLICATE FOUND');
+    //console.log('DUPLICATE FOUND');
     return false;
     }
 }
@@ -185,7 +185,6 @@ if (filesrc == 'ncbi' && !(validateAcc())) {
 }
 else {
 uploader(filesrc);
-console.log($("#uploadprog")); // -> doesn't clear properly!
 }
 }
 

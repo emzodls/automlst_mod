@@ -315,6 +315,18 @@ td.hittype_ResModel{
     color: #151580;
 }
 
+.panel-primary {
+    border-color: #1B1B1B;
+}
+
+.panel-primary>.panel-heading {
+    background-color: #151580;
+    border-color: #1B1B1B;
+    font-weight: bold;
+}
+
+
+
 .smallbox {
   float: left;
   width: 10px;
@@ -338,6 +350,11 @@ td.details-control {
 tr.shown td.details-control {
     background: url('/static/images/expcolbtn2.png') no-repeat center center;
     background-size: 10px 10px;
+}
+
+/* show labels are clickable! */
+g.leaf>text.tnt_tree_label {
+    cursor:pointer;
 }
 
 .resultTable{
@@ -626,8 +643,20 @@ color: #151580;
 color: #595959;
 }
 
+
+
 @media screen and (max-width:768px){
     #svgCanvas {
         overflow:auto;
     }
+}
+
+@media print {
+body * {
+display:none;
+}
+
+.printable {
+display: block!important;
+}
 }

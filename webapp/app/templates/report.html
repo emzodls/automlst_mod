@@ -34,10 +34,17 @@
             <span class="glyphicon glyphicon-resize-vertical" style="font-size:25px;vertical-align:middle"></span>
             <button type="button" class="btn btn-primary" aria-label="Decrease tree height" data-toggle="tooltip" title="Decrease tree height" onclick="resizeTree('downV')"><span class="glyphicon glyphicon-minus"></span></button>
             <span style="display:block; padding:2px"></span> -->
+        <div class="row">
+            <div class="col-md-10">
              <button type="button" class="btn btn-primary" aria-label="Increase tree width" data-toggle="tooltip" data-placement="top" title="Increase tree width" onclick="resizeTree('upH')"><span class="glyphicon glyphicon-plus"></span></button>
             <span class="glyphicon glyphicon-resize-horizontal" style="font-size:25px;vertical-align:middle"></span>
             <button type="button" class="btn btn-primary" aria-label="Decrease tree width" data-toggle="tooltip" data-placement="top" title="Decrease tree width" onclick="resizeTree('downH')"><span class="glyphicon glyphicon-minus"></span></button>
-        <span style="display:block; padding:2px"></span>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary" aria-label="Print tree" data-toggle="tooltip" data-placement="top" title="Print tree" onclick="window.print();"><span class="glyphicon glyphicon-print"></span></button>
+            </div>
+            </div>
+            <span style="display:block; padding:2px"></span>
         <button type="button" class="btn btn-primary" onclick="toggleScale();" style="width:250px">Toggle scaled/unscaled branches</button>
         <span style="display:block; padding:2px"></span>
         <div class="btn-group">
@@ -46,8 +53,15 @@
             <button type="button" class="btn btn-primary" onclick="resetColor();" style="width:200px">Reset colors</button>
         </div>
     </div>
-    <div id="colorkey">
-
+    <br />
+    <div id="colorkey" class="panel panel-primary hidden">
+        <div class="panel-heading" id="colorscheme">Color scheme</div>
+        <div class="panel-body hidden" id="anicolorscheme"><span class="glyphicon glyphicon-stop" style="color:#00990d"></span><span class="glyphicon glyphicon-stop" style="color:#9900ff"></span><span class="glyphicon glyphicon-stop" style="color:#e6007a"></span><span class="glyphicon glyphicon-stop" style="color:#0000CD"></span> <abbr title="average nucleotide identity">ANI</abbr> groups</div>
+        <div class="panel-body hidden" id="tscolorscheme"><span class="glyphicon glyphicon-stop" style="color:#0000ff"></span> Query sequence <br />
+            <span class="glyphicon glyphicon-stop" style="color:#cc3300"></span> Outgroup <br />
+            <span class="glyphicon glyphicon-stop" style="color:#1f7a1f"></span> Type strain
+        </div>
+        <div class="panel-body hidden" id="singleani"><span class="glyphicon glyphicon-stop" id="aniicon" style="color:black"></span> <abbr title="average nucleotide identity">ANI</abbr> group <span id="selectedani"></span></div>
     </div>
     <div id="svgCanvas">
 
@@ -87,9 +101,9 @@
         <ul class="dropdown-menu" role="menu">
             <li style="width:200px"><a href="/results/{{ jobid }}/tree?format=newick">Download Newick file</a></li>
             <!-- <li><a href="/results/{{ jobid }}/tree?format=nexml">Download NeXML file</a></li>
-            <li><a href="/results/{{ jobid }}/tree?format=phyloxml">Download PhyloXML file</a></li>
-            <li id="downlink"><a id="imgdownl" href="#" target="_blank">Download svg image</a></li>
-            <li id="pnglink"><a id="pngdownl" href="#" target="_blank" onclick="downloadPng();">Download png image</a></li>-->
+            <li><a href="/results/{{ jobid }}/tree?format=phyloxml">Download PhyloXML file</a></li>-->
+            <li id="downlink" style="width:200px"><a id="imgdownl" href="#" target="_blank">Download svg image</a></li>
+            <!-- <li id="pnglink"><a id="pngdownl" href="#" target="_blank" onclick="downloadPng();">Download png image</a></li>-->
         </ul>
         </div>
     <!-- <a href="/results/{{ jobid }}/tree?format=newick" class="btn btn-primary" role="button" style="width:200px" id="treedownl" name="treedownl"><span class="glyphicon glyphicon-download-alt"></span> Download tree</a> -->

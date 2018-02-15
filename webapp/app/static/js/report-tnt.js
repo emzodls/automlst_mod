@@ -40,6 +40,17 @@ if (node.node_name().search("QS--") != -1) {
 /*return '#888888';
 }*/
 
+/*function setSvg() {
+$('svg').attr('xmlns',"http://www.w3.org/2000/svg");
+var treeSvg = $('svg').html();
+                var fileNameToSave = "treetest3.svg";
+                //treeSvg = '<?xml version="1.0" standalone="no"?>\r\n' + treeSvg;
+                var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(treeSvg);
+                $('#imgdownl').attr("href",url);
+                $('#imgdownl').attr("download", fileNameToSave);
+                }*/
+
+
 function treeSuccess(data,textStatus,xhr) {
 if (data != "false") {
 	$('#svgCanvas').empty();
@@ -149,8 +160,16 @@ if (data != "false") {
             } else {
                 tree.label().color('black')
             }
+            $('#colorkey').removeClass("hidden");
+            $('#tscolorscheme').addClass('hidden');
+            $('#anicolorscheme').addClass('hidden');
+            $('#aniicon').css('color',subtreeFill(node,ani95));
+            $('#selectedani').text(ani95);
+            $('#singleani').removeClass('hidden');
             tree.update_nodes();
         });
+        //setSvg();
+        $('#svgCanvas').addClass('printable');
 
 } else {
     $('#treefail').removeClass("hidden");
@@ -184,7 +203,6 @@ $.ajax({
 
 function resizeTree(resizeDir) {
     var treeWidth = tree.layout().width();
-    console.log(treeWidth);
 
     if (resizeDir == 'upH') {
         /*var treeLayout = tnt.tree.layout.vertical().width(treeWidth+100).scale(false);
@@ -225,6 +243,10 @@ if (value.length) {
 }
 
 function showAniGroups() {
+$('#colorkey').removeClass('hidden');
+$('#tscolorscheme').addClass('hidden');
+$('#singleani').addClass('hidden');
+$('#anicolorscheme').removeClass('hidden');
 tree.label().color(function(node) {
 if (node.is_leaf()) {
     return nodeFill(node);
@@ -237,6 +259,10 @@ tree.update_nodes();
 }
 
 function showTypeStrains() {
+$('#colorkey').removeClass('hidden');
+$('#anicolorscheme').addClass('hidden');
+$('#singleani').addClass('hidden');
+$('#tscolorscheme').removeClass('hidden');
 tree.label().color(function(node) {
     return strainTypeNodes(node);
 });
@@ -244,6 +270,10 @@ tree.update_nodes();
 }
 
 function resetColor() {
+$('#colorkey').addClass("hidden");
+$('#tscolorscheme').addClass('hidden');
+$('#anicolorscheme').addClass('hidden');
+$('#singleani').addClass('hidden');
 tree.label().color('black');
 tree.update_nodes();
 }
@@ -251,7 +281,6 @@ tree.update_nodes();
 treeTimer = 0;
 
 function startSearch() {
-console.log('START');
 clearTimeout(treeTimer);
 treeTimer = setTimeout(searchTree, 1000);
 }
