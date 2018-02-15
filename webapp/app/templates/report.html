@@ -27,7 +27,8 @@
             <p>{{ errormsg }}</p>
             {% endfor %}
     </div>
-    {% else %}
+    {% endif %}
+    <div id="treefail" class="alert alert-danger hidden">Error: Tree failed to build</div>
     <div id="sizebtns" style="display:none">
             <!--<button type="button" class="btn btn-primary" aria-label="Increase tree height" data-toggle="tooltip" title="Increase tree height" onclick="resizeTree('upV')"><span class="glyphicon glyphicon-plus"></span></button>
             <span class="glyphicon glyphicon-resize-vertical" style="font-size:25px;vertical-align:middle"></span>
@@ -45,6 +46,9 @@
             <button type="button" class="btn btn-primary" onclick="resetColor();" style="width:200px">Reset colors</button>
         </div>
     </div>
+    <div id="colorkey">
+
+    </div>
     <div id="svgCanvas">
 
             <!-- <img src="/static/images/Socotra_dragon_tree.jpeg" alt="loading screen" class="thumbnail" style="width:50%;margin:auto">-->
@@ -57,7 +61,7 @@
     <label for="searchtree">Search organisms:</label>
         <input type="text" id="searchtree" placeholder="Search...">
 </div>
-    {% endif %}
+
     <!-- <button type="button" class="btn btn-primary" onclick="drawTree('{{ jobid }}')" style="margin-top:20px">Click</button> -->
     <hr>
     <h4>Most similar organisms</h4>

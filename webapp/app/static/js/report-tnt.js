@@ -75,7 +75,7 @@ if (data != "false") {
             .color("black")
         )
         .layout(tnt.tree.layout.vertical()
-            .width(800)
+            .width(1000)
             .scale(false)
         );
         root = tree.root();
@@ -120,7 +120,8 @@ if (data != "false") {
 
       console.log(sortedAni);*/
       //var aniList = [];
-      var prettyColors = ["#8B0000","#cc3600","#b36200","#7b7737","#556B2F","#006400"," #2d8653","#008080","#396a93","#00008B","#4B0082","#800080","#C71585","#DC143C"]; //sorted array of colors -> rainbow
+      //var prettyColors = ["#8B0000","#cc3600","#b36200","#7b7737","#556B2F","#006400"," #2d8653","#008080","#396a93","#00008B","#4B0082","#800080","#C71585","#DC143C"]; //sorted array of colors -> rainbow
+      var prettyColors = [ "#00990d", "#9900ff", " #e6007a", "#0000CD"];
       var amountColors = prettyColors.length;
       /*for (var x in sortedAni) {
         aniList.push(sortedAni[x]);
@@ -151,6 +152,10 @@ if (data != "false") {
             tree.update_nodes();
         });
 
+} else {
+    $('#treefail').removeClass("hidden");
+    $('#svgCanvas').addClass("hidden");
+    clearInterval(timer);
 }
 }
 
@@ -193,32 +198,29 @@ function resizeTree(resizeDir) {
     tree.update();
 }
 
-function treeColor(node,value) {
+function treeFontSize(node,value) {
 //console.log('TEST');
 if (node.is_leaf()) {
     var name = node.node_name();
     if (name.toLowerCase().search(value.toLowerCase()) != -1) {
-        return 'cyan';
+        return 14;
     }
-    return strainTypeNodes(node);
+    return 12;
 }
-    return '#888888';
+    return 12;
     }
 
 function searchTree() {
 var value = $('#searchtree').val().toLowerCase();
 if (value.length) {
-    tree.node_display()
-    .fill(function(node) {
-        return treeColor(node,value);
+    tree.label().fontsize(function(node) {
+        return treeFontSize(node,value);
     });
-    tree.update_nodes();
+    tree.update();
     }
     else {
-    tree.node_display().fill(function(node) {
-        return strainTypeNodes(node);
-    });
-    tree.update_nodes();
+    tree.label().fontsize(12);
+    tree.update();
     }
 }
 

@@ -70,7 +70,7 @@ def showstep(jobid,step):
                 return render_template("report.html",jobid=jobid,jobname=jobname[1])
             else:
                 return render_template("report.html",jobid=jobid, jobname=jobname[1],workflow=2)
-        elif errmsgs:
+        elif jobinfo["checkpoint"].upper() == "W1-F" and errmsgs:
             return render_template("report.html",jobid=jobid,jobname=jobname[1], errmsgs = errmsgs)
         else:
             return redirect('/results/'+jobid+'/loading')
