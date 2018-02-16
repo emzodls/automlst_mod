@@ -109,6 +109,10 @@ def getTree(jobid):
 #    elif step == "report":
 #        return render_template("report.html",jobid=jobid,workflow=2)
 
+#@app.route('/sendtree', methods=['POST'])
+#def sendtree():
+
+
 @app.route('/results/<jobid>/downloadorgs', methods=['GET'])
 def downloadorgs(jobid):
     format = request.args.get('format','json')

@@ -652,11 +652,17 @@ color: #595959;
 }
 
 @media print {
-body * {
-display:none;
+
+
+:not(.printable) {
+visibility: hidden;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+.printable, .printable *  {
+visibility:visible;
 }
 
-.printable {
-display: block!important;
-}
 }

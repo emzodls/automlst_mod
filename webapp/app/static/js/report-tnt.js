@@ -170,6 +170,7 @@ if (data != "false") {
         });
         //setSvg();
         $('#svgCanvas').addClass('printable');
+        $('#svgCanvas *').addClass('printable');
 
 } else {
     $('#treefail').removeClass("hidden");
@@ -317,6 +318,36 @@ if (tree.layout().scale()) {
     tree.layout().scale(true);
     }
     tree.update();
+}
+
+function treePopup() {
+    var treeWindow = window.open("","Tree View");
+    treeWindow.document.write($('#svgCanvas *').html());
+}
+
+function uploadSuccess(data,textStatus,xhr) {
+console.log('SUCCESS');
+}
+function uploadError(xhr,ajaxOptions,thrownError) {
+console.log('FAIL');
+}
+
+function uploadTree() {
+var treeToSvg = $('#svgCanvas').html();
+treeToSvg = '<?xml version="1.0" standalone="no"?>\r\n' + treeToSvg;
+$.ajax({
+    contentType: 'image/svg+xml',
+        url: '/sendtree',
+        async: true,
+        type: 'POST',
+        //Form data
+        data: treeToSvg,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: uploadSuccess,
+        error: uploadError
+});
 }
 
 $("button[data-toggle='tooltip']").on('click',function(){
