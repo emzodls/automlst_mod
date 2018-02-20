@@ -1,4 +1,4 @@
-import os, tempfile, models, json, datetime, csv
+import os, tempfile, models, json, datetime, csv, zipfile
 from flask import render_template, jsonify, request, redirect, abort, make_response, send_from_directory, flash, g
 from flask_mail import Message
 from redis import Redis
@@ -245,3 +245,15 @@ def getlastresults():
         lastresult.reverse()
         lastresult = [findjobinfo(x) for x in lastresult]
     return lastresult
+
+def zipalignments(jobid):
+    jobpath = os.path.join(app.config['RESULTS_FOLDER'],jobid)
+    alignpath = os.path.join(jobpath,'mlst_aligned')
+    with zipfile.ZipFile(os.path.join(jobpath,jobid+'_alignments.zip'),'w') as alignzip:
+        for alignfile in os.listdir(alignpath):
+            if os.path.splitext(alignfile)[1] == '.fna':
+                alignzip.write(os.path.join(alignpath,alignfile), jobid+'_alignments/'+alignfile)
+        if os.path.exists(os.path.join(jobpath, 'concatMLST.fasta')):
+            alignzip.write(os.path.join(jobpath, 'concatMLST.fasta'), jobid+'_alignments/concatMLST.fasta')
+
+

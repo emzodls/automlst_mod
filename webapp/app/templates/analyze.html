@@ -126,7 +126,7 @@
   {% endif %}
 {% endwith %}
 
-        <button type="button" class="btn btn-primary" style="width:300px" id="submitjob" onclick="selectAndSend('#sequpload');">Submit Job &raquo;</button>
+        <button type="button" class="btn btn-primary" style="width:300px" id="submitjob" onclick="$('#seqfile1').val([]);$('#ncbiacc1').val('');selectAndSend('#sequpload');">Submit Job &raquo;</button>
         <input type="hidden" id="filesrc" name="filesrc" value="">
         <input type="hidden" id="workflow" name="workflow" value="2">
     </form>

@@ -112,7 +112,7 @@ def getTree(jobid):
 #@app.route('/sendtree', methods=['POST'])
 #def sendtree():
 
-
+# wrap all the downloads except for the tree into one page
 @app.route('/results/<jobid>/downloadorgs', methods=['GET'])
 def downloadorgs(jobid):
     format = request.args.get('format','json')
@@ -128,7 +128,7 @@ def downloadorgs(jobid):
         else:
             #jsonpath = os.path.join(resultdir,jobid,'reflist.json')
             jsonpath = os.path.join(resultdir,'reflist.json')
-            routines.jsontotsv(jsonpath,jobid)
+            routines.jsontotsv(jsonpath,jobid) # make a more versatile version of that?
             #return send_from_directory(resultdir,jobid,'reftext.txt',as_attachment=True)
             return send_from_directory(resultdir, 'reftext.txt', as_attachment=True)
 
@@ -136,6 +136,20 @@ def downloadorgs(jobid):
 def downloadmash(jobid):
     resultdir = os.path.join(app.config['RESULTS_FOLDER'], jobid)
     return send_from_directory(resultdir, 'mash_distances.txt', as_attachment=True)
+
+@app.route('/results/<jobid>/downloadlists', methods=['GET'])
+def downloadlists(jobid):
+    downl = request.args.get('downl')
+    resultdir = os.path.join(app.config['RESULTS_FOLDER'], jobid)
+    if downl == 'mlstlist':
+        return send_from_directory(resultdir,'mlstpriority.json', as_attachment=True)
+    elif downl == 'alignment':
+        alignpath = os.path.join(resultdir, 'mlst_aligned')
+        if os.path.exists(os.path.join(resultdir, jobid+'_alignments.zip')):
+            return send_from_directory(resultdir, jobid+'_alignments.zip', as_attachment=True)
+        else:
+            routines.zipalignments(jobid)
+            return send_from_directory(resultdir, jobid + '_alignments.zip', as_attachment=True)
 
 @app.route('/results2/<jobid>/refs')
 def getrefs(jobid):
