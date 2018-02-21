@@ -144,7 +144,6 @@ def downloadlists(jobid):
     if downl == 'mlstlist':
         return send_from_directory(resultdir,'mlstpriority.json', as_attachment=True)
     elif downl == 'alignment':
-        alignpath = os.path.join(resultdir, 'mlst_aligned')
         if os.path.exists(os.path.join(resultdir, jobid+'_alignments.zip')):
             return send_from_directory(resultdir, jobid+'_alignments.zip', as_attachment=True)
         else:

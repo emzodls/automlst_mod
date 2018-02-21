@@ -40,15 +40,17 @@ if (node.node_name().search("QS--") != -1) {
 /*return '#888888';
 }*/
 
-/*function setSvg() {
+function setSvg() {
 $('svg').attr('xmlns',"http://www.w3.org/2000/svg");
-var treeSvg = $('svg').html();
+$('svg').attr('xmlns:xlink', "http://www.w3.org/1999/xlink");
+var treeSvg = $('#svgCanvas').html();
                 var fileNameToSave = "treetest3.svg";
-                //treeSvg = '<?xml version="1.0" standalone="no"?>\r\n' + treeSvg;
+                treeSvg = '<?xml version="1.0" standalone="no"?>\r\n' + treeSvg;
                 var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(treeSvg);
+                //console.log(url);
                 $('#imgdownl').attr("href",url);
                 $('#imgdownl').attr("download", fileNameToSave);
-                }*/
+                }
 
 
 function treeSuccess(data,textStatus,xhr) {
@@ -167,8 +169,9 @@ if (data != "false") {
             $('#selectedani').text(ani95);
             $('#singleani').removeClass('hidden');
             tree.update_nodes();
+            setSvg();
         });
-        //setSvg();
+        setSvg();
         $('#svgCanvas').addClass('printable');
         $('#svgCanvas *').addClass('printable');
 
@@ -215,6 +218,7 @@ function resizeTree(resizeDir) {
         tree.layout().width(treeWidth - 100);
     }
     tree.update();
+    setSvg();
 }
 
 function treeFontSize(node,value) {
@@ -257,6 +261,7 @@ if (node.is_leaf()) {
     }
 });
 tree.update_nodes();
+setSvg();
 }
 
 function showTypeStrains() {
@@ -268,6 +273,7 @@ tree.label().color(function(node) {
     return strainTypeNodes(node);
 });
 tree.update_nodes();
+setSvg();
 }
 
 function resetColor() {
@@ -277,6 +283,7 @@ $('#anicolorscheme').addClass('hidden');
 $('#singleani').addClass('hidden');
 tree.label().color('black');
 tree.update_nodes();
+setSvg();
 }
 
 treeTimer = 0;
@@ -318,12 +325,14 @@ if (tree.layout().scale()) {
     tree.layout().scale(true);
     }
     tree.update();
+    setSvg();
 }
 
 function treePopup() {
     var treeWindow = window.open("","Tree View");
     treeWindow.document.write($('#svgCanvas *').html());
 }
+
 
 function uploadSuccess(data,textStatus,xhr) {
 console.log('SUCCESS');
