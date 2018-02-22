@@ -2,7 +2,7 @@ var jobid = $('#jobinfo').val();
 
 function nodeFill(node) {
     //var nodeIndex = node.node_name().search('ANIid_95');
-    var nodeAni = node.property('ANIid');
+    var nodeAni = node.property('ANI95');
     if (nodeAni in aniTable) {
         return aniTable[nodeAni];
     } else {
@@ -12,14 +12,17 @@ function nodeFill(node) {
 
 }
 
-function subtreeFill(node, searchId) {
-if (node.property('ANIid') == searchId) {
+function subtreeFill(node, searchId,aniCutoff) {
+if (aniCutoff == 'cutoff95') {
+if (node.property('ANI95') == searchId) {
     if (searchId in aniTable) {
         return aniTable[searchId];
     } else {
         return "black";
     }
 } else {
+    return "black";
+}} else {
     return "black";
 }
 }
@@ -69,7 +72,7 @@ if (data != "false") {
             if (node.is_leaf()) {
                 return 4;
             } else {
-                return 3;
+                return 2;
             }
             })
             .fill(function(node) {
@@ -91,29 +94,36 @@ if (data != "false") {
             .width(1000)
             .scale(false)
         );
+          tree(document.getElementById("svgCanvas"));
+          clearInterval(timer);
+        var aniDict = {};
         root = tree.root();
         leaves = root.get_all_leaves();
         for (var leafNode in leaves) {
         var nodeIndex = leaves[leafNode].node_name().search('ANIid_95');
         var nodeAni = leaves[leafNode].node_name().slice(nodeIndex+9);
-        leaves[leafNode].property('ANIid', nodeAni); // store as property so the name won't have to be searched every time
+        var nodeName = leaves[leafNode].node_name();
+        leaves[leafNode].property('ANI95', nodeAni); // store as property so the name won't have to be searched every time
+        var nodeHeight = $('text.tnt_tree_label:contains("'+ nodeName+'")').offset().top; //get y-position of branches relative to page
+        if (!(nodeAni in aniDict)) {
+            aniDict[nodeAni] = [];
+        }
+        aniDict[nodeAni].push(nodeHeight);
         }
         /*streptonodes = root.find_all(function(node) {
             return (node.node_name().toString().search('Streptomyces') != -1);
         });
         console.log(streptonodes);*/
-      tree(document.getElementById("svgCanvas"));
-          clearInterval(timer);
+
       //console.log(tree.layout().width());
-      var aniDict = {};
-      $('text.tnt_tree_label:contains("ANIid_95")').each(function() { // still needed, since node height can only be accessed by labels' offsets
+      /*$('text.tnt_tree_label:contains("ANIid_95")').each(function() { // still needed, since node height can only be accessed by labels' offsets
         var aniIndex = $(this).text().search('ANIid_95');
         var aniId = $(this).text().slice(aniIndex+9).replace(/_/g, "");
         if (!(aniId in aniDict)) {
             aniDict[aniId] = [];
         }
-        aniDict[aniId].push($(this).offset().top); //get y-position of branches relative to page
-      });
+        aniDict[aniId].push($(this).offset().top);
+      });*/
       // create array of arrays storing highest branch height (lowest y-offset) & ANI id
       var sortableAni = [];
       for (var z in aniDict) {
@@ -135,6 +145,10 @@ if (data != "false") {
       //var aniList = [];
       //var prettyColors = ["#8B0000","#cc3600","#b36200","#7b7737","#556B2F","#006400"," #2d8653","#008080","#396a93","#00008B","#4B0082","#800080","#C71585","#DC143C"]; //sorted array of colors -> rainbow
       var prettyColors = [ "#00990d", "#9900ff", " #e6007a", "#0000CD"];
+      //var ani96Colors = ["#cc4400", "#008080", "#590099", "#518000"];
+      //var ani97Colors = ["#e6007a", "#008080", "#590099", "#00990d"];
+      //var ani98Colors = ["#cc4400", "#0000CD", "#9900ff", "#518000"];
+      //var ani99Colors = ["#e6007a", "#0000CD", "#518000", "590099"];
       var amountColors = prettyColors.length;
       /*for (var x in sortedAni) {
         aniList.push(sortedAni[x]);
@@ -154,10 +168,10 @@ if (data != "false") {
 
         tree.on("click", function(node) {
             if (node.is_leaf()) {
-            var ani95 = node.property('ANIid');
+            var ani95 = node.property('ANI95');
             //console.log(ani95);
             tree.label().color(function(node) {
-                return subtreeFill(node,ani95);
+                return subtreeFill(node,ani95,'cutoff95');
             });
             } else {
                 tree.label().color('black')
@@ -165,7 +179,7 @@ if (data != "false") {
             $('#colorkey').removeClass("hidden");
             $('#tscolorscheme').addClass('hidden');
             $('#anicolorscheme').addClass('hidden');
-            $('#aniicon').css('color',subtreeFill(node,ani95));
+            $('#aniicon').css('color',subtreeFill(node,ani95,'cutoff95'));
             $('#selectedani').text(ani95);
             $('#singleani').removeClass('hidden');
             tree.update_nodes();
@@ -248,6 +262,10 @@ if (value.length) {
 }
 
 function showAniGroups() {
+$('#colorblock1').css('color','#00990d');
+$('#colorblock2').css('color','#9900ff');
+$('#colorblock3').css('color','#e6007a');
+$('#colorblock4').css('color','#0000CD');
 $('#colorkey').removeClass('hidden');
 $('#tscolorscheme').addClass('hidden');
 $('#singleani').addClass('hidden');
@@ -334,7 +352,7 @@ function treePopup() {
 }
 
 
-function uploadSuccess(data,textStatus,xhr) {
+/*function uploadSuccess(data,textStatus,xhr) {
 console.log('SUCCESS');
 }
 function uploadError(xhr,ajaxOptions,thrownError) {
@@ -358,7 +376,7 @@ $.ajax({
         error: uploadError
 });
 }
-
+*/
 $("button[data-toggle='tooltip']").on('click',function(){
     $(this).blur();
 })

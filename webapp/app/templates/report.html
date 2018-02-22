@@ -49,7 +49,16 @@
         <button type="button" class="btn btn-primary" onclick="toggleScale();" style="width:250px">Toggle scaled/unscaled branches</button>
         <span style="display:block; padding:2px"></span>
         <div class="btn-group">
-            <button type="button" class="btn btn-primary" onclick="showAniGroups();" style="width:200px">Display ANI groups</button>
+            <div class="btn-group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" style="width:200px">Display ANI groups <span class="caret"></span></button>
+            <ul class="dropdown-menu" role="menu">
+                <li style="width:200px"><a href="#" onclick="showAniGroups();">95% cutoff</a></li>
+                <li style="width:200px"><a href="#">96% cutoff</a></li>
+                <li style="width:200px"><a href="#">97% cutoff</a></li>
+                <li style="width:200px"><a href="#">98% cutoff</a></li>
+                <li style="width:200px"><a href="#">99% cutoff</a></li>
+            </ul>
+                </div>
             <button type="button" class="btn btn-primary" onclick="showTypeStrains();" style="width:200px">Display strain info</button>
             <button type="button" class="btn btn-primary" onclick="resetColor();" style="width:200px">Reset colors</button>
         </div>
@@ -57,7 +66,7 @@
     <br />
     <div id="colorkey" class="panel panel-primary hidden">
         <div class="panel-heading" id="colorscheme">Color scheme</div>
-        <div class="panel-body hidden" id="anicolorscheme"><span class="glyphicon glyphicon-stop" style="color:#00990d"></span><span class="glyphicon glyphicon-stop" style="color:#9900ff"></span><span class="glyphicon glyphicon-stop" style="color:#e6007a"></span><span class="glyphicon glyphicon-stop" style="color:#0000CD"></span> <abbr title="average nucleotide identity">ANI</abbr> groups</div>
+        <div class="panel-body hidden" id="anicolorscheme"><span id="colorblock1" class="glyphicon glyphicon-stop" style="color:#00990d"></span><span id="colorblock2" class="glyphicon glyphicon-stop" style="color:#9900ff"></span><span id="colorblock3" class="glyphicon glyphicon-stop" style="color:#e6007a"></span><span id="colorblock4" class="glyphicon glyphicon-stop" style="color:#0000CD"></span> <abbr title="average nucleotide identity">ANI</abbr> groups</div>
         <div class="panel-body hidden" id="tscolorscheme"><span class="glyphicon glyphicon-stop" style="color:#0000ff"></span> Query sequence <br />
             <span class="glyphicon glyphicon-stop" style="color:#cc3300"></span> Outgroup <br />
             <span class="glyphicon glyphicon-stop" style="color:#1f7a1f"></span> Type strain
