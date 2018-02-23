@@ -75,6 +75,14 @@ $(document).ready(function() {
 $('#outgroupsearch').on("keyup",outgrStart);
 });
 
+function arrayToSelectBox(inputArray, selectBox, isActive) {
+    if (isActive == 'true') {
+    $(selectBox).append("<option value='"+inputArray.id+"' data-title='"+ inputArray.orgname + " (mean distance: "+ parseFloat(inputArray.dist).toFixed(3)+")"+"' id='" + inputArray.id +"' data-genusid='"+inputArray.genusid+"' data-genusname='"+inputArray.genusname+"' data-familyid='"+inputArray.familyid+"' data-familyname='"+inputArray.familyname+"' data-orderid='"+inputArray.orderid + "' data-ordername='"+inputArray.ordername+"' data-phylid='"+inputArray.phylid+"' data-phylname='"+inputArray.phylname+"'>"+inputArray.orgname+ " (mean distance: "+ parseFloat(inputArray.dist).toFixed(3)+") </option>");
+    } else {
+    $(selectBox).append("<option value='"+inputArray.id+"' data-title='"+ inputArray.orgname + " (mean distance: "+ parseFloat(inputArray.dist).toFixed(3)+")"+"' id='" + inputArray.id +"' data-genusid='"+inputArray.genusid+"' data-genusname='"+inputArray.genusname+"' data-familyid='"+inputArray.familyid+"' data-familyname='"+inputArray.familyname+"' data-orderid='"+inputArray.orderid + "' data-ordername='"+inputArray.ordername+"' data-phylid='"+inputArray.phylid+"' data-phylname='"+inputArray.phylname+"' disabled>"+inputArray.orgname+ " (mean distance: "+ parseFloat(inputArray.dist).toFixed(3)+") </option>");
+    }
+}
+
 
 var jsonOrgs = false;
 function commonGroup() {
@@ -128,11 +136,36 @@ var refOrgs = $.extend(jsonOrgs["reforgs"], jsonOrgs["queryorgs"]); //how to han
 function outgroupPick() {
 var commonTax = commonGroup();
 console.log(typeof commonTax[1]);
+var activeOutgroups = [];
+var inactiveOutgroups = [];
 if (typeof commonTax[1] == "string") {
 //var allOutgroups = jsonOrgs["outgroups"]; // change?
 var groupId = commonTax[0]+"id";
+$('#outgrsel').empty();
+for (var counter in outgrInfo) {
+    if (outgrInfo[counter][groupId] == commonTax[1]) {
+        inactiveOutgroups.push(outgrInfo[counter]);
+        console.log(outgrInfo[counter].id);
+        removeFromList('#outgrlist',outgrInfo[counter].id);
+    } else {
+        activeOutgroups.push(outgrInfo[counter]);
+    }
+
+}
+activeOutgroups.sort(function(a,b) {
+    return a['dist'] - b['dist'];
+});
+inactiveOutgroups.sort(function(c,d) {
+    return c['dist'] - d['dist'];
+});
+for (var counter3 in activeOutgroups) {
+arrayToSelectBox(activeOutgroups[counter3],'#outgrsel','true');
+}
+for (var counter4 in inactiveOutgroups) {
+arrayToSelectBox(inactiveOutgroups[counter4],'#outgrsel','false');
+}
 //var counter;
-$('#outgrsel > option').each(function() {
+/*$('#outgrsel > option').each(function() {
     var currId = $(this).attr("id");
     if ($(this).data(groupId) == commonTax[1]) {
     $(this).attr("disabled", true);
@@ -140,7 +173,7 @@ $('#outgrsel > option').each(function() {
                 removeFromList('#outgrlist', $(this).val());
     } else {
     $(this).removeAttr("disabled"); // faster to remove disabled from the start?
-    }
+    }*/
     /*for (counter=0; counter<allOutgroups.length; counter++) {
         var outgrInfo = allOutgroups[counter];
         if (currId == outgrInfo.id) {
@@ -153,8 +186,8 @@ $('#outgrsel > option').each(function() {
                 $(this).removeAttr("disabled");
             }
         }
-    }*/
-});
+    }
+});*/
 $('#commgroup').text(commonTax[2]);
 if (!($('#outgrsel > option:not([disabled])').length)) {
     $('#nooutgroups').removeClass("hidden");
@@ -164,10 +197,31 @@ if (!($('#outgrsel > option:not([disabled])').length)) {
 refreshView('#outgrlist',5,'#outgrlimit');
 outgrSearch();
 } else if (typeof commonTax[1] == "object") {
+$('#outgrsel').empty();
     //var allOutgroups = jsonOrgs["outgroups"]; // change?
     var groupId = commonTax[0]+"id";
-    var counter2;
-    $('#outgrsel > option').each(function() {
+    //var counter2;
+    for (var counter2 in outgrInfo) {
+        if (outgrInfo[counter2][groupId] in commonTax[1]) {
+            inactiveOutgroups.push(outgrInfo[counter2]);
+            removeFromList('#outgrlist',outgrInfo[counter2].id);
+        } else {
+            inactiveOutgroups.push(outgrInfo[counter2]);
+        }
+    }
+    activeOutgroups.sort(function(e,f) {
+    return e['dist'] - f['dist'];
+});
+inactiveOutgroups.sort(function(g,h) {
+    return g['dist'] - h['dist'];
+});
+for (var counter5 in activeOutgroups) {
+arrayToSelectBox(activeOutgroups[counter5],'#outgrsel','true');
+}
+for (var counter6 in inactiveOutgroups) {
+arrayToSelectBox(inactiveOutgroups[counter6],'#outgrsel','false');
+}
+    /*$('#outgrsel > option').each(function() {
     //var currId = $(this).attr("id");
     $(this).removeAttr("disabled");
     for (counter2=0; counter2<commonTax[1].length; counter2++) {
@@ -196,8 +250,8 @@ outgrSearch();
             }
         }
     }
-    }*/
-    });
+    }
+    });*/
     $('#commgroup').text(commonTax[2].join(", "));
 if (!($('#outgrsel > option:not([disabled])').length)) {
     $('#nooutgroups').removeClass("hidden");
@@ -218,6 +272,7 @@ outgrSearch();
 }
 }
 
+
 function orgSuccess(data,textStatus,xhr) {
 var counter;
 var counter2;
@@ -226,6 +281,7 @@ jsonOrgs = data;
 var queryOrgs = data["queryorgs"];
 var refOrgs = data["reforgs"];
 var outgroups = data["outgroups"];
+outgrInfo = [];
 for (counter3 = 0; counter3<queryOrgs.length; counter3++) {
     var queryInfo = queryOrgs[counter3];
     $('#speciessel').append("<option value='"+queryInfo.id+"' data-title='(U) "+ queryInfo.orgname + " (detected genus: "+ queryInfo.genusname +")"+"' id='" + queryInfo.id +"' data-genusid='"+queryInfo.genusid+"' data-genusname='"+queryInfo.genusname+"' data-familyid='"+queryInfo.familyid+"' data-familyname='"+queryInfo.familyname+"' data-orderid='"+queryInfo.orderid + "' data-ordername='"+queryInfo.ordername+"' data-phylid='"+queryInfo.phylid+"' data-phylname='"+queryInfo.phylname+"'> (U) "+queryInfo.orgname+ " (detected genus: "+ queryInfo.genusname+") </option>");
@@ -240,8 +296,9 @@ for (counter = 0; counter<refOrgs.length; counter++) {
    }
    }
 for (counter2 = 0; counter2<outgroups.length; counter2++) {
-    var outgrInfo = outgroups[counter2];
-    $('#outgrsel').append("<option value='"+outgrInfo.id+"' data-title='"+ outgrInfo.orgname + " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+")"+"' id='" + outgrInfo.id +"' data-genusid='"+outgrInfo.genusid+"' data-genusname='"+outgrInfo.genusname+"' data-familyid='"+outgrInfo.familyid+"' data-familyname='"+outgrInfo.familyname+"' data-orderid='"+outgrInfo.orderid + "' data-ordername='"+outgrInfo.ordername+"' data-phylid='"+outgrInfo.phylid+"' data-phylname='"+outgrInfo.phylname+"'>"+outgrInfo.orgname+ " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+") </option>");
+    outgrInfo[counter2] = outgroups[counter2];
+    //$('#outgrsel').append("<option value='"+outgrInfo[counter2].id+"' data-title='"+ outgrInfo[counter2].orgname + " (mean distance: "+ parseFloat(outgrInfo[counter2].dist).toFixed(3)+")"+"' id='" + outgrInfo[counter2].id +"' data-genusid='"+outgrInfo.genusid+"' data-genusname='"+outgrInfo.genusname+"' data-familyid='"+outgrInfo.familyid+"' data-familyname='"+outgrInfo[counter2].familyname+"' data-orderid='"+outgrInfo[counter2].orderid + "' data-ordername='"+outgrInfo[counter2].ordername+"' data-phylid='"+outgrInfo[counter2].phylid+"' data-phylname='"+outgrInfo[counter2].phylname+"'>"+outgrInfo[counter2].orgname+ " (mean distance: "+ parseFloat(outgrInfo[counter2].dist).toFixed(3)+") </option>");
+    //arrayToSelectBox(outgrInfo[counter2],'#outgrsel','true');
 }
 if (data["selspecies"] && data["seloutgroups"]) {
     var selectedSpecies = data["selspecies"];
@@ -252,7 +309,7 @@ if (data["selspecies"] && data["seloutgroups"]) {
 } else {
     loadDefaults('#speciessel','#specieslist',50);
     outgroupPick();
-    loadDefaults('#outgrsel','#outgrlist',5);
+    loadDefaults('#outgrsel','#outgrlist',1);
 }
 }
 

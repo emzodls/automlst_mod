@@ -143,6 +143,8 @@ def getjobstatus(jobid):
                     errormsgline = line.strip().split(' - ')
                     currerror = errormsgline[3]
                     errorlist.append(currerror)
+                elif "JOB_REANALYZE" in line:
+                    errorlist = []
             if mlstfound > 0 and mlstaligned > 0 and mlstfound != mlstaligned:
                 jobstatus += " (%s/%s complete)"%(mlstaligned,mlstfound)
                 # total percent is pct * portion extra
@@ -257,3 +259,20 @@ def zipalignments(jobid):
             alignzip.write(os.path.join(jobpath, 'concatMLST.fasta'), jobid+'_alignments/concatMLST.fasta')
 
 
+def mlsttsv(jobid):
+    genesused = []
+    prioritydict = {}
+    jobpath = os.path.join(app.config['RESULTS_FOLDER'], jobid)
+    alignpath = os.path.join(jobpath, 'mlst_aligned')
+    for alignfile in os.listdir(alignpath):
+        if os.path.splitext(alignfile)[1] == '.fna':
+            genesused.append(os.path.splitext(alignfile)[0])
+    with open(os.path.join(jobpath,'mlstpriority.json'),'r') as jsondict:
+        fulldict = json.load(jsondict)
+        for x in fulldict:
+            if x['acc'] in genesused:
+                prioritydict[x['acc']] = {"name":x['name'], "function": x['func'], "description": x['desc']}
+    with open(os.path.join(jobpath,'mlst_genes.txt'), 'wb') as tsvfile:
+        csvwriter = csv.writer(tsvfile, delimiter="\t")
+        for key, value in prioritydict.items():
+            csvwriter.writerow([key, prioritydict[key]['name'], prioritydict[key]['function'], prioritydict[key]['description']])

@@ -126,7 +126,11 @@ def downloadlists(jobid):
     downl = request.args.get('downl')
     resultdir = os.path.join(app.config['RESULTS_FOLDER'], jobid)
     if downl == 'mlstlist':
-        return send_from_directory(resultdir,'mlstpriority.json', as_attachment=True)
+        if os.path.exists(os.path.join(resultdir,'mlst_genes.txt')):
+            return send_from_directory(resultdir,'mlst_genes.txt', as_attachment=True)
+        else:
+            routines.mlsttsv(jobid)
+            return send_from_directory(resultdir, 'mlst_genes.txt', as_attachment=True)
     elif downl == 'alignment':
         if os.path.exists(os.path.join(resultdir, jobid+'_alignments.zip')):
             return send_from_directory(resultdir, jobid+'_alignments.zip', as_attachment=True)
@@ -312,7 +316,7 @@ def showmash(jobid):
         nodata["data"] = []
         return jsonify(nodata)
 @app.route('/aniclades')
-def aniclades():
+def aniclades(): # move to static? 
     if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'], 'aniclades.json')):
         with open(os.path.join(app.config['RESULTS_FOLDER'], 'aniclades.json'),'r') as anifile:
             anijson = json.load(anifile)

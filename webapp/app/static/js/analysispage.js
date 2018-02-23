@@ -18,6 +18,22 @@ if ($("#upfiles > option").length >= 20) {
             return true;
         }
 }
+
+function validateForm() {
+if ($('.selectablein').has('option').length>0) {
+return "validated";
+} else {
+return "notvalidated";}
+}
+
+function submitToggle() {
+    if ($('#upfiles').has('option').length>0) {
+        $('#submitjob').removeClass('disabled');
+    } else {
+        $('#submitjob').addClass('disabled');
+    }
+}
+
 function clearProgress() {
 if ($("#uploadprog").attr("value") == $("#uploadprog").attr("max")) {
     $("#uploadprog").attr("value",0);
@@ -41,6 +57,7 @@ if (data["filename"] == false) {
     }
     maxSeqs();
     $("#uploadsuccess").removeClass("hidden");
+    submitToggle();
     }
     clearProgress();
 }
@@ -90,7 +107,7 @@ var uploadForm = {
             return myXhr;
         }*/
 };
-console.log(uploadForm.data);
+//console.log(uploadForm.data);
 if (filesrc == 'ncbi') {
     $('#ncbiload').removeClass("hidden");
     $('progress').addClass("hidden");
@@ -213,6 +230,7 @@ function removeAllSeqs() {
     removeFromList('#upfiles', selectedValues3[l]);
     }
     maxSeqs();
+    submitToggle();
 }
 function selectToggle() {
 if (($('input[name="workflow"]:checked', '#sequpload').val()) == "2") {
@@ -222,14 +240,21 @@ if (($('input[name="workflow"]:checked', '#sequpload').val()) == "2") {
     }
 }
 
+/*$('#ncbiacc1').on('change', function(){
+    if ($('#ncbiacc1').val().length) {
+        $('#ncbibtn').removeClass('disabled');
+    } else {
+        $('#ncbibtn').addClass('disabled');
+    }
+});*/
 
-
-function validateForm() {
-if ($('.selectablein').has('option').length>0) {
-return "validated";
-} else {
-return "notvalidated";}
-}
+$('#seqfile1').on('change', function() {
+    if ($('#seqfile1').val().length) {
+        $('#seqbtn').removeClass('disabled');
+    } else {
+        $('#seqbtn').addClass('disabled');
+    }
+});
 
 $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();

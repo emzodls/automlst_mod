@@ -22,10 +22,13 @@ $(document).ready(function() {
             render: function(data,type,row,meta){
                 return (data*100).toFixed(1) + "%";}},
             {data: 5,
-            responsivePriority: 4},
-            {data: 6},
-            {data: 7},
-            {data: 8}
+            responsivePriority: 9},
+            {data: 6,
+            responsivePriority: 7},
+            {data: 7,
+            responsivePriority: 8},
+            {data: 8,
+            responsivePriority: 4}
         ],
         order: [[4, 'desc']],
     responsive: {

@@ -295,16 +295,16 @@ if (data != "false") {
             tree.label().color(function(node) {
                 return subtreeFill(node,currentNodeGroup,lastAni);
             });
-            } else {
-                tree.label().color('black')
-            }
-            $('#colorkey').removeClass("hidden");
+                        $('#colorkey').removeClass("hidden");
             $('#tscolorscheme').addClass('hidden');
             $('#anicolorscheme').addClass('hidden');
             $('#aniicon').css('color',subtreeFill(node,currentNodeGroup,lastAni));
             $('#selectedani').text(currentNodeGroup+'; cutoff: '+lastAni.slice(3)+'%');
             $('#singleani').removeClass('hidden');
             tree.update_nodes();
+            } else {
+                tree.label().color('black')
+            }
             setSvg();
         });
         setSvg();

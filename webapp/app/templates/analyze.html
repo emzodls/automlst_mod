@@ -84,7 +84,7 @@
                 <input type="file" class="form-control" id="seqfile1" name="seqfile1" multiple>
             </div>
             <div class="col-md-2">
-            <button type="button" class="btn btn-primary" id="seqbtn" onclick="uploadSequence('seqfile')"><span class="glyphicon glyphicon-plus"></span> Upload</button>
+            <button type="button" class="btn btn-primary disabled" id="seqbtn" onclick="uploadSequence('seqfile')"><span class="glyphicon glyphicon-plus"></span> Upload</button>
         </div>
         </div>
 
@@ -99,7 +99,7 @@
         <div class="form-group row">
             <label class="control-label col-md-2" for="jobname">Enter job title (optional)</label>
             <div class="col-md-8">
-                <input type="text" class="form-control" name="jobname" id="jobname" placeholder="(Optional">
+                <input type="text" class="form-control" name="jobname" id="jobname" placeholder="(Optional)">
             </div>
         </div>
         <div class="form-group row">
@@ -126,7 +126,7 @@
   {% endif %}
 {% endwith %}
 
-        <button type="button" class="btn btn-primary" style="width:300px" id="submitjob" onclick="$('#seqfile1').val([]);$('#ncbiacc1').val('');selectAndSend('#sequpload');">Submit Job &raquo;</button>
+        <button type="button" class="btn btn-primary disabled" style="width:300px" id="submitjob" onclick="$('#seqfile1').val([]);$('#ncbiacc1').val('');selectAndSend('#sequpload');">Submit Job &raquo;</button>
         <input type="hidden" id="filesrc" name="filesrc" value="">
         <input type="hidden" id="workflow" name="workflow" value="2">
     </form>
