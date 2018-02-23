@@ -1,38 +1,109 @@
 var jobid = $('#jobinfo').val();
 
-function nodeFill(node) {
-    //var nodeIndex = node.node_name().search('ANIid_95');
+//  ANI group coloring of labels
+function nodeFill(node,aniGroupCutoff) { // add second parameter for ANI cutoff, or handle ANI group selection as a dropdown select & get value?
+    if (aniGroupCutoff == '95') {
     var nodeAni = node.property('ANI95');
-    if (nodeAni in aniTable) {
-        return aniTable[nodeAni];
+    if (nodeAni in aniTable[0]) {
+        return aniTable[0][nodeAni];
     } else {
-        //console.log(nodeAni);
         return "black";
+    }
+    } else if (aniGroupCutoff == '96') {
+    var nodeAni = node.property('ANI96');
+    if (nodeAni in aniTable[1]) {
+        return aniTable[1][nodeAni];
+    } else {
+        return "black";
+    }
+    } else if (aniGroupCutoff == '97') {
+    var nodeAni = node.property('ANI97');
+    if (nodeAni in aniTable[2]) {
+        return aniTable[2][nodeAni];
+    } else {
+        return "black";
+    }
+    }
+    else if (aniGroupCutoff == '98') {
+    var nodeAni = node.property('ANI98');
+    if (nodeAni in aniTable[3]) {
+        return aniTable[3][nodeAni];
+    } else {
+        return "black";
+    }
+    }
+    else if (aniGroupCutoff == '99') {
+    var nodeAni = node.property('ANI99');
+    if (nodeAni in aniTable[4]) {
+        return aniTable[4][nodeAni];
+    } else {
+        return "black";
+    }
     }
 
 }
-
-function subtreeFill(node, searchId,aniCutoff) {
-if (aniCutoff == 'cutoff95') {
+//  coloring single ANI groups
+function subtreeFill(node, searchId,aniCutoff) { //see nodeFill; how to get ANI cutoff?
+if (aniCutoff == 'ANI95') {
 if (node.property('ANI95') == searchId) {
-    if (searchId in aniTable) {
-        return aniTable[searchId];
+    if (searchId in aniTable[0]) {
+        return aniTable[0][searchId];
     } else {
         return "black";
     }
 } else {
     return "black";
-}} else {
+}} else if (aniCutoff == 'ANI96') {
+if (node.property('ANI96') == searchId) {
+    if (searchId in aniTable[1]) {
+        return aniTable[1][searchId];
+    } else {
+        return "black";
+    }
+} else {
+    return "black";
+}
+} else if (aniCutoff == 'ANI97') {
+if (node.property('ANI97') == searchId) {
+    if (searchId in aniTable[2]) {
+        return aniTable[2][searchId];
+    } else {
+        return "black";
+    }
+} else {
+    return "black";
+}
+} else if (aniCutoff == 'ANI98') {
+
+if (node.property('ANI98') == searchId) {
+    if (searchId in aniTable[3]) {
+        return aniTable[3][searchId];
+    } else {
+        return "black";
+    }
+} else {
+    return "black";
+}
+} else if (aniCutoff == 'ANI99') {
+if (node.property('ANI99') == searchId) {
+    if (searchId in aniTable[4]) {
+        return aniTable[4][searchId];
+    } else {
+        return "black";
+    }
+} else {
+    return "black";
+}
+} else {
     return "black";
 }
 }
-
+//  coloring of nodes as type strains/query seqs/outgroups; also used for coloring labels
 function strainTypeNodes(node) {
-//if (node.is_leaf()) {
 if (node.node_name().search("QS--") != -1) {
               return '#0000ff';
             }
-            else if (node.node_name().search("OG--") != -1) {
+            else if (node.node_name().search("OG--") != -1) { // marking as outgroup currently has higher priority than marking as TS
               return '#cc3300';
             }
             else if (node.node_name().search("TS--") != -1) {
@@ -40,9 +111,8 @@ if (node.node_name().search("QS--") != -1) {
             }
             return '#888888';
 }
-/*return '#888888';
-}*/
 
+// setting up SVG; needs to be called after every visual change to the tree that should be reflected in downloaded image
 function setSvg() {
 $('svg').attr('xmlns',"http://www.w3.org/2000/svg");
 $('svg').attr('xmlns:xlink', "http://www.w3.org/1999/xlink");
@@ -54,7 +124,21 @@ var treeSvg = $('#svgCanvas').html();
                 $('#imgdownl').attr("href",url);
                 $('#imgdownl').attr("download", fileNameToSave);
                 }
-
+function sortAniList(aniDictToSort) {
+// create array of arrays storing highest branch height (lowest y-offset) & ANI id
+      var sortableAni = [];
+      for (var z in aniDictToSort) {
+      if (aniDictToSort[z].length > 1) {
+      higherBranch = Math.min.apply(null,aniDictToSort[z]);
+      sortableAni.push([higherBranch, z]);
+      }
+      }
+      //sort by y-position
+      sortableAni.sort(function(a,b){
+        return a[0]-b[0];
+      });
+      return sortableAni;
+}
 
 function treeSuccess(data,textStatus,xhr) {
 if (data != "false") {
@@ -94,29 +178,65 @@ if (data != "false") {
             .width(1000)
             .scale(false)
         );
-          tree(document.getElementById("svgCanvas"));
+          tree(document.getElementById("svgCanvas")); // tree needs to be rendered at this point to get y-positions of nodes later
           clearInterval(timer);
         var aniDict = {};
+        aniDict[0] = {};
+        aniDict[1] = {};
+        aniDict[2] = {};
+        aniDict[3] = {};
+        aniDict[4] = {};
+        /*aniDict[95] = {};
+        aniDict[96] = {};
+        aniDict[97] = {};
+        aniDict[98] = {};
+        aniDict[99] = {};*/
         root = tree.root();
         leaves = root.get_all_leaves();
+        // get all ANI ids and y-positions
         for (var leafNode in leaves) {
-        var nodeIndex = leaves[leafNode].node_name().search('ANIid_95');
-        var nodeAni = leaves[leafNode].node_name().slice(nodeIndex+9);
         var nodeName = leaves[leafNode].node_name();
-        leaves[leafNode].property('ANI95', nodeAni); // store as property so the name won't have to be searched every time
+        var gcfIndex = nodeName.search('GCF_');
+        if (gcfIndex != -1) {
+        var nodeGcf = nodeName.slice(gcfIndex,gcfIndex+13);
+        var nodeAni = [aniMasterList[nodeGcf][0], aniMasterList[nodeGcf][1], aniMasterList[nodeGcf][2], aniMasterList[nodeGcf][3],aniMasterList[nodeGcf][4]];
+        leaves[leafNode].property('ANI95', nodeAni[0]); // store as property so the name won't have to be searched every time
+        leaves[leafNode].property('ANI96', nodeAni[1]);
+        leaves[leafNode].property('ANI97', nodeAni[2]);
+        leaves[leafNode].property('ANI98', nodeAni[3]);
+        leaves[leafNode].property('ANI99', nodeAni[4]);
         var nodeHeight = $('text.tnt_tree_label:contains("'+ nodeName+'")').offset().top; //get y-position of branches relative to page
-        if (!(nodeAni in aniDict)) {
-            aniDict[nodeAni] = [];
+        for (var b in nodeAni) {
+                if (!(nodeAni[b] in aniDict[b])) {
+                    aniDict[b][nodeAni[b]] = [];
+                }
+                aniDict[b][nodeAni[b]].push(nodeHeight);
         }
-        aniDict[nodeAni].push(nodeHeight);
+        //long version:
+        /*if (!(nodeAni[0] in aniDict[95])) {
+            aniDict[95][nodeAni[0]] = [];
         }
-        /*streptonodes = root.find_all(function(node) {
-            return (node.node_name().toString().search('Streptomyces') != -1);
-        });
-        console.log(streptonodes);*/
-
-      //console.log(tree.layout().width());
-      /*$('text.tnt_tree_label:contains("ANIid_95")').each(function() { // still needed, since node height can only be accessed by labels' offsets
+        aniDict[95][nodeAni[0]].push(nodeHeight);
+        if (!(nodeAni[1] in aniDict[96])) {
+            aniDict[96][nodeAni[1]] = [];
+        }
+        aniDict[96][nodeAni[1]].push(nodeHeight);
+        if (!(nodeAni[2] in aniDict[97])) {
+            aniDict[97][nodeAni[2]] = [];
+        }
+        aniDict[97][nodeAni[2]].push(nodeHeight);
+        if (!(nodeAni[3] in aniDict[98])) {
+            aniDict[98][nodeAni[3]] = [];
+        }
+        aniDict[98][nodeAni[3]].push(nodeHeight);
+        if (!(nodeAni[4] in aniDict[99])) {
+            aniDict[99][nodeAni[4]] = [];
+        }
+        aniDict[99][nodeAni[4]].push(nodeHeight);*/
+        }
+        }
+        // alternate way of getting branch heights matched to ANI ids, in case the above code for height fails
+      /*$('text.tnt_tree_label:contains("ANIid_95")').each(function() {
         var aniIndex = $(this).text().search('ANIid_95');
         var aniId = $(this).text().slice(aniIndex+9).replace(/_/g, "");
         if (!(aniId in aniDict)) {
@@ -124,54 +244,56 @@ if (data != "false") {
         }
         aniDict[aniId].push($(this).offset().top);
       });*/
-      // create array of arrays storing highest branch height (lowest y-offset) & ANI id
-      var sortableAni = [];
-      for (var z in aniDict) {
-      if (aniDict[z].length > 1) {
-      higherBranch = Math.min.apply(null,aniDict[z]);
-      sortableAni.push([higherBranch, z]);
-      }
-      }
-      //sort by y-position
-      sortableAni.sort(function(a,b){
-        return a[0]-b[0];
-      });
-      /*var sortedAni = {};
-      for (var a in sortableAni) {
-      sortedAni[sortableAni[a][0]] = sortableAni[a][1];
-      }
-
-      console.log(sortedAni);*/
-      //var aniList = [];
+      /*var aniSorted95 = sortAniList(aniDict[95]);
+      var aniSorted96 = sortAniList(aniDict[96]);
+      var aniSorted97 = sortAniList(aniDict[97]);
+      var aniSorted98 = sortAniList(aniDict[98]);
+      var aniSorted99 = sortAniList(aniDict[99]);*/
+      var aniSorted = [sortAniList(aniDict[0]),sortAniList(aniDict[1]),sortAniList(aniDict[2]),sortAniList(aniDict[3]),sortAniList(aniDict[4])];
       //var prettyColors = ["#8B0000","#cc3600","#b36200","#7b7737","#556B2F","#006400"," #2d8653","#008080","#396a93","#00008B","#4B0082","#800080","#C71585","#DC143C"]; //sorted array of colors -> rainbow
-      var prettyColors = [ "#00990d", "#9900ff", " #e6007a", "#0000CD"];
-      //var ani96Colors = ["#cc4400", "#008080", "#590099", "#518000"];
-      //var ani97Colors = ["#e6007a", "#008080", "#590099", "#00990d"];
-      //var ani98Colors = ["#cc4400", "#0000CD", "#9900ff", "#518000"];
-      //var ani99Colors = ["#e6007a", "#0000CD", "#518000", "590099"];
-      var amountColors = prettyColors.length;
-      /*for (var x in sortedAni) {
-        aniList.push(sortedAni[x]);
-      }*/
+      var prettyColors = [[ "#00990d", "#9900ff", " #e6007a", "#0000CD"],["#cc4400", "#008080", "#590099", "#518000"],["#e6007a", "#008080", "#590099", "#00990d"],["#cc4400", "#0000CD", "#9900ff", "#518000"],["#e6007a", "#0000CD", "#518000", "#590099"]];
       aniTable = {};
-      /*for (var y in aniList) {
-      aniTable[aniList[y]] = prettyColors[y % amountColors]
-      }*/
-      // iterate through list, pair each entry with color value
-      for (var y in sortableAni) {
-      aniTable[sortableAni[y][1]] = prettyColors[y % amountColors];
+      aniTable[0] = {};
+      aniTable[1] = {};
+      aniTable[2] = {};
+      aniTable[3] = {};
+      aniTable[4] = {};
+      // iterate through each list of ANIs, match up with corresponding color schemes
+      for (var y in aniSorted) {
+        for (var a in aniSorted[y]) {
+        aniTable[y][aniSorted[y][a][1]] = prettyColors[y][a % prettyColors[y].length];
+        }
       }
-      /*tree.label().color(function(node) {
-        return nodeFill(node);
-      });
-      tree.update_nodes();*/
-
+      // long version:
+      /*aniTable[95] = {};
+      aniTable[96] = {};
+      aniTable[97] = {};
+      aniTable[98] = {};
+      aniTable[99] = {};*/
+      /*for (var y in aniSorted95) {
+      aniTable[95][aniSorted95[y][1]] = prettyColors[y % amountColors];
+      }
+      for (var a in aniSorted96) {
+      aniTable[96][aniSorted96[a][1]] = ani96Colors[a % amountColors];
+      }
+      for (var b in aniSorted97) {
+      aniTable[97][aniSorted97[b][1]] = ani97Colors[b % amountColors];
+      }
+      for (var c in aniSorted98) {
+      aniTable[98][aniSorted98[c][1]] = ani98Colors[c % amountColors];
+      }
+      for (var d in aniSorted99) {
+      aniTable[99][aniSorted99[d][1]] = ani99Colors[d % amountColors];
+      }*/
+      // coloring of single groups
         tree.on("click", function(node) {
-            if (node.is_leaf()) {
-            var ani95 = node.property('ANI95');
+            if (node.is_leaf()) { // rework this; let subtreeFill do the lifting of what ANI group to search?
+            //var ani95 = node.property('ANI95');
+            var lastAni = $('#lastani').val();
+            var currentNodeGroup = node.property(lastAni);
             //console.log(ani95);
             tree.label().color(function(node) {
-                return subtreeFill(node,ani95,'cutoff95');
+                return subtreeFill(node,currentNodeGroup,lastAni);
             });
             } else {
                 tree.label().color('black')
@@ -179,8 +301,8 @@ if (data != "false") {
             $('#colorkey').removeClass("hidden");
             $('#tscolorscheme').addClass('hidden');
             $('#anicolorscheme').addClass('hidden');
-            $('#aniicon').css('color',subtreeFill(node,ani95,'cutoff95'));
-            $('#selectedani').text(ani95);
+            $('#aniicon').css('color',subtreeFill(node,currentNodeGroup,lastAni));
+            $('#selectedani').text(currentNodeGroup+'; cutoff: '+lastAni.slice(3)+'%');
             $('#singleani').removeClass('hidden');
             tree.update_nodes();
             setSvg();
@@ -200,7 +322,6 @@ function treeError(xhr,ajaxOptions,thrownError) { // communication error
 console.log(xhr,ajaxOptions,thrownError);
 }
 function drawTree() {
-//console.log(jobid);
 $.ajax({
         // Your server script to process the upload
         url: '/results/'+jobid+'/tree',
@@ -213,30 +334,20 @@ $.ajax({
 
 }
 
-/*function downloadPng() {
-    var pngExport = tnt.utils.png()
-        .filename(jobid+"tree._png");
-    pngExport(d3.select("#svgCanvas"));
-}*/
 
 function resizeTree(resizeDir) {
     var treeWidth = tree.layout().width();
 
     if (resizeDir == 'upH') {
-        /*var treeLayout = tnt.tree.layout.vertical().width(treeWidth+100).scale(false);
-        tree.layout(treeLayout);*/
         tree.layout().width(treeWidth+100);
     } else if (resizeDir == 'downH' && treeWidth > 500) {
-        /*var treeLayout = tnt.tree.layout.vertical().width(treeWidth - 100).scale(false);
-        tree.layout(treeLayout);*/
         tree.layout().width(treeWidth - 100);
     }
     tree.update();
     setSvg();
 }
-
+// returns font sizes used for search function
 function treeFontSize(node,value) {
-//console.log('TEST');
 if (node.is_leaf()) {
     var name = node.node_name();
     if (name.toLowerCase().search(value.toLowerCase()) != -1) {
@@ -260,19 +371,48 @@ if (value.length) {
     tree.update();
     }
 }
-
-function showAniGroups() {
+// recolors tree according to ANI groups
+function showAniGroups(aniCutoffLevel) {
+// coloring of legend currently only for 95% cutoff
+if (aniCutoffLevel == '95') {
 $('#colorblock1').css('color','#00990d');
 $('#colorblock2').css('color','#9900ff');
 $('#colorblock3').css('color','#e6007a');
 $('#colorblock4').css('color','#0000CD');
+$('#lastani').val('ANI95');
+} else if (aniCutoffLevel == '96') {
+$('#colorblock1').css('color','#cc4400');
+$('#colorblock2').css('color','#008080');
+$('#colorblock3').css('color','#590099');
+$('#colorblock4').css('color','#518000');
+$('#lastani').val('ANI96');
+} else if (aniCutoffLevel == '97') {
+$('#colorblock1').css('color','#e6007a');
+$('#colorblock2').css('color','#008080');
+$('#colorblock3').css('color','#590099');
+$('#colorblock4').css('color','#00990d');
+$('#lastani').val('ANI97');
+} else if (aniCutoffLevel == '98') {
+$('#colorblock1').css('color','#cc4400');
+$('#colorblock2').css('color','#0000CD');
+$('#colorblock3').css('color','#9900ff');
+$('#colorblock4').css('color','#518000');
+$('#lastani').val('ANI98');
+} else if (aniCutoffLevel == '99') {
+$('#colorblock1').css('color','#e6007a');
+$('#colorblock2').css('color','#0000CD');
+$('#colorblock3').css('color','#518000');
+$('#colorblock4').css('color','#590099');
+$('#lastani').val('ANI99');
+}
+$('#anicutoff').text(aniCutoffLevel);
 $('#colorkey').removeClass('hidden');
 $('#tscolorscheme').addClass('hidden');
 $('#singleani').addClass('hidden');
 $('#anicolorscheme').removeClass('hidden');
 tree.label().color(function(node) {
 if (node.is_leaf()) {
-    return nodeFill(node);
+    return nodeFill(node,aniCutoffLevel);
     }
     else {
     return 'black';
@@ -281,7 +421,7 @@ if (node.is_leaf()) {
 tree.update_nodes();
 setSvg();
 }
-
+// recolors tree according to type strains/QS/outgroups
 function showTypeStrains() {
 $('#colorkey').removeClass('hidden');
 $('#anicolorscheme').addClass('hidden');
@@ -293,7 +433,7 @@ tree.label().color(function(node) {
 tree.update_nodes();
 setSvg();
 }
-
+// resets label colors to default (black)
 function resetColor() {
 $('#colorkey').addClass("hidden");
 $('#tscolorscheme').addClass('hidden');
@@ -315,26 +455,7 @@ $(document).ready(function () {
 $('#searchtree').on("keyup", startSearch);
 });
 
-/*function treeQueue() {
-    console.log('TQ running');
-    if (treeTimer <= 0) {
-        searchTree();
-        treeStarted = false;
-    } else {
-        treeTimer -= 100;
-        setTimeout(treeQueue, 100);
-    }
-}
-$(document).ready(function() {
-$('#searchtree').on("change", function() {
-    //console.log('Search running');
-    treeTimer = 1000;
-    if (treeStarted == false) {
-        treeQueue();
-        treeStarted = true;
-    }
-});
-}); */
+
 
 function toggleScale() {
 if (tree.layout().scale()) {
@@ -351,32 +472,29 @@ function treePopup() {
     treeWindow.document.write($('#svgCanvas *').html());
 }
 
-
-/*function uploadSuccess(data,textStatus,xhr) {
-console.log('SUCCESS');
-}
-function uploadError(xhr,ajaxOptions,thrownError) {
-console.log('FAIL');
+function aniError(xhr,ajaxOptions,thrownError) { // communication error
+console.log(xhr,ajaxOptions,thrownError);
 }
 
-function uploadTree() {
-var treeToSvg = $('#svgCanvas').html();
-treeToSvg = '<?xml version="1.0" standalone="no"?>\r\n' + treeToSvg;
+function aniSuccess(data,textStatus,xhr) {
+aniMasterList = data;
+//console.log(aniMasterList);
+}
+
+function loadAniGroups() {
 $.ajax({
-    contentType: 'image/svg+xml',
-        url: '/sendtree',
+        // Your server script to process the upload
+        url: '/aniclades',
         async: true,
-        type: 'POST',
-        //Form data
-        data: treeToSvg,
         cache: false,
         contentType: false,
         processData: false,
-        success: uploadSuccess,
-        error: uploadError
-});
+        success: aniSuccess,
+        error: aniError});
+
 }
-*/
+
+
 $("button[data-toggle='tooltip']").on('click',function(){
     $(this).blur();
 })

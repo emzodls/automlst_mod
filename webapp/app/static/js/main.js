@@ -23,7 +23,7 @@ var optionList = [];
         var speciesOption = "<option value='"+$(this).val()+"' class='"+hashCode($(this).val())+" picked' data-title='"+$(this).data("title")+"'>"+$(this).data("title")+"</option>";
     }*/
     optionList.unshift(speciesOption);
-    removeFromList(id2, $(this).val()); //removes any item that already has this class from the list it'll get added to -> problem on step 2 if same species in outgroups and regular species
+    removeFromList(id2, $(this).val()); //removes any item that already has this class from the list it'll get added to -> problem on step 2 if same species in outgroups and regular species?
     });
     var i;
     for (i = 0; i < optionList.length; i++) {
@@ -46,7 +46,6 @@ var optionList = [];
 function removeFromList(id10, selectedValue) {
     var y = "."+hashCode(selectedValue);
     $(id10+" > option").remove(y);
-    //console.log(selectedValue,hashCode(selectedValue));
 }
 
 function removeAllFromList(id3) {
