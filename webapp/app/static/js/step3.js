@@ -1,27 +1,27 @@
-// not elegant but at least it works
+// displays organisms that need to be deleted to proceed with current gene selection
 function findDeleted() {
 var deletedList = [];
 $('#deletewarning').addClass('hidden');
 $('#todelete').empty();
-$('#mlstlist > option').each(function() {
-    if ($(this).data("del")) {
-        $(this).css({"background-color":"#fcf8e5"});
+$('#mlstlist > option').each(function() { // which organisms don't contain the gene in question?
+    if ($(this).data("del")) { //if gene requires organisms to be deleted (recorded in data-del)
+        $(this).css({"background-color":"#fcf8e5"}); // highlights background if organisms need to be deleted
         var currDel = $(this).data("del").split(",");
         var i;
         for (i in currDel) {
-            if (deletedList.indexOf(currDel[i]) == -1) {
+            if (deletedList.indexOf(currDel[i]) == -1) { // add to list of deleted organisms if not already in the list
                 deletedList.push(currDel[i]);
             }
         }
     }
 });
-if (deletedList.length > 0) {
+if (deletedList.length > 0) { // if there are deleted organisms, show list
     var j;
     for (j in deletedList) {
-        $('#todelete').append("<li>"+deletedList[j]+"</li>");
+        $('#todelete').append("<li>"+deletedList[j]+"</li>"); // add entries to list displayed to user
     }
-    $('#deletewarning').removeClass("hidden");
-    $('#removeorgs').val(deletedList.toString());
+    $('#deletewarning').removeClass("hidden"); // *then* show the user that list
+    $('#removeorgs').val(deletedList.toString()); // currently without function...
 }
 }
 
@@ -29,6 +29,7 @@ function geneError(xhr,ajaxOptions,thrownError) { // communication error
 console.log(xhr,ajaxOptions,thrownError);
 }
 
+// load genes into multiselects, add information
 function geneSuccess(data,textStatus,xhr) {
     var counter;
     var mlstGenes = data;
@@ -36,7 +37,7 @@ function geneSuccess(data,textStatus,xhr) {
     var selectedGenes = data["selected"];*/
     for (counter=0; counter<mlstGenes.length; counter++) {
         var geneInfo = mlstGenes[counter];
-        console.log(geneInfo);
+        //console.log(geneInfo);
         if (geneInfo["orgdel"].length>0) {
         $('#mlstsel').append("<option id='" + geneInfo.acc + "' data-title='"+ geneInfo.name +": "+geneInfo.desc+"' value='"+geneInfo.acc+"' data-del='"+geneInfo.orgdel +"' style='background-color:#fcf8e5'>" + geneInfo.name +": "+geneInfo.desc+"</option>");
         } else {

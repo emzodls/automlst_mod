@@ -1,7 +1,7 @@
 var jobid = $('#jobinfo').val();
 
 //  ANI group coloring of labels
-function nodeFill(node,aniGroupCutoff) { // add second parameter for ANI cutoff, or handle ANI group selection as a dropdown select & get value?
+function nodeFill(node,aniGroupCutoff) {
     if (aniGroupCutoff == '95') {
     var nodeAni = node.property('ANI95');
     if (nodeAni in aniTable[0]) {
@@ -139,7 +139,7 @@ function sortAniList(aniDictToSort) {
       });
       return sortableAni;
 }
-
+// actual tree rendering
 function treeSuccess(data,textStatus,xhr) {
 if (data != "false") {
 	$('#svgCanvas').empty();
@@ -285,11 +285,11 @@ if (data != "false") {
       for (var d in aniSorted99) {
       aniTable[99][aniSorted99[d][1]] = ani99Colors[d % amountColors];
       }*/
-      // coloring of single groups
+      // coloring of single groups on click; "remembers" last ANI cutoff level via hidden input
         tree.on("click", function(node) {
-            if (node.is_leaf()) { // rework this; let subtreeFill do the lifting of what ANI group to search?
+            if (node.is_leaf()) {
             //var ani95 = node.property('ANI95');
-            var lastAni = $('#lastani').val();
+            var lastAni = $('#lastani').val(); // values from ANI95-ANI99
             var currentNodeGroup = node.property(lastAni);
             //console.log(ani95);
             tree.label().color(function(node) {
@@ -308,6 +308,7 @@ if (data != "false") {
             setSvg();
         });
         setSvg();
+        // for printing; everything without .printable is hidden
         $('#svgCanvas').addClass('printable');
         $('#svgCanvas *').addClass('printable');
 
@@ -334,13 +335,13 @@ $.ajax({
 
 }
 
-
+// tree resizing; only horizontal resizing possible
 function resizeTree(resizeDir) {
     var treeWidth = tree.layout().width();
 
     if (resizeDir == 'upH') {
         tree.layout().width(treeWidth+100);
-    } else if (resizeDir == 'downH' && treeWidth > 500) {
+    } else if (resizeDir == 'downH' && treeWidth > 500) { //semi-arbitrary cutoff so display doesn't break
         tree.layout().width(treeWidth - 100);
     }
     tree.update();
@@ -357,7 +358,7 @@ if (node.is_leaf()) {
 }
     return 12;
     }
-
+// searches tree; search results have larger font size
 function searchTree() {
 var value = $('#searchtree').val().toLowerCase();
 if (value.length) {
@@ -373,7 +374,6 @@ if (value.length) {
 }
 // recolors tree according to ANI groups
 function showAniGroups(aniCutoffLevel) {
-// coloring of legend currently only for 95% cutoff
 if (aniCutoffLevel == '95') {
 $('#colorblock1').css('color','#00990d');
 $('#colorblock2').css('color','#9900ff');
@@ -456,7 +456,7 @@ $('#searchtree').on("keyup", startSearch);
 });
 
 
-
+// switches between scaled and unscaled layout
 function toggleScale() {
 if (tree.layout().scale()) {
     tree.layout().scale(false);
@@ -466,7 +466,7 @@ if (tree.layout().scale()) {
     tree.update();
     setSvg();
 }
-
+// opening tree SVG in new window if needed
 function treePopup() {
     var treeWindow = window.open("","Tree View");
     treeWindow.document.write($('#svgCanvas *').html());
@@ -480,7 +480,7 @@ function aniSuccess(data,textStatus,xhr) {
 aniMasterList = data;
 //console.log(aniMasterList);
 }
-
+// loading ANI groups for coloring
 function loadAniGroups() {
 $.ajax({
         // Your server script to process the upload

@@ -19,13 +19,15 @@ if ($("#upfiles > option").length >= 20) {
         }
 }
 
+// prevent submitting with empty list
+// check if any orgs in list
 function validateForm() {
 if ($('.selectablein').has('option').length>0) {
 return "validated";
 } else {
 return "notvalidated";}
 }
-
+// disables submit button if list is empty
 function submitToggle() {
     if ($('#upfiles').has('option').length>0) {
         $('#submitjob').removeClass('disabled');

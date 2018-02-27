@@ -1,8 +1,9 @@
+// for loading screen: handles progress bar; handles redirects
 function progressSuccess(data,textStatus,xhr) {
 //var data = JSON.parse(data);
 var jobid = $('#jobinfo').val();
 var lastStep = $('#laststep').val();
-//console.log(lastStep);
+// handles redirects to appropriate steps
 if (data["redirect"]) {
 //console.log('TESTING');
     if (data["redirect"] == "step2" && lastStep != "step2") {
@@ -11,13 +12,13 @@ if (data["redirect"]) {
         window.location.replace("/results/"+jobid+"/step3");
     } else if (data["redirect"] == "report") {
         window.location.replace("/results/"+jobid+"/report");
-    } else if ((data["redirect"] == "step2" && lastStep == "step2") || (data["redirect"] == "step3" && lastStep == "step3")) {
+    } else if ((data["redirect"] == "step2" && lastStep == "step2") || (data["redirect"] == "step3" && lastStep == "step3")) { // if user just left manual input step, redirect to loading page and set progress bar
         $('#workflow2stat').attr("style", "width:"+data["progress"]+"%");
         $('#workflow2stat').attr("aria-valuenow",data["progress"]);
         $('#currentstatus').text(data["status"]);
     }
 } else {
-//console.log('WORKING');
+// sets current progress on Bootstrap-styled progress bar
 $('#workflow2stat').attr("style", "width:"+data["progress"]+"%");
 //console.log($('#workflow2stat').attr("style"));
 $('#workflow2stat').attr("aria-valuenow",data["progress"]);
@@ -38,7 +39,7 @@ else if (data["progress"] >= 30) {
 function progressError(xhr,ajaxOptions,thrownError) {
 console.log(xhr,ajaxOptions,thrownError);
 }
-
+// retrieves job progress information information
 function getStatus() {
 var jobid = $('#jobinfo').val();
 /*var workflow = $('#workinfo').val();

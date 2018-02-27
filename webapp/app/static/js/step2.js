@@ -74,32 +74,35 @@ outgrTimer = setTimeout(outgrSearch, 1000);
 $(document).ready(function() {
 $('#outgroupsearch').on("keyup",outgrStart);
 });
-
-function arrayToSelectBox(inputArray, selectBox, isActive) {
+// add entries from object
+function objectToSelectBox(inputObject, selectBox, isActive) {
     if (isActive == 'true') {
-    $(selectBox).append("<option value='"+inputArray.id+"' data-title='"+ inputArray.orgname + " (mean distance: "+ parseFloat(inputArray.dist).toFixed(3)+")"+"' id='" + inputArray.id +"' data-genusid='"+inputArray.genusid+"' data-genusname='"+inputArray.genusname+"' data-familyid='"+inputArray.familyid+"' data-familyname='"+inputArray.familyname+"' data-orderid='"+inputArray.orderid + "' data-ordername='"+inputArray.ordername+"' data-phylid='"+inputArray.phylid+"' data-phylname='"+inputArray.phylname+"'>"+inputArray.orgname+ " (mean distance: "+ parseFloat(inputArray.dist).toFixed(3)+") </option>");
+    $(selectBox).append("<option value='"+inputObject.id+"' data-title='"+ inputObject.orgname + " (mean distance: "+ parseFloat(inputObject.dist).toFixed(3)+")"+"' id='" + inputObject.id +"' data-genusid='"+inputObject.genusid+"' data-genusname='"+inputObject.genusname+"' data-familyid='"+inputObject.familyid+"' data-familyname='"+inputObject.familyname+"' data-orderid='"+inputObject.orderid + "' data-ordername='"+inputObject.ordername+"' data-phylid='"+inputObject.phylid+"' data-phylname='"+inputObject.phylname+"'>"+inputObject.orgname+ " (mean distance: "+ parseFloat(inputObject.dist).toFixed(3)+") </option>");
     } else {
-    $(selectBox).append("<option value='"+inputArray.id+"' data-title='"+ inputArray.orgname + " (mean distance: "+ parseFloat(inputArray.dist).toFixed(3)+")"+"' id='" + inputArray.id +"' data-genusid='"+inputArray.genusid+"' data-genusname='"+inputArray.genusname+"' data-familyid='"+inputArray.familyid+"' data-familyname='"+inputArray.familyname+"' data-orderid='"+inputArray.orderid + "' data-ordername='"+inputArray.ordername+"' data-phylid='"+inputArray.phylid+"' data-phylname='"+inputArray.phylname+"' disabled>"+inputArray.orgname+ " (mean distance: "+ parseFloat(inputArray.dist).toFixed(3)+") </option>");
+    $(selectBox).append("<option value='"+inputObject.id+"' data-title='"+ inputObject.orgname + " (mean distance: "+ parseFloat(inputObject.dist).toFixed(3)+")"+"' id='" + inputObject.id +"' data-genusid='"+inputObject.genusid+"' data-genusname='"+inputObject.genusname+"' data-familyid='"+inputObject.familyid+"' data-familyname='"+inputObject.familyname+"' data-orderid='"+inputObject.orderid + "' data-ordername='"+inputObject.ordername+"' data-phylid='"+inputObject.phylid+"' data-phylname='"+inputObject.phylname+"' disabled>"+inputObject.orgname+ " (mean distance: "+ parseFloat(inputObject.dist).toFixed(3)+") </option>");
     }
 }
 
 
 var jsonOrgs = false;
+// identify common taxonomic group of all selected organisms, as identified by NCBI ids
 function commonGroup() {
 var counter, counter2, commonTaxId;
 //var selectedList = [];
 var allGroup = {};
 var groupList = ["genus","family","order","phyl"];
 var refOrgs = $.extend(jsonOrgs["reforgs"], jsonOrgs["queryorgs"]); //how to handle if only query orgs remaining?
+ // for each taxonomical level, see what group each active option in species selection belongs to
  for (var group in groupList) {
                 var groupId = groupList[group]+"id";
                 var groupName = groupList[group]+"name";
+                // iterate through all selected options
                 $("#specieslist > .picked").each(function(){
                     var currId = $(this).val();
                     var currGroup = $(this).data(groupId);
                     var currName = $(this).data(groupName)
                     if (currGroup != "N/A" && currName != "N/A") {
-                                allGroup[currGroup] = currName;
+                                allGroup[currGroup] = currName; //stores current option's group ID and name in allGroup; overwrites respective entry if already present
                                 //console.log(allGroup);
                                 }
                     /*for (counter=0; counter<refOrgs.length; counter++) {
@@ -115,43 +118,48 @@ var refOrgs = $.extend(jsonOrgs["reforgs"], jsonOrgs["queryorgs"]); //how to han
                                 }
                         }*/
                 });
+                // if all options belong to the same group at the level currently examined, return examined level, NCBI group ID and name of group
                 if (Object.keys(allGroup).length == 1) {
-                commonTaxId = Object.keys(allGroup);
-                var commonInfo = [groupList[group], commonTaxId[0], allGroup[commonTaxId[0]]];
+                    commonTaxId = Object.keys(allGroup);
+                    var commonInfo = [groupList[group], commonTaxId[0], allGroup[commonTaxId[0]]];
                 //console.log(commonInfo);
-                return commonInfo;
-                } else if (groupList[group] == "phyl" && Object.keys(allGroup).length > 1){
-                commonTaxId = Object.keys(allGroup);
-                var multiGroups = [];
-                for (var idkey in commonTaxId) {
-                multiGroups.push(allGroup[commonTaxId[idkey]]);
+                    return commonInfo;
+                } else if (groupList[group] == "phyl" && Object.keys(allGroup).length > 1){ // if the check has been run down to phylum level without finding one single group to which all options belong, return level (phylum), as well as NCBI ids and names of all phyla represented
+                    commonTaxId = Object.keys(allGroup);
+                    var multiGroups = [];
+                    for (var idkey in commonTaxId) {
+                        multiGroups.push(allGroup[commonTaxId[idkey]]);
+                    }
+                    var commonInfo = [groupList[group], commonTaxId, multiGroups];
+                    //console.log(commonInfo);
+                    return commonInfo
                 }
-                var commonInfo = [groupList[group], commonTaxId, multiGroups];
-                console.log(commonInfo);
-                return commonInfo
-                }
+                // if neither of these conditions has been satisfied, empty allGroup and repeat check at next higher taxonomical level
                 allGroup = {};
 }
 }
+
+// select all organisms suitable as outgroups for current species selection, sort by Mash distance and add to outgroup list
 function outgroupPick() {
 var commonTax = commonGroup();
-console.log(typeof commonTax[1]);
+//console.log(typeof commonTax[1]);
 var activeOutgroups = [];
 var inactiveOutgroups = [];
-if (typeof commonTax[1] == "string") {
+if (typeof commonTax[1] == "string") { //if only one NCBI id in list
 //var allOutgroups = jsonOrgs["outgroups"]; // change?
 var groupId = commonTax[0]+"id";
 $('#outgrsel').empty();
-for (var counter in outgrInfo) {
+for (var counter in outgrInfo) { //iterate through outgroup dictionary
     if (outgrInfo[counter][groupId] == commonTax[1]) {
         inactiveOutgroups.push(outgrInfo[counter]);
-        console.log(outgrInfo[counter].id);
+        //console.log(outgrInfo[counter].id);
         removeFromList('#outgrlist',outgrInfo[counter].id);
     } else {
         activeOutgroups.push(outgrInfo[counter]);
     }
 
 }
+// sort outgroups from smallest to largest Mash distance
 activeOutgroups.sort(function(a,b) {
     return a['dist'] - b['dist'];
 });
@@ -159,10 +167,10 @@ inactiveOutgroups.sort(function(c,d) {
     return c['dist'] - d['dist'];
 });
 for (var counter3 in activeOutgroups) {
-arrayToSelectBox(activeOutgroups[counter3],'#outgrsel','true');
+objectToSelectBox(activeOutgroups[counter3],'#outgrsel','true');
 }
 for (var counter4 in inactiveOutgroups) {
-arrayToSelectBox(inactiveOutgroups[counter4],'#outgrsel','false');
+objectToSelectBox(inactiveOutgroups[counter4],'#outgrsel','false');
 }
 //var counter;
 /*$('#outgrsel > option').each(function() {
@@ -196,7 +204,7 @@ if (!($('#outgrsel > option:not([disabled])').length)) {
 }
 refreshView('#outgrlist',5,'#outgrlimit');
 outgrSearch();
-} else if (typeof commonTax[1] == "object") {
+} else if (typeof commonTax[1] == "object") { //if more than one NCBI id in group
 $('#outgrsel').empty();
     //var allOutgroups = jsonOrgs["outgroups"]; // change?
     var groupId = commonTax[0]+"id";
@@ -209,18 +217,19 @@ $('#outgrsel').empty();
             inactiveOutgroups.push(outgrInfo[counter2]);
         }
     }
+    // sort outgroups from smallest to largest Mash distance
     activeOutgroups.sort(function(e,f) {
-    return e['dist'] - f['dist'];
-});
-inactiveOutgroups.sort(function(g,h) {
-    return g['dist'] - h['dist'];
-});
-for (var counter5 in activeOutgroups) {
-arrayToSelectBox(activeOutgroups[counter5],'#outgrsel','true');
-}
-for (var counter6 in inactiveOutgroups) {
-arrayToSelectBox(inactiveOutgroups[counter6],'#outgrsel','false');
-}
+        return e['dist'] - f['dist'];
+    });
+    inactiveOutgroups.sort(function(g,h) {
+        return g['dist'] - h['dist'];
+    });
+    for (var counter5 in activeOutgroups) {
+        objectToSelectBox(activeOutgroups[counter5],'#outgrsel','true');
+    }
+    for (var counter6 in inactiveOutgroups) {
+        objectToSelectBox(inactiveOutgroups[counter6],'#outgrsel','false');
+    }
     /*$('#outgrsel > option').each(function() {
     //var currId = $(this).attr("id");
     $(this).removeAttr("disabled");
@@ -272,7 +281,7 @@ outgrSearch();
 }
 }
 
-
+// add all query and reference organisms to species multiselect; set outgroup information as global variable, fill in from data, then add to outgroup multiselect
 function orgSuccess(data,textStatus,xhr) {
 var counter;
 var counter2;
@@ -296,9 +305,9 @@ for (counter = 0; counter<refOrgs.length; counter++) {
    }
    }
 for (counter2 = 0; counter2<outgroups.length; counter2++) {
-    outgrInfo[counter2] = outgroups[counter2];
+    outgrInfo[counter2] = outgroups[counter2]; //add entries to object; outgroup multiselect is later populated by outgroupPick
     //$('#outgrsel').append("<option value='"+outgrInfo[counter2].id+"' data-title='"+ outgrInfo[counter2].orgname + " (mean distance: "+ parseFloat(outgrInfo[counter2].dist).toFixed(3)+")"+"' id='" + outgrInfo[counter2].id +"' data-genusid='"+outgrInfo.genusid+"' data-genusname='"+outgrInfo.genusname+"' data-familyid='"+outgrInfo.familyid+"' data-familyname='"+outgrInfo[counter2].familyname+"' data-orderid='"+outgrInfo[counter2].orderid + "' data-ordername='"+outgrInfo[counter2].ordername+"' data-phylid='"+outgrInfo[counter2].phylid+"' data-phylname='"+outgrInfo[counter2].phylname+"'>"+outgrInfo[counter2].orgname+ " (mean distance: "+ parseFloat(outgrInfo[counter2].dist).toFixed(3)+") </option>");
-    //arrayToSelectBox(outgrInfo[counter2],'#outgrsel','true');
+
 }
 if (data["selspecies"] && data["seloutgroups"]) {
     var selectedSpecies = data["selspecies"];
@@ -312,10 +321,10 @@ if (data["selspecies"] && data["seloutgroups"]) {
     loadDefaults('#outgrsel','#outgrlist',1);
 }
 }
-
+// load initial species and outgroups
 function getOrgs() {
 var jobid = $('#jobinfo').val();
-console.log(jobid)
+//console.log(jobid)
 $.ajax({
         // Your server script to process the upload
         contentType: 'application/json',
@@ -336,17 +345,21 @@ console.log(xhr,ajaxOptions,thrownError);
 function outgroupSuccess(data,textStatus,xhr) {
 //console.log(data);
 var counter;
-var counter2;
-    var optionList = [];
-for (counter=0; counter<data.length;counter++) {
-    var outgrInfo = data[counter];
-    $('#outgrsel > option').remove('#'+outgrInfo.id); //fix ordering?
-    var optionInfo = "<option value='"+outgrInfo.id+"' data-title='"+ outgrInfo.orgname + " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+")"+"' id='" + outgrInfo.id +"' data-genusid='"+outgrInfo.genusid+"' data-genusname='"+outgrInfo.genusname+"' data-familyid='"+outgrInfo.familyid+"' data-familyname='"+outgrInfo.familyname+"' data-orderid='"+outgrInfo.orderid + "' data-ordername='"+outgrInfo.ordername+"' data-phylid='"+outgrInfo.phylid+"' data-phylname='"+outgrInfo.phylname+"'>"+outgrInfo.orgname+ " (mean distance: "+ parseFloat(outgrInfo.dist).toFixed(3)+") </option>";
+//var counter2;
+//    var optionList = [];
+for (counter=0; counter<data.length;counter++) { //if setup with outgrInfo works, only needs to add to outgrInfo, the rest is handled by outgroupPick
+    //var newOutgrInfo[counter] = data[counter];
+    if (!(data[counter] in outgrInfo)) {
+    outgrInfo.push(data[counter]);
+    }
+    /*$('#outgrsel > option').remove('#'+newOutgrInfo.id); //fix ordering?
+    var optionInfo = "<option value='"+newOutgrInfo.id+"' data-title='"+ newOutgrInfo.orgname + " (mean distance: "+ parseFloat(newOutgrInfo.dist).toFixed(3)+")"+"' id='" + newOutgrInfo.id +"' data-genusid='"+newOutgrInfo.genusid+"' data-genusname='"+outgrInfo.genusname+"' data-familyid='"+newOutgrInfo.familyid+"' data-familyname='"+newOutgrInfo.familyname+"' data-orderid='"+newOutgrInfo.orderid + "' data-ordername='"+newOutgrInfo.ordername+"' data-phylid='"+newOutgrInfo.phylid+"' data-phylname='"+newOutgrInfo.phylname+"'>"+newOutgrInfo.orgname+ " (mean distance: "+ parseFloat(newOutgrInfo.dist).toFixed(3)+") </option>";
     optionList.unshift(optionInfo);
 }
 for (counter2=0; counter2<optionList.length; counter2++) {
-    $('#outgrsel').prepend(optionList[counter2]);
+    $('#outgrsel').prepend(optionList[counter2]);*/
 }
+outgroupPick(); //handles sorting by Mash distance, filtering of outgroups, adding outgroups to multiselect
 if (!($('#outgrsel > option:not([disabled])').length)) {
     $('#nooutgroups').removeClass("hidden");
 } else {
@@ -355,7 +368,7 @@ if (!($('#outgrsel > option:not([disabled])').length)) {
 $('#outgroupsearch').val("");
 outgrSearch();
 }
-
+// loading more outgroups, pre-filtered to exclude any belonging to the selected organisms' common  taxonomical group
 function outgroupLoad() {
 var jobid = $('#jobinfo').val();
 var commonTax = commonGroup();
@@ -408,11 +421,11 @@ for (counter=0; counter<refOrgs.length;counter++) {
     speciesSearch();
 }
 
-
+// loading more sequences for species multiselect
 function loadMore() {
 var jobid = $('#jobinfo').val();
-var loadedSeqs = $('#speciessel > option').length - jsonOrgs["queryorgs"].length;
-console.log(loadedSeqs);
+var loadedSeqs = $('#speciessel > option').length - jsonOrgs["queryorgs"].length; // amount of species loaded, minus user-submitted species
+//console.log(loadedSeqs);
 $.ajax({
         // Your server script to process the upload
         contentType: 'application/json',
@@ -424,15 +437,6 @@ $.ajax({
         success: moreSeqsSuccess,
         error: moreSeqsError});
 }
-
-
-/*function validateForm() {
-if ($('.selectablein').has('option').length>0 && $('.selectablein2').has('option').length>0) {
-return "validated";
-} else {
-return "notvalidated";}
-} */
-//
 
 
 
@@ -466,6 +470,7 @@ $(document).ready(function() {
     });
 }); */
 
+// check if enough organisms (at least 5) and enough outgroups (at least 1) selected
 function validateForm() {
 if ($('.selectablein >option').length>4 && $('.selectablein2 > option').length>0) {
 return "validated";

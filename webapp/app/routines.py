@@ -184,26 +184,32 @@ def reanalyzejob(jobid):
 
 def jsontotsv(jsonpath,jobid):
     resultdict = {}
+    treeseqs = []
+    with open(os.path.join(app.config['RESULTS_FOLDER'],jobid, 'autoOrglist.json'),'r') as jsonorglist:
+        jsonorgdict = json.load(jsonorglist)
+        treeseqs = jsonorgdict.get("selspecies")
+        treeseqs += jsonorgdict.get("seloutgroups")
     with open(jsonpath, 'r') as jsondict:
         fulldict = json.load(jsondict)
         orglist = fulldict["orglist"]
         refdict = fulldict["reforgs"]
         for i in range(0,len(refdict)):
-            currorg = refdict[i]
-            distvals=currorg["dlist"]
-            pvals=currorg["plist"]
-            for j in range (0, len(orglist)):
-                currquery = orglist[j]
-                currd=""
-                currp=""
-                if not j >= len(pvals):
-                    currp=pvals[j]
-                if not j >= len(distvals):
-                    currd=distvals[j]
-                orgcomp = currorg["orgname"] + currquery
-                if orgcomp not in resultdict:
-                    resultdict[orgcomp] = ""
-                resultdict[orgcomp] = {"orgname":currorg["orgname"], "strain":currorg["strain"], "id":currorg["id"], "queryname":currquery,"pval":currp, "dist":currd}
+            if refdict[i]["id"] in treeseqs:
+                currorg = refdict[i]
+                distvals=currorg["dlist"]
+                pvals=currorg["plist"]
+                for j in range (0, len(orglist)):
+                    currquery = orglist[j]
+                    currd=""
+                    currp=""
+                    if not j >= len(pvals):
+                        currp=pvals[j]
+                    if not j >= len(distvals):
+                        currd=distvals[j]
+                    orgcomp = currorg["orgname"] + currquery
+                    if orgcomp not in resultdict:
+                        resultdict[orgcomp] = ""
+                    resultdict[orgcomp] = {"orgname":currorg["orgname"], "strain":currorg["strain"], "id":currorg["id"], "queryname":currquery,"pval":currp, "dist":currd}
     with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'reftext.txt'),'wb') as csvfile:
         csvwriter = csv.writer(csvfile,delimiter="\t")
         for resultval in resultdict.values():

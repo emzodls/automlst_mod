@@ -1,24 +1,27 @@
 var genusKeys = false;
+// lists genera in to which user sequences belong; if there are multiple, user needs to select one to proceed with
+// may need some troubleshooting
 function genusSuccess(data,textStatus,xhr) {
     var genusList = data["genuslist"];
     if (String(genusKeys) != String(Object.keys(genusList))) {
     genusKeys = Object.keys(genusList);
     //need to clear the counter?
-    console.log(genusKeys.length);
+    //console.log(genusKeys.length);
     /*var genusVals = Object.values(genusList);
     var maxValue = Math.max.apply(null,genusVals); */
     var queries = data["queryfiles"];
     var maxGenus = data["maxgenus"];
-    console.log(maxGenus);
+    //console.log(maxGenus);
     var counter;
     var counter2;
+    // if more than one genus represented, list of genera to select from built; table with information built
     if (genusKeys.length > 1) {
         $('#genuswarn').removeClass("hidden");
         $('#genustable >tbody').empty();
         for (counter=0;counter<genusKeys.length;counter++) {
             $('#genusoptions').append("<option id='"+genusKeys[counter]+"' value='"+genusKeys[counter]+"'>"+genusKeys[counter]+": "+genusList[genusKeys[counter]]+" sequences </option>");
             if (genusKeys[counter] == maxGenus) {
-                console.log(genusKeys[counter]);
+                //console.log(genusKeys[counter]);
                 $('#'+genusKeys[counter]).attr("selected","selected");
             }
         }

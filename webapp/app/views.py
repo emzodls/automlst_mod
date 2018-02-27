@@ -106,7 +106,7 @@ def getTree(jobid):
 def downloadorgs(jobid):
     format = request.args.get('format','json')
     resultdir = os.path.join(app.config['RESULTS_FOLDER'],jobid)
-    if format == 'json':
+    if format == 'json': # narrow down like the txt version?
         return send_from_directory(resultdir, 'reflist.json', as_attachment=True)
     elif format == 'txt':
         if os.path.exists(os.path.join(resultdir, 'reftext.txt')):
@@ -316,7 +316,7 @@ def showmash(jobid):
         nodata["data"] = []
         return jsonify(nodata)
 @app.route('/aniclades')
-def aniclades(): # move to static? 
+def aniclades(): # move to static?
     if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'], 'aniclades.json')):
         with open(os.path.join(app.config['RESULTS_FOLDER'], 'aniclades.json'),'r') as anifile:
             anijson = json.load(anifile)
