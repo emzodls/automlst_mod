@@ -182,6 +182,7 @@ def reanalyzejob(jobid):
         if fname not in keepfiles:
             os.rename(os.path.join(jobdir,fname),os.path.join(oldfiles,fname))
 
+# converts organism list .json to tab-separated text file, filters for only selected species and outgroups (dependent on presence of autoOrglist.json!)
 def jsontotsv(jsonpath,jobid):
     resultdict = {}
     treeseqs = []
@@ -215,6 +216,7 @@ def jsontotsv(jsonpath,jobid):
         for resultval in resultdict.values():
             csvwriter.writerow([resultval["orgname"],resultval["strain"],resultval["id"],resultval["queryname"],resultval["pval"],resultval["dist"]])
 
+# converts .txt file of Mash distances to JSON
 def tsvtojson(tsvpath):
     jsondict = {}
     linelist = []
@@ -264,7 +266,7 @@ def zipalignments(jobid):
         if os.path.exists(os.path.join(jobpath, 'concatMLST.fasta')):
             alignzip.write(os.path.join(jobpath, 'concatMLST.fasta'), jobid+'_alignments/concatMLST.fasta')
 
-
+# identifies MLST genes used, extracts information on these genes from mlstpriority.json, outputs tab-separated .txt file
 def mlsttsv(jobid):
     genesused = []
     prioritydict = {}

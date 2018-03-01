@@ -180,7 +180,7 @@ if (data != "false") {
         );
           tree(document.getElementById("svgCanvas")); // tree needs to be rendered at this point to get y-positions of nodes later
           clearInterval(timer);
-        var aniDict = {};
+        var aniDict = [];
         aniDict[0] = {};
         aniDict[1] = {};
         aniDict[2] = {};
@@ -252,7 +252,7 @@ if (data != "false") {
       var aniSorted = [sortAniList(aniDict[0]),sortAniList(aniDict[1]),sortAniList(aniDict[2]),sortAniList(aniDict[3]),sortAniList(aniDict[4])];
       //var prettyColors = ["#8B0000","#cc3600","#b36200","#7b7737","#556B2F","#006400"," #2d8653","#008080","#396a93","#00008B","#4B0082","#800080","#C71585","#DC143C"]; //sorted array of colors -> rainbow
       var prettyColors = [[ "#00990d", "#9900ff", " #e6007a", "#0000CD"],["#cc4400", "#008080", "#590099", "#518000"],["#e6007a", "#008080", "#590099", "#00990d"],["#cc4400", "#0000CD", "#9900ff", "#518000"],["#e6007a", "#0000CD", "#518000", "#590099"]];
-      aniTable = {};
+      aniTable = [];
       aniTable[0] = {};
       aniTable[1] = {};
       aniTable[2] = {};

@@ -242,6 +242,8 @@ if (($('input[name="workflow"]:checked', '#sequpload').val()) == "2") {
     }
 }
 
+// check if accession number has been entered before upload button is available - currently deactivated
+
 /*$('#ncbiacc1').on('change', function(){
     if ($('#ncbiacc1').val().length) {
         $('#ncbibtn').removeClass('disabled');
@@ -250,13 +252,15 @@ if (($('input[name="workflow"]:checked', '#sequpload').val()) == "2") {
     }
 });*/
 
-$('#seqfile1').on('change', function() {
+// check if file has been entered before upload button is available - currently deactivated due to compatibility issues with Safari
+
+/*$('#seqfile1').on('change', function() {
     if ($('#seqfile1').val().length) {
         $('#seqbtn').removeClass('disabled');
     } else {
         $('#seqbtn').addClass('disabled');
     }
-});
+});*/
 
 $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();
