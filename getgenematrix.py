@@ -119,7 +119,9 @@ def rebalancefuncs(genelist,OVthresh=1.1,maxgenes=100,maxiter=100, exfuncs=[], E
     else:
         return genelist
 
-def prioritize(genemat,orgs,dndsfile="",jsonfile="",metadata="",pct=0.5,maxgenes=100):
+def prioritize(genemat,orgs,dndsfile="",jsonfile="",metadata="",pct=0.5,maxgenes=100,ignoreorgs=None):
+    if not ignoreorgs:
+        ignoreorgs = []
     gsets = getgenesets(genemat,orgs,missing=True)
     if not metadata or not os.path.exists(metadata):
         metadata = os.path.join(os.path.dirname(os.path.realpath(__file__)),"model_metadata.json")
@@ -133,8 +135,8 @@ def prioritize(genemat,orgs,dndsfile="",jsonfile="",metadata="",pct=0.5,maxgenes
     numorgs = len(genemat.values()[0])
     genelist = []
     for gene,notsingle in gsets.items():
-        #Skip gene if number of organisms needing removal are over pct
-        if float(len(gsets.get(gene,[])))/numorgs >= pct:
+        #Skip gene if number of organisms needing removal are over pct or if any ignore orgs are in delete set
+        if float(len(gsets.get(gene,[])))/numorgs >= pct or any([x in ignoreorgs for x in gsets.get(gene,[])]):
             continue
 
         rec = {"acc":metadata.get(gene,{}).get("acc",gene),
@@ -163,7 +165,7 @@ def prioritize(genemat,orgs,dndsfile="",jsonfile="",metadata="",pct=0.5,maxgenes
 
     return genelist
 
-def getmat(db,pct=0.5,pct2=1.0,ev=0.1,bs=0,bh=True,rna=False,savefil="",prifile="",maxgenes=100,dndsfile=""):
+def getmat(db,pct=0.5,pct2=1.0,ev=0.1,bs=0,bh=True,rna=False,savefil="",prifile="",maxgenes=100,dndsfile="",ignoreorgs=None):
     conn=sql.connect(db)
     cur=conn.cursor()
     tabletitle="HMMhits"
@@ -202,7 +204,7 @@ def getmat(db,pct=0.5,pct2=1.0,ev=0.1,bs=0,bh=True,rna=False,savefil="",prifile=
             tfil.write(gmstr+"\n")
 
     if prifile:
-        mlst = prioritize(countdict,orgs,jsonfile=prifile,dndsfile=dndsfile,maxgenes=maxgenes,pct=pct)
+        mlst = prioritize(countdict,orgs,jsonfile=prifile,dndsfile=dndsfile,maxgenes=maxgenes,pct=pct,ignoreorgs=ignoreorgs)
     else:
         mlst = getsingles(genemat=countdict,pct2=pct2)
 

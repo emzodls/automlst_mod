@@ -97,7 +97,7 @@ def getoutgrouporgs(common,refrecs,glimit=100):
     else:
         ingroupset.add(common[1])
     #Filter sorted reference list to remove ingroups
-    filtorgs = [rec for rec in refrecs if str(rec[group+"id"]) not in ingroupset][:glimit]
+    filtorgs = [rec for rec in refrecs if str(rec[group+"id"]) not in ingroupset and rec["typestrain"]][:glimit]
     return filtorgs
 
 def getrefrecs(recs,top=list()):

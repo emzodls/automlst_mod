@@ -57,12 +57,12 @@ def appendheader(seqtitle, desc, lnum, qual, loc):
     return gi + "|" + seqtitle + " " + desc + "|" + gdesc + "loc|" + str(loc[0]) + " " + str(loc[1] + 1) + " " + str(loc[2]) + " # ID=1_" + str(lnum) + ";"
 
 
-def convertgenes(filename, outdir="./", genes=False,f="",rename=False,usetrans=False,plasmid=False,userecnum=False):
+def convertgenes(filename, outdir="./", genes=False,f="",rename=False,usetrans=False,plasmid=False,userecnum=False,prfix=""):
     """Parse all gbk records and output nuc and prot sequences for each CDS in multi-fasta format"""
     log.info("Starting %s..."%filename)
     fpath, fname = os.path.split(filename)
     fname, ext = os.path.splitext(fname)
-    basename = os.path.join(outdir,fname)
+    basename = os.path.join(outdir,prfix+fname)
     SeqIO.convert(filename, "genbank", basename + ".fa", "fasta")
     if genes:
         reclist = SeqIO.parse(filename, "genbank")

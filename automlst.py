@@ -2,7 +2,7 @@
 import os, json, argparse, setlog, parsegenomes, mash, shutil
 import copyseqsql, makeseqsql, glob, seqsql2fa, subprocess
 import multiprocessing as mp
-import makehmmsql, getgenematrix, getgenes, concatmsa
+import makehmmsql, getgenematrix, getgenes, concatmsa, ete3helper
 import numpy as np
 from scipy.cluster.vq import kmeans2
 
@@ -166,7 +166,7 @@ def getmlstselection(resultdir,mlstpriority,maxmlst=100,minmlst=10,skip="",ignor
 
     return selection, list(delorgs), concat
 
-def runIQtree(outdir,infasta,partfile="",cpu=1,model="GTR",bs=0,fout="speciestree",titlesep="",outgroup="OG--"):
+def runIQtree(outdir,infasta,partfile="",cpu=1,model="GTR",bs=0,fout="speciestree",titlesep="",outgroup=""):
     #If title seperator exists rename titles in file first
     if titlesep:
         tf = infasta+".renamed"
@@ -196,7 +196,7 @@ def runIQtree(outdir,infasta,partfile="",cpu=1,model="GTR",bs=0,fout="speciestre
 def runAstral(resultdir,intree,outtree,astjar=""):
     log.info("Started running Astral: %s"%(intree))
     if not astjar or not os.path.realpath(astjar):
-        jar = os.path.join(os.path.dirname(__file__),"astral.5.5.9.jar")
+        astjar = os.path.join(os.path.dirname(__file__),"astral.5.5.9.jar")
     cmd=["java", "-Xmx3000M", "-jar", str(astjar), "-i", intree, "-o", outtree]
     with open(os.path.join(resultdir,"astral.log"),"w") as astlog:
         subprocess.call(cmd,stdout=astlog,stderr=astlog)
@@ -412,6 +412,10 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
     mlstselection = []
     delorgs = []
     if checkpoint == "w1-5":
+        allquery = [os.path.splitext(os.path.split(x)[-1])[0].replace(" ","_") for x in glob.glob(os.path.join(resultdir,"queryseqs","*.fna"))]
+        ignoreorgs = list(selorgs.get("seloutgroups",[]))
+        ignoreorgs.extend(allquery)
+
         #getmlstgenes.findsingles(orgdb,maxgenes=500,outdir=mlstdir)
         if os.path.exists(mlstpriority) and os.path.exists(genematjson):
             with open(genematjson,"r") as mfil, open(mlstpriority,"r") as pfil:
@@ -421,12 +425,9 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
                 orgs = temp["orgs"]
                 del temp
         else:
-            genemat,orgs,mlstpriority = getgenematrix.getmat(orgdb,pct=0.5,pct2=1.0,bh=True,rna=True,savefil=genematjson,prifile=mlstpriority,dndsfile=dndsfile)
-        allquery = [os.path.splitext(os.path.split(x)[-1])[0].replace(" ","_") for x in glob.glob(os.path.join(resultdir,"queryseqs","*.fna"))]
-        ignoreorgs = list(selorgs.get("seloutgroups",[]))
-        ignoreorgs.extend(allquery)
+            genemat,orgs,mlstpriority = getgenematrix.getmat(orgdb,pct=0.5,pct2=1.0,bh=True,rna=True,savefil=genematjson,prifile=mlstpriority,dndsfile=dndsfile,ignoreorgs=allquery)
         mlstselection, delorgs, concat = getmlstselection(resultdir,mlstpriority,maxmlst,ignoreorgs=ignoreorgs)
-        if "skip3" in skip.lower():
+        if "skip3" in skip.lower() or os.path.exists(os.path.join(resultdir,"usergenes.json")):
             #Export selected genes to mlst folder
             log.info("JOB_STATUS:: Writing MLST genes...")
             getgenes.writeallgenes(orgdb,mlstselection,delorgs,outdir=mlstdir,outgroups=selorgs.get("seloutgroups",None),pct=0.5)
@@ -463,30 +464,35 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         log.info("JOB_CHECKPOINT::%s"%checkpoint)
 
     treedir = os.path.join(resultdir,"trees")
-    finishedtree = finaltree = ""
+    finishedtree = ""
     #Build trees
     if checkpoint == "w1-7":
         log.info("JOB_PROGRESS::75/100")
-        finaltree = os.path.join(resultdir,"final.tree")
         if concat:
             log.info("JOB_STATUS:: Running concatenated supermatrix phylogeny")
             concatfasta = os.path.join(resultdir,"concatMLST.fasta")
             partfile = os.path.join(resultdir,"nucpartition.txt")
-            concatphylogeny(resultdir, concatfasta, partfile,cpu=cpu,model=model,bs=bs,outgroup="OG--")
+            concatphylogeny(resultdir, concatfasta, partfile,cpu=cpu,model=model,bs=bs)
             checkpoint = "w1-F"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
-            finishedtree = os.path.join(treedir,"concatTree.tree.treefile")
         else:
             log.info("JOB_STATUS:: Running coalescent tree phylogeny")
             colphylogeny(resultdir,trimdir,cpu=cpu,model=model,bs=bs)
             checkpoint = "w1-F"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
-            finishedtree = os.path.join(treedir,"summaryTree.tree.treefile")
 
     if checkpoint == "w1-F":
+        finaltree = os.path.join(resultdir,"final.tree")
+        if os.path.exists(os.path.join(treedir,"concatTree.tree.treefile")):
+            finishedtree = os.path.join(treedir,"concatTree.tree.treefile")
+        elif os.path.exists(os.path.join(treedir,"summaryTree.tree")):
+            finishedtree = os.path.join(treedir,"summaryTree.tree")
         #Copy final tree to root dir
-        if finishedtree and os.path.exists(finishedtree):
-            shutil.copy(finishedtree,finaltree)
+        if finishedtree:
+            fmat = 2 if bs or not concat else 5
+            log.debug("Saving final tree... %s"%fmat)
+            if not ete3helper.rerootTree(finishedtree,finaltree,fmat=fmat):
+                shutil.copy(finishedtree,finaltree)
         else:
             log.error("Could not find final tree. Tree building failed")
 

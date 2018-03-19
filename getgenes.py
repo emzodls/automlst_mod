@@ -66,7 +66,7 @@ def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False,genelimit=100
         with open(os.path.join(outdir,gene+".fna"),"w") as nafil, open(os.path.join(outdir,gene+".faa"),"w") as aafil:
             for row in results:
                 #Translate assembly id using taxonomy table if applicable. Defualt to user title and add {}identifiers to title
-                orgname = taxonomy.get(row[0],"QS--"+row[0])
+                orgname = taxonomy.get(row[0],row[0])
                 #mark outgroups
                 if outgroups and row[0] in outgroups:
                     orgname = "OG--" + orgname

@@ -1,7 +1,59 @@
 {% extends "main.html" %}
 {% block mainbody %}
 <div class="container" style="padding-top:25px;">
+    <ul class="nav nav-tabs">
+        <li class="active" id="fasttab"><a data-toggle="tab" href="#fastwork" onclick="$('#workflow').val('2');">Accelerated workflow</a> </li> <!-- active class is lost after scrolling -->
+        <li id="mtab"><a data-toggle="tab" href="#manual" onclick="$('#workflow').val('1');">Advanced workflow</a> </li>
+    </ul>
+    <br />
+
     <form action="startjob" method="post" enctype="multipart/form-data" name="sequpload" id="sequpload">
+            <div class="tab-content">
+            <div id="fastwork" class="tab-pane fade in active">
+                <p><b>Accelerated Mode</b>: Automatically add your sequences to a precreated reference tree for a genus of your choice.</p>
+                <hr>
+        <div class="form-group" id="genusform">
+            <label for="genusselect">Select reference genus:</label>
+            <select class="form-control" id="genusselect" name="genusselect">
+                <option value="auto">Auto</option>
+                <option value="autouser">Auto with user confirmation</option>
+            </select>
+        </div>
+            </div>
+                <div id="manual" class="tab-pane fade">
+                    <span class="sr-only">Workflow progress: The current step is </span><a href="/analyze" class="steps">Step 1 <small>Enter sequences</small> &raquo;</a> <span class="sr-only">The next steps in this workflow are </span><span class="steps-disabled">Step 2 &raquo;</span> <span class="steps-disabled">Step 3 &raquo;</span> <span class="steps-disabled">Results</span>
+                    <hr>
+                    <p><b>Advanced Mode</b>: After uploading your sequences, choose from which species to construct the tree for them, and choose
+                        the genes to use for the <abbr title="multilocus species tree">MLST</abbr>.</p>
+                    <div class="form-group row">
+                        <div class="col-md-2">
+                            <h2 class="h4alike">Options</h2></div>
+                        <div class="col-md-10">
+                            <div class="checkbox">
+                                <label><input type="checkbox" value="skip2" id="skip2" name="skip2">Select default nearest organisms (skip Step 2)</label>
+                            </div>
+                            <div class="checkbox">
+                                <label><input type="checkbox" value="skip3" id="skip3" name="skip3">Select default <abbr title="multilocus species tree">MLST</abbr> genes (skip Step 3)</label>
+                            </div>
+
+                            <div class="checkbox">
+                                <label data-toggle="tooltip" data-placement="right" title="For interpretation of scores see About section."><input type="checkbox" value="1000" id="boots" name="boots">Perform IQ-TREE Ultrafast Bootstrap analysis (1000 replicates)</label>
+                            </div>
+                            <div class="checkbox">
+                                <label data-toggle="tooltip" data-placement="right" title="For information on ModelFinder see"><input type="checkbox" value="MFP" id="modelfinder" name="modelfinder">Run ModelFinder</label>
+                            </div>
+                            <div class="radio">
+                                <label><input type="radio" name="optradio" value="concatenated" checked="checked">Concatenated alignment</label>
+                            </div>
+                            <div class="radio">
+                                <label><input type="radio" name="optradio" value="coalescent">Coalescent tree</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+    <hr>
     <h2 class="h4alike">Sequences</h2>
 
         <div class="form-group row">
@@ -51,34 +103,11 @@
             </div>
         </div>
         <div class="form-group row">
-            <label class="control-label col-md-2" for="jobname">Advanced</label>
-                <div class="checkbox col-md-10">
-                            <div class="checkbox">
-                                <label><input type="checkbox" value="skip2" id="skip2" name="skip2" checked="true">Select default nearest organisms (skip Step 2)</label>
-                            </div>
-                            <div class="checkbox">
-                                <label><input type="checkbox" value="skip3" id="skip3" name="skip3" checked="true">Select default <abbr title="multilocus species tree">MLST</abbr> genes (skip Step 3)</label>
-                            </div>
-
-                            <div class="checkbox">
-                                <label data-toggle="tooltip" data-placement="right" title="For interpretation of scores see About section."><input type="checkbox" value="1000" id="boots" name="boots">Perform IQ-TREE Ultrafast Bootstrap analysis (1000 replicates)</label>
-                            </div>
-                            <div class="checkbox">
-                                <label data-toggle="tooltip" data-placement="right" title="For information on ModelFinder see"><input type="checkbox" value="MFP" id="modelfinder" name="modelfinder">Run ModelFinder</label>
-                            </div>
-                            <div class="checkbox">
-                                <label data-toggle="tooltip" data-placement="right" title="By selecting this you consent to our use of cookies. For more information see the Help page"><input type="checkbox" value="keeplink" id="keeplink" name="keeplink">Save link in cookies (viewable on results page under "last results")</label>
-                            </div>
-
-                            <div class="radio">
-                                <label><input type="radio" name="optradio" value="concatenated" checked="checked">Concatenated alignment</label>
-                            </div>
-                            <div class="radio">
-                                <label><input type="radio" name="optradio" value="coalescent">Coalescent tree</label>
-                            </div>
-                </div>
+            <label class="col-md-2">Save links</label>
+        <div class="checkbox col-md-10">
+            <label data-toggle="tooltip" data-placement="right" title="By selecting this you consent to our use of cookies. For more information see the Help page"><input type="checkbox" value="keeplink" id="keeplink" name="keeplink">Save link in cookies (viewable on results page under "last results")</label>
         </div>
-
+            </div>
 <!-- if file fails/ID not found, unhide warning -->
         <div class="alert alert-success hidden" id="uploadsuccess">Upload successful</div>
         <div class="alert alert-danger hidden" id="uploadwarning"><strong>Error:</strong> Upload failed</div>
@@ -99,7 +128,7 @@
 
         <button type="button" class="btn btn-primary disabled" style="width:300px" id="submitjob" onclick="$('#seqfile1').val([]);$('#ncbiacc1').val('');selectAndSend('#sequpload');">Submit Job &raquo;</button>
         <input type="hidden" id="filesrc" name="filesrc" value="">
-        <input type="hidden" id="workflow" name="workflow" value="1">
+        <input type="hidden" id="workflow" name="workflow" value="2">
     </form>
     <hr>
     <div style="margin-top:10px">

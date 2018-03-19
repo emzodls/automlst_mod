@@ -484,7 +484,7 @@ aniMasterList = data;
 function loadAniGroups() {
 $.ajax({
         // Your server script to process the upload
-        url: '/aniclades',
+        url: '/static/aniclades.json',
         async: true,
         cache: false,
         contentType: false,

@@ -45,7 +45,7 @@ def fastatype(fastafil, tol=0.05):
 def parsegbks(flist, outdir):
     for fname in flist:
         try:
-            gbk2fa.convertgenes(fname,outdir=outdir,genes=True,f="rRNA")
+            gbk2fa.convertgenes(fname,outdir=outdir,genes=True,f="rRNA",prfix="QS--")
         except Exception as e:
             log.error("Could not parse %s : %s"%(os.path.split(fname)[-1],e))
 
@@ -77,14 +77,14 @@ def parseall(indir,outdir):
     #Find orfs using prodigal for contig files if exists
     for fname in contigfiles:
         #copy input files to job directory and run gene finding
-        outfile = os.path.join(outdir,os.path.splitext(os.path.split(fname)[-1])[0])
+        outfile = os.path.join(outdir,"QS--"+os.path.splitext(os.path.split(fname)[-1])[0])
         log.info("copying %s to %s"%(fname,outfile))
         shutil.copy(fname,outfile+".fa")
         runprodigal(fname,outfile+".fna")
 
     #Find all orf documents and copy to output directory
     for fname in orffiles:
-        outfile = os.path.join(outdir,os.path.splitext(os.path.split(fname)[-1])[0])
+        outfile = os.path.join(outdir,"QS--"+os.path.splitext(os.path.split(fname)[-1])[0])
         shutil.copy(fname,outfile+".fa") #Normalize input by using orf multi-gene fasta as whole geneome fasta
         shutil.copy(fname,outfile+".fna")
     return True

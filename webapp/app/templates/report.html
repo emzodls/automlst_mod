@@ -119,13 +119,13 @@
     <!-- <a href="/results/{{ jobid }}/tree?format=newick" class="btn btn-primary" role="button" style="width:200px" id="treedownl" name="treedownl"><span class="glyphicon glyphicon-download-alt"></span> Download tree</a> -->
     <a href="/results/{{ jobid }}/downloadlists?downl=alignment" type="button" class="btn btn-primary" style="width:200px" id="aligndownl" name="aligndownl"><span class="glyphicon glyphicon-download-alt"></span> Download alignments</a>
     <a href="/results/{{ jobid }}/downloadlists?downl=mlstlist" type="button" class="btn btn-primary" style="width:200px" id="mlstdownl" name="mlstdownl" ><span class="glyphicon glyphicon-download-alt"></span> Download MLST list</a>
-    <div class="btn-group">
-    <button type="button" class="btn btn-primary dropdown-toggle" style="width:200px" id="orgdownl" name="orgdownl" data-toggle="dropdown"><span class="glyphicon glyphicon-download-alt"></span> Download organism list <span class="caret"></span></button>
-        <ul class="dropdown-menu" role="menu">
-            <li><a href="/results/{{ jobid }}/downloadorgs?format=json">Download JSON file</a></li>
-            <li><a href="/results/{{ jobid }}/downloadorgs?format=txt">Download tab-separated text</a></li>
-        </ul>
-        </div>
+    <!--<div class="btn-group">-->
+    <!--<button type="button" class="btn btn-primary dropdown-toggle" style="width:200px" id="orgdownl" name="orgdownl" data-toggle="dropdown"><span class="glyphicon glyphicon-download-alt"></span> Download organism list <span class="caret"></span></button>-->
+        <!--<ul class="dropdown-menu" role="menu">-->
+            <!--<li><a href="/results/{{ jobid }}/downloadorgs?format=json">Download JSON file</a></li>-->
+            <!--<li><a href="/results/{{ jobid }}/downloadorgs?format=txt">Download tab-separated text</a></li>-->
+        <!--</ul>-->
+        <!--</div>-->
     <a href="/results/{{ jobid }}/downloadmash" class="btn btn-primary" role="button" style="width:200px" id="mashdownl" name="mashdownl"><span class="glyphicon glyphicon-download-alt"></span> Download Mash distances</a>
     <!-- button layout? -->
         {% if workflow != 2 %}
