@@ -174,7 +174,7 @@ def reanalyzejob(jobid):
         joblog.write(str(datetime.datetime.now())+"- INFO - JOB_PROGRESS::15/100\n")
         joblog.write(str(datetime.datetime.now())+" - INFO - JOB_PARAMS::"+json.dumps(paramdict)+"\n")
     #Reset to Step2 state, remove all files except keepfiles
-    keepfiles = ["automlst.log","mash_distances.txt","queryflist_hAPYqZ.txt","queryseqs","reflist.json"]
+    keepfiles = ["automlst.log","mash_distances.txt","mash_distances.json","queryseqs","reflist.json"]
     jobdir = os.path.join(app.config['RESULTS_FOLDER'],jobid)
     oldfiles = tempfile.mkdtemp(prefix="old_",dir=jobdir)
     keepfiles.append(os.path.split(oldfiles)[1])

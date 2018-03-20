@@ -167,6 +167,10 @@ def refgenus():
 def analyze():
     return render_template("analyze.html")
 
+@app.route('/analyze2')
+def analyze2():
+    return render_template("analyze2.html")
+
 @app.route('/upload', methods=['POST'])
 def upload():
     #print request.files.getlist("seqfile1")
@@ -300,21 +304,15 @@ def genein(jobid):
 def showmash(jobid):
     resultpath =os.path.join(app.config['RESULTS_FOLDER'],jobid)
     tsvpath = os.path.join(resultpath,'mash_distances.txt')
-    if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'],jobid,'mash_distances.json')):
-        with open(os.path.join(app.config['RESULTS_FOLDER'],jobid,'mash_distances.json'),'r') as jfile:
-            jsondict = json.load(jfile)
-            jsondict["data"] = [rec for rec in jsondict["data"] if float(rec[4])>=0.7]
-            return jsonify(jsondict)
-    elif os.path.exists(tsvpath):
+    if os.path.exists(tsvpath):
         jsondata = routines.tsvtojson(tsvpath)
-        with open(os.path.join(resultpath,'mash_distances.json'),'w') as jsonfile:
-            json.dump(jsondata,jsonfile)
-        jsondata["data"] = [rec for rec in jsondata["data"] if float(rec[4])>=0.7]
+        jsondata["data"] = [rec for rec in jsondata["data"] if float(rec[4])>=0.65]
         return jsonify(jsondata)
     else:
         nodata = {}
         nodata["data"] = []
         return jsonify(nodata)
+
 @app.route('/aniclades')
 def aniclades(): # move to static?
     if os.path.exists(os.path.join(app.config['RESULTS_FOLDER'], 'aniclades.json')):

@@ -179,7 +179,7 @@ if (data != "false") {
             .scale(false)
         );
           tree(document.getElementById("svgCanvas")); // tree needs to be rendered at this point to get y-positions of nodes later
-          clearInterval(timer);
+//          clearInterval(timer);
         var aniDict = [];
         aniDict[0] = {};
         aniDict[1] = {};
@@ -315,7 +315,7 @@ if (data != "false") {
 } else {
     $('#treefail').removeClass("hidden");
     $('#svgCanvas').addClass("hidden");
-    clearInterval(timer);
+//    clearInterval(timer);
 }
 }
 
@@ -324,7 +324,6 @@ console.log(xhr,ajaxOptions,thrownError);
 }
 function drawTree() {
 $.ajax({
-        // Your server script to process the upload
         url: '/results/'+jobid+'/tree',
         async: true,
         cache: false,
@@ -476,8 +475,11 @@ function aniError(xhr,ajaxOptions,thrownError) { // communication error
 console.log(xhr,ajaxOptions,thrownError);
 }
 
+aniMasterList = null
+
 function aniSuccess(data,textStatus,xhr) {
 aniMasterList = data;
+drawTree();
 //console.log(aniMasterList);
 }
 // loading ANI groups for coloring
@@ -491,7 +493,6 @@ $.ajax({
         processData: false,
         success: aniSuccess,
         error: aniError});
-
 }
 
 
@@ -499,4 +500,6 @@ $("button[data-toggle='tooltip']").on('click',function(){
     $(this).blur();
 })
 
-var timer = setInterval(drawTree, 3000);
+$(document).ready(function() {
+    loadAniGroups();
+});

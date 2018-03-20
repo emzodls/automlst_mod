@@ -91,13 +91,12 @@ dataObject = {
 }
 
 function treeError(xhr,ajaxOptions,thrownError) { // communication error
-console.log(xhr,ajaxOptions,thrownError);
+    console.log(xhr,ajaxOptions,thrownError);
 }
 function drawTree() {
 var jobid = $('#jobinfo').val();
 //console.log(jobid);
 $.ajax({
-        // Your server script to process the upload
         url: '/results/'+jobid+'/tree',
         async: true,
         cache: false,
@@ -105,7 +104,6 @@ $.ajax({
         processData: false,
         success: treeSuccess,
         error: treeError});
-
 }
 
 $("button[data-toggle='tooltip']").on('click',function(){
