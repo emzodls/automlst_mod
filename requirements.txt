@@ -26,6 +26,7 @@ scipy==1.0.0
 six==1.10.0
 transaction==2.1.2
 trollius==2.1
+uWSGI==2.0.17
 wsgiref==0.1.2
 zc.lockfile==1.2.1
 zdaemon==4.2.0
