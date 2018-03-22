@@ -1,6 +1,6 @@
 var jobid = $('#jobinfo').val();
 $(document).ready(function() {
-     $('#mashinfo').DataTable({
+     mashTable = $('#mashinfo').DataTable({
         ajax: {
          contentType: 'application/json',
          url:'/results/'+jobid+'/mash'
@@ -38,4 +38,12 @@ $(document).ready(function() {
     }
 
     });
+
+    reloadTimer = setInterval( function () {
+        if ( ! mashTable.data().count() ){
+            mashTable.ajax.reload( null, false );
+        } else {
+            clearInterval(reloadTimer);
+        }
+    }, 3000 );
 });
