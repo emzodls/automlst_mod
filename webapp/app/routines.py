@@ -156,9 +156,6 @@ def getjobstatus(jobid):
                 # total percent is pct * portion extra
                 pct = float(mlstaligned)/mlstfound
                 percent = percent + (pct * 25)
-    else:
-        jobstatus = "False"
-        errorlist = ["Not a valid job id"]
 
     jobstatdict = {"progress": percent,"status":jobstatus, "mash":mashstatus, "checkpoint": checkpoint, "workflow": workflow, "params":paramdict, "errors":errorlist}
     return jobstatdict

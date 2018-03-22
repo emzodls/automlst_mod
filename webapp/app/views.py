@@ -48,7 +48,7 @@ def showstep(jobid,step):
     jobname = routines.findjobinfo(jobid)
 
     #Redirect if job log doesnt exist or not present in redis
-    if not routines.isjob(jobid) and jobinfo.get("status","False") == "False":
+    if not routines.isjob(jobid) and jobinfo.get("status","Waiting in queue") == "Waiting in queue":
         flash('Invalid Jobid')
         return redirect('/analyze')
 
