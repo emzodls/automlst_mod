@@ -15,6 +15,7 @@
 # A copy of the GPLv3 can also be found at: <http://www.gnu.org/licenses/>.
 
 import argparse, sys, time, ast, os, logging, shutil
+from multiprocessing import cpu_count
 from Daemon import Daemon
 from logging.handlers import RotatingFileHandler
 from redis import Redis
@@ -165,6 +166,9 @@ class AmlstDaemon(Daemon):
                         refdb = self.config.get("REFDB",False)
                         keepfiles = self.config.get("KEEPFILES",False)
                         cpu = int(self.config.get("MCPU",1))
+                        #Check for bad config values
+                        if cpu > cpu_count() or cpu <= 0:
+                            cpu = cpu_count()
 
                         self.log.info("ARGS: workflow=%s skip=%s concat=%s model=%s refdb=%s cpu=%s"%(workflow,skip,concat,model,refdb,cpu))
 

@@ -247,7 +247,7 @@ def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
                 hk = os.path.split(fname)[-1]
                 hk = hk[:hk.find(".")]
                 hkgenes.append(hk)
-                gtfil.write("".join([x.strip() for x in tfil])+";\n")
+                gtfil.write("".join([x.strip() for x in tfil]).replace(";","")+";\n")
     #Run robinson foulds distance calculation
     cmd = ["iqtree","-nt",str(cpu),"-rf_all",alltrees]
     with open(os.devnull,"w") as devnull:
