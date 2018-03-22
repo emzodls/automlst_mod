@@ -46,6 +46,12 @@ def showstep(jobid,step):
     #skips = paramdict.get("skip",[])
     laststep = request.args.get('laststep','NONE')
     jobname = routines.findjobinfo(jobid)
+
+    #Redirect if job log doesnt exist or not present in redis
+    if not routines.isjob(jobid) and jobinfo.get("status","False") == "False":
+        flash('Invalid Jobid')
+        return redirect('/analyze')
+
     if step == "loading":
         if jobinfo["workflow"] == "1" or jobinfo["workflow"] == 0:
             if laststep == "step2" or laststep == "step3":
@@ -76,11 +82,14 @@ def showstep(jobid,step):
             return redirect('/results/'+jobid+'/loading')
 
 
-@app.route('/results/<jobid>/reanalyze')
+@app.route('/results/<jobid>/reanalyze', methods=['GET'])
 def reanalyze(jobid):
-    routines.reanalyzejob(jobid)
-    jobname = routines.findjobinfo(jobid)
-    return render_template("step2.html", jobid=jobid,jobname=jobname[1])
+    if request.args.get("confirm",False):
+        routines.reanalyzejob(jobid)
+        jobname = routines.findjobinfo(jobid)
+        return render_template("step2.html", jobid=jobid,jobname=jobname[1])
+    else:
+        return redirect('/results/'+jobid+'/loading')
 
 @app.route('/results/<jobid>/tree', methods=['GET'])
 def getTree(jobid):
@@ -185,6 +194,8 @@ def startjob():
               "reference": request.form.get('genusselect','NA')}
     os.mkdir(os.path.join(app.config['RESULTS_FOLDER'],jobid))
     resp = make_response(redirect('/results/' + jobid + '/loading'))
+
+    #Emailer
     email = request.form.get('email', False)
     if email:
         # Run threaded so mail server resp does not block process
@@ -194,6 +205,18 @@ def startjob():
 
         mailer = threading.Thread(name='mail_sender', target=sendmail, args=("", jobid, email))
         mailer.start()
+
+    #Jobtitle
+    validchars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 _-()"
+    jobtitle = request.form.get('jobname', False)
+    jobtitle = ''.join([c for c in str(jobtitle[:30]) if c in validchars])
+    if jobtitle and len(jobtitle):
+        with open(os.path.join(app.config['RESULTS_FOLDER'], jobid, "jobtitle.txt"), "w") as namefile:
+            namefile.write(jobtitle + "\n")
+    else:
+        jobtitle = jobid
+
+    #Recent results
     keeplink = request.form.get('keeplink',False)
     if keeplink and keeplink.lower() != "false":
         lastresult = request.cookies.get('automlst.lastresult')
@@ -201,22 +224,13 @@ def startjob():
             lastresult += ";%s"%jobid
         else:
             lastresult = jobid
-        resp.set_cookie('automlst.lastresult',lastresult)
-    validchars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 _-()"
-    jobtitle = request.form.get('jobname', False)
-    jobtitle = ''.join([c for c in str(jobtitle[:30]) if c in validchars])
-    if jobtitle and len(jobtitle):
-        with open(os.path.join(app.config['RESULTS_FOLDER'], jobid, "jobtitle.txt"), "w") as namefile:
-            namefile.write(jobtitle + "\n")
-    if request.form.get("workflow") == "1":
+    resp.set_cookie('automlst.lastresult',lastresult)
+
+    #Workflow redirecting
+    if request.form.get("workflow") == "1" or request.form.get("workflow") == "2":
         automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0), mode=request.form.get('optradio',"concatenated"),modelfind=request.form.get("modelfinder","GTR"))
         #with open(os.path.join(app.config['RESULTS_FOLDER'],'examplein.json'),'w') as uploadfile:
         #    json.dump(jobdict,uploadfile)
-        return redirect('/results/'+jobid)
-    elif request.form.get("workflow") == "2":
-        automlstjob = routines.addjob(id=jobid, workflow=request.form.get("workflow"),
-                                      genomes=request.form.getlist('upfiles'),
-                                      reference=request.form.get('genusselect', 'NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0),mode=request.form.get('optradio',"concatenated"))
         return resp
     else:
         flash('Invalid workflow')

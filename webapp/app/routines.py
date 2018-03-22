@@ -1,4 +1,4 @@
-import os, tempfile, models, json, datetime, csv, zipfile
+import os, tempfile, models, json, datetime, csv, zipfile, time
 from flask import render_template, jsonify, request, redirect, abort, make_response, send_from_directory, flash, g
 from flask_mail import Message
 from redis import Redis
@@ -77,6 +77,12 @@ def getinfile():
                 filename.append(tmp)
     return filename
 
+def isjob(jobid):
+    rddb = getdb()
+    if rddb and rddb.keys("automlstjob:%s"%jobid):
+        return True
+    return False
+
 def readdjob(jobid):
     rddb = getdb()
     if rddb:
@@ -150,6 +156,9 @@ def getjobstatus(jobid):
                 # total percent is pct * portion extra
                 pct = float(mlstaligned)/mlstfound
                 percent = percent + (pct * 25)
+    else:
+        jobstatus = "False"
+        errorlist = ["Not a valid job id"]
 
     jobstatdict = {"progress": percent,"status":jobstatus, "mash":mashstatus, "checkpoint": checkpoint, "workflow": workflow, "params":paramdict, "errors":errorlist}
     return jobstatdict

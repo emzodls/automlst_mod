@@ -25,7 +25,6 @@ if os.path.exists(os.path.join(parentdir,"config","active_config.py")):
     app.config.from_pyfile(os.path.join(parentdir,"config","active_config.py"))
 else:
     app.config.from_pyfile(os.path.join(parentdir,"config","webapp.py"))
-print parentdir
 mail = Mail(app)
 
 from app import views

@@ -130,16 +130,23 @@
     <!-- button layout? -->
         {% if workflow != 2 %}
     <hr>
-    <a href="/results/{{ jobid }}/reanalyze" role="button" class="btn btn-primary" style="width:300px" id="resubmit" name="resubmit"><span class="glyphicon glyphicon-repeat"></span> Reanalyze from Step 2</a>
-    <div class="alert alert-warning" style="margin-top:10px"><strong>Warning:</strong> Reanalyzing will clear your current results.</div>
+    <button type="button" class="btn btn-primary" id="reanalyzebtn">Reanalyze from Step 2</button>
+    <div class="invisible" id="confirmreanalyze">
+    <a href="/results/{{ jobid }}/reanalyze?confirm=true" role="button" class="btn btn-warning" style="width:300px" id="resubmit" name="resubmit"><span class="glyphicon glyphicon-repeat"></span> Confirm and reanalyze</a>
+    <div class="alert alert-warning" style="margin-top:10px" id="reanalyzewarn"><strong>Warning:</strong> Reanalyzing will clear your current results. Ensure you have saved your results before proceeding.</div>
         {% endif %}
         <input type="hidden" id="jobinfo" name="jobinfo" value="{{ jobid }}">
         <input type="hidden" id="pageid" name="pageid" value="report">
         <input type="hidden" id="lastani" value="ANI95">
+    </div>
 </div>
-    <script>
+<script>
 $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();
+});
+$("#reanalyzebtn").on("click",function(){
+    $("#confirmreanalyze").removeClass("invisible");
+    $("#reanalyzebtn").addClass("invisible");
 });
 </script>
 <script src="/static/js/mashtable.js?v=1.0"></script>

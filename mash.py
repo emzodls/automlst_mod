@@ -9,7 +9,7 @@ def mashdist(listfile,reffile,outputfile,cpu=1,maxdist=1.0):
     cmd = ["mash","dist","-d",str(maxdist),reffile,"-l", listfile]
     if(cpu > 1):
         cmd = cmd[:2] + ["-p",str(cpu)] + cmd[2:]
-    with open(outputfile,"w") as ofil:
+    with open(outputfile+".temp","w") as ofil:
         try:
             log.info("MASH_STATUS:: Running MASH ANI estimation on all input genomes")
             subprocess.call(cmd, stdout=ofil)
@@ -37,7 +37,7 @@ def parse(mashresult,taxdb="",maxdist=0.5,TStol=0.05):
         taxdb = os.path.join(os.path.dirname(os.path.realpath(__file__)),"taxonomy.pkl")
     with open(taxdb,"r") as fil:
         taxonomy = pickle.load(fil)
-    with open(mashresult,"r") as fil:
+    with open(mashresult+".temp","r") as fil:
         recs = {}
         for line in fil:
             tabs = line.strip().split("\t")
@@ -57,12 +57,13 @@ def parse(mashresult,taxdb="",maxdist=0.5,TStol=0.05):
         for qorg in recs:
             # Typestrain genome distances are allowed to be -(tolerance) larger for prioritization
             recs[qorg] = sorted(recs[qorg], key=lambda row: row[2]-TStol if row[-1] else row[2])
-    #Rewrite mash distance text file:
+    #Rewrite mash distance text file and remove old output:
     with open(mashresult,"w") as fil:
         fil.write("#Query_org\tReference_assembly\tRef_name\tMASH_distance\tEstimated_ANI\tP-value\tGenus\tOrder\tType_strain\n")
         for qorg,reclist in recs.items():
             for rec in reclist:
                 fil.write("%s\t%s\t%s\t%.4f\t%.4f\t%.4f\t%s\t%s\t%s\n"%(qorg,rec[0],rec[1].replace(" ","_"),rec[2],1.0-rec[2],rec[3],rec[5],rec[9],rec[-1]))
+        os.remove(mashresult+".temp")
     return recs
 
 lastid = 0

@@ -284,7 +284,7 @@ def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
 
     return hkhigh
 
-def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="GTR",bs=0,kf=False,maxorg=50):
+def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="GTR",bs=0,kf=False,maxorg=50,filtMLST=True):
     """WORKFLOW 2: Build phylogeny from scratch"""
     if not checkpoint:
         checkpoint = "w1-0"
@@ -450,11 +450,14 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         log.info("JOB_PROGRESS::30/100")
         #align all
         processmlst(mlstdir,aligndir,cpu=cpu)
-        #Extra screen of MLST genes to remove outliers based on starting tree distance
-        log.info("JOB_STATUS:: Screening for inconsistent MLST genes")
-        log.info("JOB_PROGRESS::55/100")
-        excludemlst = screenmlst(mlstdir,aligndir,cpu=cpu)
-        log.info("JOB_STATUS:: Excluded MLST genes: %s"%excludemlst)
+
+        if filtMLST and filtMLST != "False":
+            #Extra screen of MLST genes to remove outliers based on starting tree distance
+            log.info("JOB_STATUS:: Screening for inconsistent MLST genes")
+            log.info("JOB_PROGRESS::55/100")
+            excludemlst = screenmlst(mlstdir,aligndir,cpu=cpu)
+            log.info("JOB_STATUS:: Excluded MLST genes: %s"%excludemlst)
+
         #trim all
         log.info("JOB_STATUS:: Trimming alignments")
         log.info("JOB_PROGRESS::65/100")
@@ -507,7 +510,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
                 os.remove(oldfil)
 
 
-def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="GTR+I",bs=0,kf=False,maxmlst=100,maxorg=50):
+def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="GTR+I",bs=0,kf=False,maxmlst=100,maxorg=50,filtMLST=True):
     #Setup working directory
     if not os.path.exists(os.path.join(os.path.realpath(resultdir),"queryseqs")):
         os.makedirs(os.path.join(os.path.realpath(resultdir),"queryseqs")) #query sequence folder
@@ -540,7 +543,7 @@ def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,
     log.info('JOB_PARAMS::{"resultdir":"%s","skip":"%s","workflow":%s,"concat":"%s","model":"%s"}'%(resultdir,skip,workflow,concat,model))
     if workflow == 1:
         log.info("WORKFLOW::1")
-        return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=kf,maxmlst=maxmlst,maxorg=maxorg)
+        return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=kf,maxmlst=maxmlst,maxorg=maxorg,filtMLST=filtMLST)
     elif workflow == 2:
         log.info("WORKFLOW::2")
         return startwf2(indir,resultdir,checkpoint=checkpoint,model=model,bs=bs,kf=kf,maxmlst=maxmlst)

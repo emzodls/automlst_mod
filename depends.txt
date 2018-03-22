@@ -8,3 +8,8 @@ MASH
 #Accelerated workflow
 ASTRAL
 RaxML
+
+#other packages
+libblas-dev
+liblapack-dev
+gfortran
