@@ -244,7 +244,7 @@ def sendnotifymail(msg="",jobid="",to=""):
             msg = "Hello, your autoMLST job has been submitted! Your job id is: "
         assert to, jobid
         msgobj = Message("Your autoMLST Job (%s) has been submitted"%jobid,recipients=[to])
-        msgobj.html = "%s %s <br> <a href='http://127.0.0.1:5000/results/%s'>http://127.0.0.1:5000/results/%s</a>"%(msg,jobid,jobid,jobid) #placeholder address while testing
+        msgobj.html = "%s %s <br> <a href='%sresults/%s'>%sresults/%s</a>"%(msg,jobid,request.url_root,jobid,request.url_root,jobid)
         mail.send(msgobj)
     except Exception as e:
         print "Warning: Email not sent, check email configuration"
