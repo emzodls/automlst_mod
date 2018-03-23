@@ -13,6 +13,7 @@
                 <button type="button" class="btn btn-default" id="remfiles" style="margin-top:25px" onclick="removeAllSeqs()">Remove selected sequences</button>
             </div>
         </div>
+        <label for="uploadprog">Upload progress</label>
     <progress id="uploadprog" style="width:100%" value=0 class="bootstripe bootstripe-active"></progress>
         <div id="ncbiload" class="hidden"><b>Downloading file from NCBI. This may take a few minutes.</b> <div class="loader"></div>
         </div>
@@ -20,19 +21,21 @@
     <div class="form-group row">
             <label class="control-label col-md-2" for="ncbiacc1"><abbr title="National Center for Biotechnology">NCBI</abbr> Accession Number</label>
         <div class="col-md-8">
-            <input type="text" class="form-control" name="ncbiacc1" id="ncbiacc1" placeholder="Enter a NCBI accession number"> <!-- hitting enter after entering accession nr automatically submits -->
+            <input type="text" class="form-control" name="ncbiacc1" id="ncbiacc1" placeholder="Enter a NCBI accession number" onchange="toggleuploadbtn('ncbibtn',this.value)" onkeyup="toggleuploadbtn('ncbibtn',this.value)"> <!-- hitting enter after entering accession nr automatically submits -->
         </div>
         <div class="col-md-2">
-            <button type="button" class="btn btn-primary" id="ncbibtn" onclick="uploadSequence('ncbi')"><span class="glyphicon glyphicon-plus"></span> Upload</button>
+            <button type="button" class="btn btn-primary" id="ncbibtn" onclick="uploadSequence('ncbi')" disabled="true"><span class="glyphicon glyphicon-upload"></span> Upload</button>
         </div>
     </div>
         <div class="form-group row">
-            <label class="control-label col-md-2" for="seqfile1">Sequence(s) (one genome per file)</label>
+            <label class="control-label col-md-2" for="seqfile1">Sequence(s)</label>
             <div class="col-md-8">
-                <input type="file" class="form-control" id="seqfile1" name="seqfile1" multiple>
+                <input type="file" class="form-control" id="seqfile1" onkeyup="toggleuploadbtn('seqbtn',this.value);limitseqs(this.id)" onchange="toggleuploadbtn('seqbtn',this.value);limitseqs(this.id)" name="seqfile1" multiple>
+                <p>One genome per sequence file. Limit 20 Genomes per run and maximum of 100Mb per upload</p>
+                <div class="alert alert-warning hidden" id="uploadwarn"><strong>Selection is over maximum allowed limits. Please select fewer genomes and ensure they are under the file upload limits.</strong></div>
             </div>
             <div class="col-md-2">
-            <button type="button" class="btn btn-primary" id="seqbtn" onclick="uploadSequence('seqfile')"><span class="glyphicon glyphicon-plus"></span> Upload</button>
+            <button type="button" class="btn btn-primary" id="seqbtn" onclick="uploadSequence('seqfile')" disabled="true"><span class="glyphicon glyphicon-upload"></span> Upload</button>
         </div>
         </div>
 
@@ -108,7 +111,7 @@
     </div>
 </div>
 
-<script src="/static/js/analysispage.js"></script>
+<script src="/static/js/analysispage.js?v=2.0"></script>
 <script>$('body').onload=refGenus();</script>
 
 {% endblock %}

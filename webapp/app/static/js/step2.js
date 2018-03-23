@@ -91,7 +91,7 @@ var counter, counter2, commonTaxId;
 //var selectedList = [];
 var allGroup = {};
 var groupList = ["genus","family","order","phyl"];
-var refOrgs = $.extend(jsonOrgs["reforgs"], jsonOrgs["queryorgs"]); //how to handle if only query orgs remaining?
+//var refOrgs = $.extend(jsonOrgs["reforgs"], jsonOrgs["queryorgs"]); //how to handle if only query orgs remaining?
  // for each taxonomical level, see what group each active option in species selection belongs to
  for (var group in groupList) {
                 var groupId = groupList[group]+"id";

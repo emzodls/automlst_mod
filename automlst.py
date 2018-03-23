@@ -112,16 +112,24 @@ def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=1,minorgs=25):
         with open(autosel,"r") as fil:
             selection = json.load(fil)
     elif "skip2" in skip:
-        commonrank = mashresult.get("commonrank",["phyl","",""])
-        if commonrank[0]:
-            selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])[:IGlimit] if str(x.get(commonrank[0]+"id","")) in str(commonrank[1])],
-                     "seloutgroups":[x.get("id","") for x in mashresult.get("outgroups",[])[:OGlimit]]}
-        else:
-            selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])[:IGlimit]],
-                     "seloutgroups":[x.get("id","") for x in mashresult.get("outgroups",[])[:OGlimit]]}
-        if not len(selection["selspecies"]) > minorgs:
-            selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])[:minorgs]],
-                     "seloutgroups":[x.get("id","") for x in mashresult.get("outgroups",[])[:OGlimit]]}
+        # commonrank = mashresult.get("commonrank",["phyl","",""])
+        # if commonrank[0]:
+        #     selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])[:IGlimit] if str(x.get(commonrank[0]+"id","")) in str(commonrank[1])],
+        #              "seloutgroups":[x.get("id","") for x in mashresult.get("outgroups",[])[:OGlimit]]}
+        # else:
+        qorgs = mashresult.get("queryorgs",[])
+        selrefs = mashresult.get("reforgs",[])[:IGlimit-len(qorgs)-OGlimit]
+        selection = {"selspecies":[x.get("id","") for x in selrefs]}
+        orgrecs = {i:v for i,v in enumerate(qorgs+selrefs)}
+        # log.debug("Issue_orgrecs: %s"%orgrecs)
+        commonrank = mash.getcommongroup(orgrecs)
+        # log.debug("Issue_commonrank: %s"%commonrank)
+        OGorgs = mash.getoutgrouporgs(commonrank,mashresult.get("reforgs",[]),glimit=OGlimit)
+        # log.debug("Issue_OGorgs: %s"%OGorgs)
+        selection["seloutgroups"] = [x.get("id","") for x in OGorgs[:OGlimit]]
+        # if not len(selection["selspecies"]) > minorgs:
+        #     selection = {"selspecies":[x.get("id","") for x in mashresult.get("reforgs",[])[:minorgs]],
+        #              "seloutgroups":[x.get("id","") for x in mashresult.get("outgroups",[])[:OGlimit]]}
 
         with open(autosel,"w") as fil:
             json.dump(selection,fil)
@@ -343,7 +351,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
 
     #Copy reference sequence database and add query organisms
     orgdb = os.path.join(resultdir,"refquery.db")
-    selorgs = {}
+    # selorgs = {}
     if not selorgs and os.path.exists(os.path.join(resultdir,"userlist.json")):
         with open(os.path.join(resultdir,"userlist.json"),"r") as fil:
             selorgs = json.load(fil)

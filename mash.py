@@ -83,7 +83,7 @@ def getcommongroup(lineage):
     allgroup = {}
     common = [False,"",""]
     for group in groups:
-        allgroup = {str(rec[group+"id"]):rec[group+"name"] for org,rec in lineage.items()}
+        allgroup = {str(rec[group+"id"]):rec[group+"name"] for rec in lineage.values()}
         if len(allgroup.keys())==1 and not common[0]:
             common = [group,allgroup.keys()[0],allgroup.values()[0]]
         #allids[group] = allgroup.keys()
@@ -190,7 +190,7 @@ def getdistances(indir,outdir,reffile="",cpu=1,limit=5000,outputfile="",TStol=0.
             result = {"reforgs":refrecs[:limit],"queryorgs":orgrecs.values(),"orglist":orglist,"commonrank":commonrank,"outgroups":OGorgs}
             json.dump(result,fil,indent=2)
             log.info("Mash distances stored in reflist.json")
-            return {"reforgs":refrecs[:limit],"queryorgs":orgrecs.values(),"orglist":orglist,"commonrank":commonrank,"outgroups":OGorgs}
+            return result
     return False
 
 # Commandline Execution

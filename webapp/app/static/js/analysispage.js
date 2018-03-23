@@ -4,16 +4,10 @@ if ($("#upfiles > option").length >= 20) {
             $("#seqbtn").addClass("disabled");
             $("#ncbibtn").addClass("disabled");
             $("#seqwarn").removeClass("hidden");
-            if ($("#upfiles > option").length >= 21) {
-            $('#submitjob').addClass("disabled");
-            } else {
-            $('#submitjob').removeClass("disabled");
-            }
             return false;
         } else {
             $("#seqbtn").removeClass("disabled");
             $("#ncbibtn").removeClass("disabled");
-            $('#submitjob').removeClass("disabled");
             $("#seqwarn").addClass("hidden");
             return true;
         }
@@ -261,6 +255,33 @@ if (($('input[name="workflow"]:checked', '#sequpload').val()) == "2") {
         $('#seqbtn').addClass('disabled');
     }
 });*/
+
+function limitseqs(objid){
+    var allowed = 20 - $("#upfiles > option").length;
+    var allfiles = $("#"+objid)[0].files;
+    var totalsize = 0;
+    for (var i = 0; i < allfiles.length; ++i) {
+        totalsize += allfiles.item(i).size;
+        }
+    console.log(totalsize);
+    //Check if seqs are less than total allowed and if request is under 100Mb
+    if ($("#"+objid)[0].files.length > allowed || totalsize > 104857600){
+        $("#"+objid).val("");
+        $("#uploadwarn").removeClass("hidden")
+    }
+    else{
+        $("#uploadwarn").addClass("hidden")
+    }
+}
+
+function toggleuploadbtn(btnid,x) {
+    if (x.toString().length >= 1) {
+        $("#"+btnid).prop("disabled",false);
+    }
+    else {
+        $("#"+btnid).prop("disabled",true);
+    }
+}
 
 $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();
