@@ -18,6 +18,16 @@ def getdb():
         rddb = False
     return rddb
 
+def getserverstats():
+    rddb = getdb()
+    status={}
+    if rddb:
+        status["running"] = rddb.llen("AMLSTRQ")
+        status["waiting"] = rddb.llen("AMLSTSQ")
+        status["finished"] = rddb.llen("AMLSTDQ")
+        status["paused"] = rddb.llen("AMLSTPQ")
+    return status
+
 def validatefile(fname, asfil=False):
     validgbkext = ['gbk','genbank','gbff','gb','embl']
     validfakext = ['fasta','fa','fna','faa','fas']

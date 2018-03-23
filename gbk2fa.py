@@ -115,18 +115,18 @@ def convertgenes(filename, outdir="./", genes=False,f="",rename=False,usetrans=F
                             cdscount += 1
                             feature_count += 1
                 log.info("Record #%s CDS bp coverage: %s%%"%(recnum,(bpcount * 100 / bpend)))
-
-                if "source" in seq_record.annotations:
-                    orgname=seq_record.annotations["source"].replace(".","").replace(" ","_")
-                elif "organism" in seq_record.annotations:
-                    orgname=seq_record.annotations["organism"].replace(".","").replace(" ","_")
+                validchars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-"
+                if "organism" in seq_record.annotations:
+                    orgname= "".join([c for c in seq_record.annotations["organism"].replace(" ","_") if c in validchars])
+                # elif "source" in seq_record.annotations:
+                #     orgname= "".join([c for c in seq_record.annotations["source"].replace(" ","_") if c in validchars])
                 else:
                     orgname=""
         if rename and len(orgname)>0:
-            os.rename(basename + ".genelist", outdir + orgname + ".genelist")
-            os.rename(basename + ".faa", outdir + orgname + ".faa")
-            os.rename(basename + ".fna", outdir + orgname + ".fna")
-            os.rename(basename + ".fa", outdir + orgname + ".fa")
+            os.rename(basename + ".genelist", os.path.join(outdir, prfix + orgname + ".genelist"))
+            os.rename(basename + ".faa", os.path.join(outdir, prfix + orgname + ".faa"))
+            os.rename(basename + ".fna", os.path.join(outdir, prfix + orgname + ".fna"))
+            os.rename(basename + ".fa", os.path.join(outdir, prfix + orgname + ".fa"))
             outfile=orgname
         else:
             outfile=fname

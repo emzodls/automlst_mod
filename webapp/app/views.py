@@ -26,6 +26,11 @@ def results():
 def amlstdownl():
     return render_template("download.html")
 
+@app.route('/serverstatus')
+def serverstatus():
+    status = routines.getserverstats()
+    return jsonify(status)
+
 @app.route('/results/getreport', methods=['POST'])
 def getreport():
     jobid = request.form.get("jobid")

@@ -1,5 +1,13 @@
 {% extends "main.html" %}
 {% block mainbody %}
+<div class="serverstats">
+        <ul class="list-inline">
+            <li class="statuslabel">Server Status &raquo;</li>
+            <li>Running: <span id="server-running">n/a</span></li>
+            <li>Queue: <span id="server-queue">n/a</span></li>
+            <li>Done: <span id="server-done">n/a</span></li>
+        </ul>
+</div>
 <div class="container" style="padding-top:25px;">
     <form action="startjob" method="post" enctype="multipart/form-data" name="sequpload" id="sequpload">
     <h2 class="h4alike">Sequences</h2>
@@ -32,7 +40,15 @@
             <div class="col-md-8">
                 <input type="file" class="form-control" id="seqfile1" onkeyup="toggleuploadbtn('seqbtn',this.value);limitseqs(this.id)" onchange="toggleuploadbtn('seqbtn',this.value);limitseqs(this.id)" name="seqfile1" multiple>
                 <p>One genome per sequence file. Limit 20 Genomes per run and maximum of 100Mb per upload</p>
-                <div class="alert alert-warning hidden" id="uploadwarn"><strong>Selection is over maximum allowed limits. Please select fewer genomes and ensure they are under the file upload limits.</strong></div>
+                <!-- Upload alerts  -->
+                    <div class="alert alert-warning hidden" id="uploadwarn"><strong>Selection is over maximum allowed limits. Please select fewer genomes and ensure they are under the file upload limits.</strong></div>
+                    <div class="alert alert-success hidden" id="uploadsuccess">Upload successful</div>
+                    <div class="alert alert-danger hidden" id="uploadwarning"><strong>Error:</strong> Upload failed</div>
+                    <div class="alert alert-danger hidden" id="errorwarning"><strong>Error:</strong> Invalid accession number or sequence file</div>
+                    <div class="alert alert-danger hidden" id="accwarning"><strong>Error:</strong> Invalid accession number. Accession numbers may only contain alphanumeric characters (A-Z, 0-9) and underscores.</div>
+                    <div class="alert alert-danger hidden" id="duplicatewarning"><strong>Error:</strong> Sequence already uploaded.</div>
+                    <div class="alert alert-warning hidden" id="seqwarn"><strong>Maximum number of files and accession numbers reached.</strong></div>
+
             </div>
             <div class="col-md-2">
             <button type="button" class="btn btn-primary" id="seqbtn" onclick="uploadSequence('seqfile')" disabled="true"><span class="glyphicon glyphicon-upload"></span> Upload</button>
@@ -83,12 +99,6 @@
         </div>
 
 <!-- if file fails/ID not found, unhide warning -->
-        <div class="alert alert-success hidden" id="uploadsuccess">Upload successful</div>
-        <div class="alert alert-danger hidden" id="uploadwarning"><strong>Error:</strong> Upload failed</div>
-        <div class="alert alert-danger hidden" id="errorwarning"><strong>Error:</strong> Invalid accession number or sequence file</div>
-        <div class="alert alert-danger hidden" id="accwarning"><strong>Error:</strong> Invalid accession number. Accession numbers may only contain alphanumeric characters (A-Z, 0-9) and underscores.</div>
-        <div class="alert alert-danger hidden" id="duplicatewarning"><strong>Error:</strong> Sequence already uploaded.</div>
-        <div class="alert alert-warning hidden" id="seqwarn"><strong>Maximum number of files and accession numbers reached.</strong></div>
         <div class="alert alert-danger selectablewarn hidden"><strong>Error:</strong> No sequences uploaded. Please upload sequences before submitting.</div>
         {% with messages = get_flashed_messages() %}
   {% if messages %}
@@ -112,6 +122,24 @@
 </div>
 
 <script src="/static/js/analysispage.js?v=2.0"></script>
-<script>$('body').onload=refGenus();</script>
+<script>
+$('body').onload=refGenus();
+$('[data-toggle="tooltip"]').tooltip();
+function statusupdate(data) {
+    $("#server-running").html(data.running);
+    $("#server-queue").html(data.waiting);
+    $("#server-done").html(data.finished);
+    }
 
+var timer1 = 0;
+
+$(document).ready(function(){
+    $.getJSON('/serverstatus',statusupdate)
+    timer1 = setInterval(function() {
+        $.getJSON('/serverstatus',statusupdate)
+        }, 20000);
+    });
+
+
+</script>
 {% endblock %}

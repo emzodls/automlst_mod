@@ -263,8 +263,7 @@ function limitseqs(objid){
     for (var i = 0; i < allfiles.length; ++i) {
         totalsize += allfiles.item(i).size;
         }
-    console.log(totalsize);
-    //Check if seqs are less than total allowed and if request is under 100Mb
+    //Check if seqs are less than total allowed and if request is under 100MB
     if ($("#"+objid)[0].files.length > allowed || totalsize > 104857600){
         $("#"+objid).val("");
         $("#uploadwarn").removeClass("hidden")
