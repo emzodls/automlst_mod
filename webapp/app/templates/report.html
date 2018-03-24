@@ -128,7 +128,7 @@
         <!--</div>-->
     <a href="/results/{{ jobid }}/downloadmash" class="btn btn-primary" role="button" style="width:200px" id="mashdownl" name="mashdownl"><span class="glyphicon glyphicon-download-alt"></span> Download Mash distances</a>
     <!-- button layout? -->
-        {% if workflow != 2 %}
+        {% if workflow != 2 and jobid != 'example' %}
     <hr>
     <button type="button" class="btn btn-primary" id="reanalyzebtn">Reanalyze from Step 2</button>
     <div class="invisible" id="confirmreanalyze">

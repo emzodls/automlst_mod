@@ -89,7 +89,7 @@ def showstep(jobid,step):
 
 @app.route('/results/<jobid>/reanalyze', methods=['GET'])
 def reanalyze(jobid):
-    if request.args.get("confirm",False):
+    if request.args.get("confirm",False) and jobid != 'example':
         routines.reanalyzejob(jobid)
         jobname = routines.findjobinfo(jobid)
         return render_template("step2.html", jobid=jobid,jobname=jobname[1])
@@ -368,10 +368,11 @@ def status(jobid):
         return jsonify(jobstat)
     else:
         return jsonify(jobstat)
+
 # probably needs to be updated; simply redirect to completed example job instead? If so, ensure it can't be reanalyzed
-@app.route('/results/example/report')
-def example():
-    return render_template("example.html")
+# @app.route('/results/example/report')
+# def example():
+#     return render_template("example.html")
 
 
 @app.errorhandler(404)
