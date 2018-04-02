@@ -195,8 +195,11 @@ def upload():
 @app.route('/startjob', methods=['POST'])
 def startjob():
     jobid = unicode(uuid.uuid4())
-    jobdict = {"jobid": jobid, "workflow": request.form.get("workflow"), "genomes": request.form.getlist('upfiles'),
-              "reference": request.form.get('genusselect','NA')}
+    jobdict = {"id": jobid, "workflow": request.form.get("workflow"), "genomes": request.form.getlist('upfiles'),
+               "skip":request.form.get('skip2',"")+","+request.form.get('skip3',""), "reference": request.form.get('genusselect','NA'),
+               "bootstr":request.form.get('boots',0), "filtmlst": request.form.get('filtmlst',''),
+               "mode":request.form.get('optradio',"concatenated"),"modelfind":request.form.get("modelfinder","GTR")}
+
     os.mkdir(os.path.join(app.config['RESULTS_FOLDER'],jobid))
     resp = make_response(redirect('/results/' + jobid + '/loading'))
 
@@ -218,8 +221,6 @@ def startjob():
     if jobtitle and len(jobtitle):
         with open(os.path.join(app.config['RESULTS_FOLDER'], jobid, "jobtitle.txt"), "w") as namefile:
             namefile.write(jobtitle + "\n")
-    else:
-        jobtitle = jobid
 
     #Recent results
     keeplink = request.form.get('keeplink',False)
@@ -233,7 +234,7 @@ def startjob():
 
     #Workflow redirecting
     if request.form.get("workflow") == "1" or request.form.get("workflow") == "2":
-        automlstjob = routines.addjob(id=jobid,workflow=request.form.get("workflow"),genomes=request.form.getlist('upfiles'),reference=request.form.get('genusselect','NA'),skip=request.form.get('skip2',"")+","+request.form.get('skip3',""),bootstr=request.form.get('boots',0), mode=request.form.get('optradio',"concatenated"),modelfind=request.form.get("modelfinder","GTR"))
+        automlstjob = routines.addjob(**jobdict)
         #with open(os.path.join(app.config['RESULTS_FOLDER'],'examplein.json'),'w') as uploadfile:
         #    json.dump(jobdict,uploadfile)
         return resp

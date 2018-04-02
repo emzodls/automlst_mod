@@ -163,9 +163,13 @@ class AmlstDaemon(Daemon):
                         concat = True
                         if mode != "concatenated":
                             concat = False
+                        filtMLST = jobargs.get("filtmlst","")
+
+                        #Get other params
                         refdb = self.config.get("REFDB",False)
                         keepfiles = self.config.get("KEEPFILES",False)
                         cpu = int(self.config.get("MCPU",1))
+
                         #Check for bad config values
                         if cpu > cpu_count() or cpu <= 0:
                             cpu = cpu_count()
@@ -173,7 +177,8 @@ class AmlstDaemon(Daemon):
                         self.log.info("ARGS: workflow=%s skip=%s concat=%s model=%s refdb=%s cpu=%s"%(workflow,skip,concat,model,refdb,cpu))
 
                         ## Do the job
-                        exitstatus = automlst.startjob(genomes,resultdir,skip=skip,checkpoint=False,workflow=workflow,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=keepfiles)
+                        exitstatus = automlst.startjob(genomes,resultdir,skip=skip,checkpoint=False,workflow=workflow,refdb=refdb,cpu=cpu,concat=concat,
+                                                       model=model,bs=bs,kf=keepfiles,filtMLST=filtMLST)
 
                         self.runningjob = False
                         self.redis.lrem("AMLSTRQ",jobid)

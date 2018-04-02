@@ -1,4 +1,4 @@
-import os, tempfile, models, json, datetime, csv, zipfile, time
+import os, tempfile, models, json, datetime, csv, zipfile, time, shutil
 from flask import render_template, jsonify, request, redirect, abort, make_response, send_from_directory, flash, g
 from flask_mail import Message
 from redis import Redis
@@ -192,11 +192,16 @@ def reanalyzejob(jobid):
     #Reset to Step2 state, remove all files except keepfiles
     keepfiles = ["automlst.log","mash_distances.txt","mash_distances.json","queryseqs","reflist.json"]
     jobdir = os.path.join(app.config['RESULTS_FOLDER'],jobid)
+
+    # Store the old files instead of deleting them
     oldfiles = tempfile.mkdtemp(prefix="old_",dir=jobdir)
     keepfiles.append(os.path.split(oldfiles)[1])
     for fname in os.listdir(jobdir):
         if fname not in keepfiles:
             os.rename(os.path.join(jobdir,fname),os.path.join(oldfiles,fname))
+
+    # Delete the old files
+    shutil.rmtree(oldfiles)
 
 # converts organism list .json to tab-separated text file, filters for only selected species and outgroups (dependent on presence of autoOrglist.json!)
 def jsontotsv(jsonpath,jobid):

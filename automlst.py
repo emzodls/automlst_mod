@@ -4,7 +4,7 @@ import copyseqsql, makeseqsql, glob, seqsql2fa, subprocess
 import multiprocessing as mp
 import makehmmsql, getgenematrix, getgenes, concatmsa, ete3helper
 import numpy as np
-from scipy.cluster.vq import kmeans2
+#from scipy.cluster.vq import kmeans2
 
 def startwf2(indir,resultdir,checkpoint=False,genus="auto",model="GTR+I",bs=0,kf=False,maxmlst=100):
     """WORKFLOW 2: Get all query genomes and identify reference tree to add sequences to"""
@@ -270,15 +270,20 @@ def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
             treedists.append(temp)
 
     #segment tress into 2 partitions using k-means
-    km,kmgroup = kmeans2(np.array(treedists),2)
+    #km,kmgroup = kmeans2(np.array(treedists),2)
     #Ensure group with highest distance is marked as group 1, group 0 is highest group
-    if km[0] > km[1]:
-        kmgroup = np.ones(len(kmgroup))-kmgroup
-    inds = [i for i,x in enumerate(kmgroup) if x>0]
+    #if km[0] > km[1]:
+    #    kmgroup = np.ones(len(kmgroup))-kmgroup
+    #inds = [i for i,x in enumerate(kmgroup) if x>0]
     #get hkgenes with highest group designation
     # return kmgroup,hkgenes,treedists
 
-    hkhigh = sorted(np.array(hkgenes)[inds], key=lambda x: treedists[hkgenes.index(x)])
+    #Assume normal distribution and highlight trees outside 1 standard deviation (~ 15% of distant genes)
+    threshold = np.mean(treedists)+np.std(treedists)
+    inds = np.array([int(x>=threshold) for x in treedists])
+
+
+    hkhigh = sorted(np.array(hkgenes)[inds>0], key=lambda x: treedists[hkgenes.index(x)])
 
     #if lowest group is under min genes remove genes from highest group
     mindiff = mingenes - (len(hkgenes)-len(hkhigh))
@@ -289,6 +294,12 @@ def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
     for hk in hkhigh:
         fname = os.path.join(aligndir,hk+".fna")
         os.rename(fname,fname+".removed")
+
+    #write table of genes and median distances
+    fname = os.path.join(aligndir,"removedsumamry.tsv")
+    with open(fname,"w") as fil:
+        for i,hk in enumerate(hkgenes):
+            fil.write("%s\t%s\t%s\n"%(hk,treedists[i],inds[i]))
 
     return hkhigh
 
@@ -458,7 +469,10 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         log.info("JOB_PROGRESS::30/100")
         #align all
         processmlst(mlstdir,aligndir,cpu=cpu)
+        checkpoint = "w1-6b"
+        log.info("JOB_CHECKPOINT::%s"%checkpoint)
 
+    if checkpoint == "w1-6b":
         if filtMLST and filtMLST != "False":
             #Extra screen of MLST genes to remove outliers based on starting tree distance
             log.info("JOB_STATUS:: Screening for inconsistent MLST genes")
