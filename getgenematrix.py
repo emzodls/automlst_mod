@@ -158,7 +158,7 @@ def prioritize(genemat,orgs,dndsfile="",jsonfile="",metadata="",pct=0.5,maxgenes
     # log.debug("Delete Org counts: %s"%set([x["delcount"] for x in genelist[:maxgenes]]))
 
     #Rebalance function diversity for MLST singles
-    genelist = rebalancefuncs(genelist,exfuncs=exfuncs,maxgenes=maxgenes,maxiter=900,ubiq=True)
+    #genelist = rebalancefuncs(genelist,exfuncs=exfuncs,maxgenes=maxgenes,maxiter=900,ubiq=True)
 
     # log.debug("Topgenes After re-balancing: %s"%getTopFuncs(genelist,maxgenes,exfuncs))
     # log.debug("Delete Org counts: %s"%set([x["delcount"] for x in genelist[:maxgenes]]))
@@ -216,14 +216,13 @@ if __name__ == '__main__':
     parser.add_argument("input", help="Sql database (READS TABLES: Seqs, HMMhits)")
     parser.add_argument("-p", "--pct", help="percent match of hmm model length to consider as hit (default: 0.5)", type=float, default=0.5)
     parser.add_argument("-p2", "--pct2", help="percent of orgs to consider as ubiquitous single copy gene (default: 1.0)", type=float, default=1.0)
+    parser.add_argument("-mxg", "--maxgenes", help="Limit MLST genes to top X genes (default: 100)", type=int, default=100)
     parser.add_argument("-e", "--evalue", help="Evalue threshold (default: 0.1)", type=float, default=0.1)
     parser.add_argument("-b", "--bitscore", help="Bitscore threshold (default: 0)", type=float, default=0)
-    parser.add_argument("-gl", "--genelimit", help="Limit MLST genes to top X genes (default: 100)", type=float, default=0)
     parser.add_argument("-sf", "--savefil", help="Save file to json file (default: disabled)", default="")
     parser.add_argument("-pf", "--priorityfile", help="Save list of top priority MLST genes (based on ubiquity and lowest dn/ds values)", default="")
     parser.add_argument("-df", "--dndsfile", help="JSON file with precalculated dN/dS values used for prioritization", default="")
     parser.add_argument("-bh", "--besthit", help="Only write best hit hmm for each gene (only lowest evalue hmm allowed per gene)", action='store_true')
     parser.add_argument("-r", "--rna", help="Also copy RNA table hits", action='store_true')
     args = parser.parse_args()
-    result=getmat(args.input, args.pct, args.pct2, args.evalue, args.bitscore, args.besthit, args.rna, args.savefil, args.priorityfile,
-                  )
+    result=getmat(args.input, args.pct, args.pct2, args.evalue, args.bitscore, args.besthit, args.rna, args.savefil, args.priorityfile, args.maxgenes)

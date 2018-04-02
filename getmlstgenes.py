@@ -16,8 +16,6 @@
 
 import os, argparse, setlog, json, sqlite3 as sql, numpy as np
 
-log = setlog.init(toconsole=True,level="info")
-
 def get16S(db,cov=800):
     conn=sql.connect(db)
     cur=conn.cursor()
@@ -77,7 +75,13 @@ def getcoregenes(db,pct=0.4,pct2=0.4,seqdict=None):
 
     return orgs,hkcore,oarry,seqdict
 
-def findsingles(db,minnum=7,minorg=0.8,maxgenes=30,dnds="",outdir="",keepgenes=""):
+def findsingles(db,minnum=7,minorg=0.8,maxgenes=30,dnds="",outdir="",keepgenes="",lf=""):
+    global log
+    if lf:
+        log = setlog.init(logfile=lf,level="info")
+    else:
+        log = setlog.init(toconsole=True,level="info")
+
     log.info("Getting 16S genes...")
     seqdict = get16S(db)
     log.info("Done. Getting Core genes...")
@@ -154,10 +158,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Find and extract MLST genes""")
     parser.add_argument("input", help="Input sequence database")
     parser.add_argument("-dnds", help="Json file with dN/dS values for further filtering",default="")
+    parser.add_argument("-log", help="Log file to save status",default="")
     parser.add_argument("-od", "--outdir", help="Directory to rewrite singles with removed organisms (default: currentdir/singles)",default="singles")
     parser.add_argument("-kg", "--keepgenes", help="list of genes that must be kept. (comma seperated, ex: RNA_16S_rRNA,TIGR02013)",default="")
     parser.add_argument("-mx","--maxgenes", help="maximum number of single copy housekeeping genes, uses lowest dNdS valued genes (default:30)",type=int,default=30)
     parser.add_argument("-mn","--minnum", help="minimum number of single copy housekeeping genes (default:7)",type=int,default=7)
     parser.add_argument("-mo","--minorg", help="minimum percent of organisms to remain (default:0.8)",type=float,default=0.8)
     args = parser.parse_args()
-    findsingles(args.input,args.minnum,args.minorg,args.maxgenes,args.dnds,args.outdir,args.keepgenes)
+    findsingles(args.input,args.minnum,args.minorg,args.maxgenes,args.dnds,args.outdir,args.keepgenes,args.log)
