@@ -230,7 +230,7 @@ def startjob():
             lastresult += ";%s"%jobid
         else:
             lastresult = jobid
-    resp.set_cookie('automlst.lastresult',lastresult)
+        resp.set_cookie('automlst.lastresult',lastresult)
 
     #Workflow redirecting
     if request.form.get("workflow") == "1" or request.form.get("workflow") == "2":
