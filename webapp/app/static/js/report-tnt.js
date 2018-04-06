@@ -2,38 +2,38 @@ var jobid = $('#jobinfo').val();
 
 //  ANI group coloring of labels
 function nodeFill(node,aniGroupCutoff) {
-    if (aniGroupCutoff == '95') {
-    var nodeAni = node.property('ANI95');
+    if (aniGroupCutoff == '97') {
+    var nodeAni = node.property('ANI97');
     if (nodeAni in aniTable[0]) {
         return aniTable[0][nodeAni];
     } else {
         return "black";
     }
-    } else if (aniGroupCutoff == '96') {
-    var nodeAni = node.property('ANI96');
+    } else if (aniGroupCutoff == '95') {
+    var nodeAni = node.property('ANI95');
     if (nodeAni in aniTable[1]) {
         return aniTable[1][nodeAni];
     } else {
         return "black";
     }
-    } else if (aniGroupCutoff == '97') {
-    var nodeAni = node.property('ANI97');
+    } else if (aniGroupCutoff == '90') {
+    var nodeAni = node.property('ANI90');
     if (nodeAni in aniTable[2]) {
         return aniTable[2][nodeAni];
     } else {
         return "black";
     }
     }
-    else if (aniGroupCutoff == '98') {
-    var nodeAni = node.property('ANI98');
+    else if (aniGroupCutoff == '85') {
+    var nodeAni = node.property('ANI85');
     if (nodeAni in aniTable[3]) {
         return aniTable[3][nodeAni];
     } else {
         return "black";
     }
     }
-    else if (aniGroupCutoff == '99') {
-    var nodeAni = node.property('ANI99');
+    else if (aniGroupCutoff == '80') {
+    var nodeAni = node.property('ANI80');
     if (nodeAni in aniTable[4]) {
         return aniTable[4][nodeAni];
     } else {
@@ -44,8 +44,8 @@ function nodeFill(node,aniGroupCutoff) {
 }
 //  coloring single ANI groups
 function subtreeFill(node, searchId,aniCutoff) { //see nodeFill; how to get ANI cutoff?
-if (aniCutoff == 'ANI95') {
-if (node.property('ANI95') == searchId) {
+if (aniCutoff == 'ANI97') {
+if (node.property('ANI97') == searchId) {
     if (searchId in aniTable[0]) {
         return aniTable[0][searchId];
     } else {
@@ -53,8 +53,8 @@ if (node.property('ANI95') == searchId) {
     }
 } else {
     return "black";
-}} else if (aniCutoff == 'ANI96') {
-if (node.property('ANI96') == searchId) {
+}} else if (aniCutoff == 'ANI95') {
+if (node.property('ANI95') == searchId) {
     if (searchId in aniTable[1]) {
         return aniTable[1][searchId];
     } else {
@@ -63,8 +63,8 @@ if (node.property('ANI96') == searchId) {
 } else {
     return "black";
 }
-} else if (aniCutoff == 'ANI97') {
-if (node.property('ANI97') == searchId) {
+} else if (aniCutoff == 'ANI90') {
+if (node.property('ANI90') == searchId) {
     if (searchId in aniTable[2]) {
         return aniTable[2][searchId];
     } else {
@@ -73,9 +73,9 @@ if (node.property('ANI97') == searchId) {
 } else {
     return "black";
 }
-} else if (aniCutoff == 'ANI98') {
+} else if (aniCutoff == 'ANI85') {
 
-if (node.property('ANI98') == searchId) {
+if (node.property('ANI85') == searchId) {
     if (searchId in aniTable[3]) {
         return aniTable[3][searchId];
     } else {
@@ -84,8 +84,8 @@ if (node.property('ANI98') == searchId) {
 } else {
     return "black";
 }
-} else if (aniCutoff == 'ANI99') {
-if (node.property('ANI99') == searchId) {
+} else if (aniCutoff == 'ANI80') {
+if (node.property('ANI80') == searchId) {
     if (searchId in aniTable[4]) {
         return aniTable[4][searchId];
     } else {
@@ -200,11 +200,11 @@ if (data != "false") {
         if (gcfIndex != -1) {
         var nodeGcf = nodeName.slice(gcfIndex,gcfIndex+13);
         var nodeAni = [aniMasterList[nodeGcf][0], aniMasterList[nodeGcf][1], aniMasterList[nodeGcf][2], aniMasterList[nodeGcf][3],aniMasterList[nodeGcf][4]];
-        leaves[leafNode].property('ANI95', nodeAni[0]); // store as property so the name won't have to be searched every time
-        leaves[leafNode].property('ANI96', nodeAni[1]);
-        leaves[leafNode].property('ANI97', nodeAni[2]);
-        leaves[leafNode].property('ANI98', nodeAni[3]);
-        leaves[leafNode].property('ANI99', nodeAni[4]);
+        leaves[leafNode].property('ANI97', nodeAni[0]); // store as property so the name won't have to be searched every time
+        leaves[leafNode].property('ANI95', nodeAni[1]);
+        leaves[leafNode].property('ANI90', nodeAni[2]);
+        leaves[leafNode].property('ANI85', nodeAni[3]);
+        leaves[leafNode].property('ANI80', nodeAni[4]);
         var nodeHeight = $('text.tnt_tree_label:contains("'+ nodeName+'")').offset().top; //get y-position of branches relative to page
         for (var b in nodeAni) {
                 if (!(nodeAni[b] in aniDict[b])) {
@@ -373,36 +373,36 @@ if (value.length) {
 }
 // recolors tree according to ANI groups
 function showAniGroups(aniCutoffLevel) {
-if (aniCutoffLevel == '95') {
+if (aniCutoffLevel == '97') {
 $('#colorblock1').css('color','#00990d');
 $('#colorblock2').css('color','#9900ff');
 $('#colorblock3').css('color','#e6007a');
 $('#colorblock4').css('color','#0000CD');
-$('#lastani').val('ANI95');
-} else if (aniCutoffLevel == '96') {
+$('#lastani').val('ANI97');
+} else if (aniCutoffLevel == '95') {
 $('#colorblock1').css('color','#cc4400');
 $('#colorblock2').css('color','#008080');
 $('#colorblock3').css('color','#590099');
 $('#colorblock4').css('color','#518000');
-$('#lastani').val('ANI96');
-} else if (aniCutoffLevel == '97') {
+$('#lastani').val('ANI95');
+} else if (aniCutoffLevel == '90') {
 $('#colorblock1').css('color','#e6007a');
 $('#colorblock2').css('color','#008080');
 $('#colorblock3').css('color','#590099');
 $('#colorblock4').css('color','#00990d');
-$('#lastani').val('ANI97');
-} else if (aniCutoffLevel == '98') {
+$('#lastani').val('ANI90');
+} else if (aniCutoffLevel == '85') {
 $('#colorblock1').css('color','#cc4400');
 $('#colorblock2').css('color','#0000CD');
 $('#colorblock3').css('color','#9900ff');
 $('#colorblock4').css('color','#518000');
-$('#lastani').val('ANI98');
-} else if (aniCutoffLevel == '99') {
+$('#lastani').val('ANI85');
+} else if (aniCutoffLevel == '80') {
 $('#colorblock1').css('color','#e6007a');
 $('#colorblock2').css('color','#0000CD');
 $('#colorblock3').css('color','#518000');
 $('#colorblock4').css('color','#590099');
-$('#lastani').val('ANI99');
+$('#lastani').val('ANI80');
 }
 $('#anicutoff').text(aniCutoffLevel);
 $('#colorkey').removeClass('hidden');

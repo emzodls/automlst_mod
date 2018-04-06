@@ -52,11 +52,10 @@
             <div class="btn-group">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" style="width:200px">Display ANI groups <span class="caret"></span></button>
             <ul class="dropdown-menu" role="menu">
-                <li style="width:200px"><a href="#" onclick="showAniGroups(95);">95% cutoff</a></li>
-                <li style="width:200px"><a href="#" onclick="showAniGroups(96);">96% cutoff</a></li>
                 <li style="width:200px"><a href="#" onclick="showAniGroups(97);">97% cutoff</a></li>
-                <li style="width:200px"><a href="#" onclick="showAniGroups(98);">98% cutoff</a></li>
-                <li style="width:200px"><a href="#" onclick="showAniGroups(99);">99% cutoff</a></li>
+                <li style="width:200px"><a href="#" onclick="showAniGroups(95);">95% cutoff</a></li>
+                <li style="width:200px"><a href="#" onclick="showAniGroups(90);">90% cutoff</a></li>
+                <li style="width:200px"><a href="#" onclick="showAniGroups(85);">85% cutoff</a></li>
             </ul>
                 </div>
             <button type="button" class="btn btn-primary" onclick="showTypeStrains();" style="width:200px">Display strain info</button>
@@ -153,5 +152,5 @@ $("#reanalyzebtn").on("click",function(){
 <script src="https://d3js.org/d3.v3.min.js"  charset="utf-8"></script>
 <script src="https://cdn.rawgit.com/tntvis/tnt.utils/master/build/tnt.utils.js"></script>
 <script src="http://tntvis.github.io/tnt.tree/build/tnt.tree.min.js" charset="utf-8"></script>
-<script src="/static/js/report-tnt.js"></script>
+<script src="/static/js/report-tnt.js?v=1.0"></script>
 {% endblock %}
