@@ -136,13 +136,12 @@ def getorgs(resultdir,mashresult,skip="",IGlimit=50,OGlimit=1,minorgs=25):
 
     return selection
 
-def getmlstselection(resultdir,mlstpriority,maxmlst=100,minmlst=10,skip="",ignoreorgs=None):
+def getmlstselection(resultdir,mlstpriority,maxmlst=100,minmlst=10,skip="",ignoreorgs=None,concat=True):
     if not ignoreorgs:
         ignoreorgs = []
     usersel = os.path.join(resultdir,"usergenes.json")
     autosel = os.path.join(resultdir,"autoMlstlist.json")
     selection = False
-    concat = True
     delorgs = set()
     if os.path.exists(usersel):
         with open(usersel,"r") as fil:
@@ -445,7 +444,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
                 del temp
         else:
             genemat,orgs,mlstpriority = getgenematrix.getmat(orgdb,pct=0.5,pct2=1.0,bh=True,rna=True,savefil=genematjson,prifile=mlstpriority,dndsfile=dndsfile,ignoreorgs=allquery)
-        mlstselection, delorgs, concat = getmlstselection(resultdir,mlstpriority,maxmlst,ignoreorgs=ignoreorgs)
+        mlstselection, delorgs, concat = getmlstselection(resultdir,mlstpriority,maxmlst,ignoreorgs=ignoreorgs,concat=concat)
         if "skip3" in skip.lower() or os.path.exists(os.path.join(resultdir,"usergenes.json")):
             #Export selected genes to mlst folder
             log.info("JOB_STATUS:: Writing MLST genes...")
@@ -493,7 +492,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
     #Build trees
     if checkpoint == "w1-7":
         log.info("JOB_PROGRESS::75/100")
-        if concat:
+        if concat and concat != "False":
             log.info("JOB_STATUS:: Running concatenated supermatrix phylogeny")
             concatfasta = os.path.join(resultdir,"concatMLST.fasta")
             partfile = os.path.join(resultdir,"nucpartition.txt")
@@ -583,10 +582,11 @@ if __name__ == '__main__':
     parser.add_argument("-bs","--bootstrap", help="Bootstrap replicates (default: None)",default="")
     parser.add_argument("-cat","--concat", help="Use concatenated supermatrix to build tree",action="store_true",default=False)
     parser.add_argument("-kf","--keepfiles", help="Do not delete intermediate files after completion",action="store_true",default=False)
+    parser.add_argument("-fm","--filtmlst", help="Filter mlst genes by starting tree congruance",action="store_true",default=False)
     parser.add_argument("-m","--model", help="Use specific model for iqtree parameter (default: GTR)",default="GTR")
     parser.add_argument("-ch","--checkpoint", help="Explicitly start at checkpoint",default=False)
     parser.add_argument("-c","--cpu", help="Number of cpu cores to use",type=int, default=1)
     parser.add_argument("-mm","--maxmlst", help="Maximum number of MLST genes to use (default:100)",type=int, default=100)
     parser.add_argument("-mo","--maxorg", help="Maximum number of organisms to use (default:50)",type=int, default=50)
     args = parser.parse_args()
-    startjob(args.indir,args.resultdir,args.skip,refdb=args.refdb,cpu=args.cpu,concat=args.concat,model=args.model,checkpoint=args.checkpoint,bs=args.bootstrap,kf=args.keepfiles,maxmlst=args.maxmlst)
+    startjob(args.indir,args.resultdir,args.skip,refdb=args.refdb,cpu=args.cpu,concat=args.concat,model=args.model,checkpoint=args.checkpoint,bs=args.bootstrap,kf=args.keepfiles,maxmlst=args.maxmlst,filtMLST=args.filtmlst)
