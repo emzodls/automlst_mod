@@ -11,6 +11,8 @@ log=setlog.init(toconsole=True)
 def runprodigal(infasta, outfasta):
     try:
         #crude check for format
+        # outfasta2 = os.path.splitext(outfasta)[0]+".faa"
+        # cmd = ["prodigal","-d",outfasta,"-a",outfasta2,"-i",infasta,"-f","gff"]
         cmd = ["prodigal","-d",outfasta,"-i",infasta,"-f","gff"]
         with open(os.devnull,"w") as devnull:
             log.info("Prodigal: Starting file %s"%infasta)

@@ -1,13 +1,10 @@
 #!/usr/bin/env python
-import os, json, argparse, setlog, parsegenomes, mash, shutil
+import os, json, argparse, setlog, parsegenomes, mash, shutil, re
 import copyseqsql, makeseqsql, glob, seqsql2fa, subprocess
 import multiprocessing as mp
 import makehmmsql, getgenematrix, getgenes, concatmsa, ete3helper
 import numpy as np
 #from scipy.cluster.vq import kmeans2
-
-def startwf2(indir,resultdir,checkpoint=False,genus="auto",model="GTR+I",bs=0,kf=False,maxmlst=100):
-    """WORKFLOW 2: Get all query genomes and identify reference tree to add sequences to"""
 
 
 ###
@@ -25,7 +22,7 @@ def catTrees(flist,outfile):
                 log.warning("Tree file not found for MLST: %s"%fname)
     return outfile
 
-def runmafft(finput,output,thread=1,maxit=300,localpair=False,options="",rename=""):
+def runmafft(finput,output,thread=1,maxit=300,localpair=False,options="",rename="",fast=False):
     if localpair:
         options += " --localpair"
     if rename:
@@ -37,7 +34,10 @@ def runmafft(finput,output,thread=1,maxit=300,localpair=False,options="",rename=
                 else:
                     ofil.write(line)
         finput = finput+".renamed"
-    cmd = "mafft --quiet --thread %d --localpair --treeout --maxiterate %d %s %s"%(thread,maxit,options,finput)
+    if fast:
+        cmd = "mafft --quiet --thread %d %s %s"%(thread,options,finput)
+    else:
+        cmd = "mafft --quiet --thread %d --localpair --treeout --maxiterate %d %s %s"%(thread,maxit,options,finput)
     cmd = cmd.split()
     with open(os.devnull,"w") as devnull, open(output,"w") as outfil:
         try:
@@ -56,7 +56,7 @@ def runtrimal(finput,output,method="automated1"):
         except Exception as e:
             log.error("Failed to run trimall %s (%s)"%(finput,e))
 
-def processmlst(indir,aligndir,cpu=1,parallel=True,trim=False):
+def processmlst(indir,aligndir,cpu=1,parallel=True,trim=False,fast=False):
     flist = glob.glob(os.path.join(indir,"*.fna"))
     if not os.path.exists(aligndir):
         os.makedirs(aligndir)
@@ -69,7 +69,7 @@ def processmlst(indir,aligndir,cpu=1,parallel=True,trim=False):
                 if trim:
                     pool.apply_async(runtrimal, args=(filename, os.path.join(aligndir,fname)))
                 else:
-                    pool.apply_async(runmafft, (filename, os.path.join(aligndir,fname)),dict(rename="|"))
+                    pool.apply_async(runmafft, (filename, os.path.join(aligndir,fname)),dict(fast=fast))
         finally:
             pool.close()
             pool.join()
@@ -79,7 +79,7 @@ def processmlst(indir,aligndir,cpu=1,parallel=True,trim=False):
             if trim:
                 runtrimal(filename, os.path.join(aligndir,fname))
             else:
-                runmafft(filename, os.path.join(aligndir,fname),thread=cpu,rename="|")
+                runmafft(filename, os.path.join(aligndir,fname),thread=cpu,fast=fast)
 
 def hmmsearch(outname,hmmdb,infile,mcpu=1,cut="tc"):
     log.info("Searching sequences against hmmdb: %s"%hmmdb)
@@ -302,8 +302,10 @@ def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
 
     return hkhigh
 
-def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="GTR",bs=0,kf=False,maxorg=50,filtMLST=True):
-    """WORKFLOW 2: Build phylogeny from scratch"""
+def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
+             skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="GTR",bs=0,
+             kf=False,maxorg=50,filtMLST=True,fast=False):
+    """WORKFLOW 1: Build phylogeny from scratch"""
     if not checkpoint:
         checkpoint = "w1-0"
     queryseqs = os.path.join(resultdir,"queryseqs")
@@ -448,7 +450,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         if "skip3" in skip.lower() or os.path.exists(os.path.join(resultdir,"usergenes.json")):
             #Export selected genes to mlst folder
             log.info("JOB_STATUS:: Writing MLST genes...")
-            getgenes.writeallgenes(orgdb,mlstselection,delorgs,outdir=mlstdir,outgroups=selorgs.get("seloutgroups",None),pct=0.5)
+            getgenes.writeallgenes(orgdb,mlstselection,delorgs,outdir=mlstdir,outgroups=selorgs.get("seloutgroups",None),pct=0.5,rename=True)
             checkpoint = "w1-6"
             log.info("JOB_CHECKPOINT::%s"%checkpoint)
         else:
@@ -467,7 +469,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
         log.info("JOB_STATUS:: Aligning MLST genes")
         log.info("JOB_PROGRESS::30/100")
         #align all
-        processmlst(mlstdir,aligndir,cpu=cpu)
+        processmlst(mlstdir,aligndir,cpu=cpu,fast=fast)
         checkpoint = "w1-6b"
         log.info("JOB_CHECKPOINT::%s"%checkpoint)
 
@@ -507,7 +509,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
 
     if checkpoint == "w1-F":
         finaltree = os.path.join(resultdir,"final.tree")
-        if os.path.exists(os.path.join(treedir,"concatTree.tree.treefile")):
+        if os.path.exists(os.path.join(treedir,"concatTree.tree.treefile")) and concat:
             finishedtree = os.path.join(treedir,"concatTree.tree.treefile")
         elif os.path.exists(os.path.join(treedir,"summaryTree.tree")):
             finishedtree = os.path.join(treedir,"summaryTree.tree")
@@ -530,8 +532,242 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
             for oldfil in glob.glob(os.path.join(treedir,"*.model")):
                 os.remove(oldfil)
 
+def raxmlEPA(outdir,inalgn,reftree):
+    #Run raxml EPA
+    cmd="raxmlHPC-SSE3 -f v -m GTRGAMMA -p 12345 -w %s -t %s -s %s -n %s"%(outdir,reftree,inalgn,os.path.split(reftree)[-1])
+    try:
+        with open(os.devnull,"w") as devnull:
+            subprocess.call(cmd.split(),stdout=devnull)
+        log.debug("RAxML-EPA: finished %s"%inalgn)
+        return True
+    except subprocess.CalledProcessError as e:
+        log.error("RAxML-EPA: error, could not process %s - %s"%(inalgn,e))
+        return False
 
-def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,model="GTR+I",bs=0,kf=False,maxmlst=100,maxorg=50,filtMLST=True):
+def addalltrees(inlist,famrefdir,outdir,cpu=1):
+    if cpu==1:
+        for x in inlist:
+            fname = os.path.split(x)[1]
+            ftree = os.path.join(famrefdir,fname+".tree")
+            raxmlEPA(outdir,x,ftree)
+    else:
+        pool = mp.Pool(cpu)
+        try:
+            for x in inlist:
+                fname = os.path.split(x)[1]
+                ftree = os.path.join(famrefdir,fname+".tree")
+                pool.apply_async(raxmlEPA, (outdir,x,ftree))
+        finally:
+            pool.close()
+            pool.join()
+
+
+def addallalign(inlist,famrefdir,outdir,cpu=1,fast=False):
+    if cpu==1:
+        for x in inlist:
+            fname = os.path.split(x)[1]
+            addopt = "--add %s"%x
+            finput = os.path.join(famrefdir,fname)
+            output = os.path.join(outdir,fname)
+            runmafft(finput,output,options=addopt,fast=fast)
+    else:
+        pool = mp.Pool(cpu)
+        try:
+            for x in inlist:
+                fname = os.path.split(x)[1]
+                addopt = "--add %s"%x
+                finput = os.path.join(famrefdir,fname)
+                output = os.path.join(outdir,fname)
+                pool.apply_async(runmafft, (finput, output),dict(options=addopt,fast=fast))
+        finally:
+            pool.close()
+            pool.join()
+
+def getreference(mashresult,refdir):
+    reffams = [str(x).lower() for x in os.listdir(refdir)]
+
+    fams = list(set([q.get("familyname","N/A") for q in mashresult["queryorgs"]]))
+    qfam = str(fams[0]).lower()
+    if len(fams) == 1 and qfam in reffams:
+        #get exact case as folder
+        family = [fam for fam in os.listdir(refdir) if qfam == fam.lower()]
+        return str(fams[0])
+    elif len(fams) > 1:
+        famlist = [(x,mashresult["queryorgs"][i].get("familyname","N/A")) for i,x in enumerate(mashresult["orglist"])]
+        log.error("Multiple families detected in query geneomes: %s" % "\t".join( ["%s = %s |"%x for x in famlist]) )
+    else:
+        log.error("No matching family detected")
+
+def startwf2(indir,resultdir,refdir="",checkpoint=False,reference="",model="GTR",bs=0,kf=False,maxmlst=100,
+             cpu=1,mashmxdist=0.5,rnadb="",hmmdb="",fast=False):
+    """WORKFLOW 2: Get all query genomes and identify reference tree to add sequences to"""
+    if not checkpoint:
+        checkpoint = "w2-0"
+    if reference:
+        checkpoint = "w2-3"
+    queryseqs = os.path.join(resultdir,"queryseqs")
+
+    #Parse all inputs
+    if checkpoint == "w2-0":
+        log.info("JOB_STATUS::Parsing all genomes...")
+        if parsegenomes.parseall(indir,queryseqs):
+            checkpoint = "w2-1"
+            log.info("JOB_CHECKPOINT::%s"%checkpoint)
+            log.info("JOB_PROGRESS::5/100")
+        else:
+            log.error("Problem parsing input genomes")
+            return False
+
+    #Run MASH distances
+    mashresult = False
+    if checkpoint == "w2-1":
+        log.info("JOB_STATUS::Running MASH ANI estimation against reference sequences...")
+        mashresult = mash.getdistances(queryseqs,resultdir,cpu=cpu,maxdist=mashmxdist)
+        if mashresult:
+            checkpoint = "w2-2"
+            log.info("JOB_CHECKPOINT::%s"%checkpoint)
+            log.info("JOB_PROGRESS::10/100")
+        else:
+            log.error("MASH distance failed")
+            return False
+
+    #Detect reference group
+    if checkpoint == "w2-2":
+        log.info("JOB_STATUS::Loading mash results...")
+        if mashresult:
+            pass
+        elif os.path.exists(os.path.join(resultdir,"reflist.json")):
+            with open(os.path.join(resultdir,"reflist.json"),"r") as fil:
+                mashresult = json.load(fil)
+                log.info("Loading mash results...")
+        else:
+            log.error("No Mash results to process")
+            return False
+
+        reference = getreference(mashresult,refdir)
+        if reference:
+            checkpoint = "w2-3"
+            log.info("JOB_STATUS::Detected reference = %s"%reference)
+            log.info("JOB_CHECKPOINT::%s"%checkpoint)
+            log.info("JOB_PROGRESS::15/100")
+        else:
+            checkpoint = "w2-F"
+            log.info("JOB_CHECKPOINT::%s"%checkpoint)
+            log.error("No matching reference found for all query organisms")
+
+    orgdb = os.path.join(resultdir,"allseqs.db")
+    seqlist = glob.glob(os.path.join(queryseqs,"*.fna"))
+    #Add to db and run HMM searches. Use model in reference folder, or use global models
+    if checkpoint == "w2-3":
+        #get file list of query orgs and add to db
+        allorgs = makeseqsql.runlist(seqlist,orgdb,True,"",False)
+
+        #Write newly added seqences to file
+        naseqs = os.path.join(resultdir,"addedseqs.fna")
+        aaseqs = os.path.join(resultdir,"addedseqs.faa")
+        seqsql2fa.writefasta(orgdb,aaseqs,False,"",True)
+        seqsql2fa.writefasta(orgdb,naseqs,True,"",True)
+
+        #Run HMM searches
+        log.info("JOB_STATUS:: Searching for MLST genes in query sequences...")
+        log.info("JOB_PROGRESS::25/100")
+
+        if not hmmdb:
+            if os.path.exists(os.path.join(refdir,reference,"core.hmm")):
+                hmmdb = os.path.join(refdir,reference,"core.hmm")
+            else:
+                hmmdb = os.path.join(os.path.dirname(os.path.realpath(__file__)),"reducedcore.hmm")
+        if not rnadb:
+            rnadb = os.path.join(os.path.dirname(os.path.realpath(__file__)),"barnap_bact_rRna.hmm")
+
+        hmmsearch(aaseqs+".domhr",hmmdb,aaseqs,mcpu=cpu)
+        hmmsearch(naseqs+".domhr",rnadb,naseqs,mcpu=cpu)
+
+        #Add HMMresults
+        log.info("Adding query HMM results to database")
+        status = makehmmsql.run(aaseqs+".domhr",orgdb)
+        if not status:
+            #If no genes were found report error
+            log.error("No MLST genes could be found. Stop processing")
+        log.info("Adding query RNA results to database")
+        status = makehmmsql.run(naseqs+".domhr",orgdb,rna=True)
+        os.remove(aaseqs)
+        os.remove(naseqs)
+        checkpoint = "w2-4"
+        log.info("JOB_CHECKPOINT::%s"%checkpoint)
+
+    mlstdir = os.path.realpath(os.path.join(resultdir,"mlstgenes"))
+    if not os.path.exists(mlstdir):
+        os.makedirs(mlstdir)
+    aligndir = os.path.realpath(os.path.join(resultdir,"mlst_aligned"))
+    if not os.path.exists(aligndir):
+        os.makedirs(aligndir)
+    trimdir = os.path.realpath(os.path.join(resultdir,"mlst_trimmed"))
+    if not os.path.exists(trimdir):
+        os.makedirs(trimdir)
+
+    # extract single copy results from genelist
+    if checkpoint == "w2-4":
+        genelist = [os.path.splitext(os.path.split(x)[1])[0] for x in glob.glob(os.path.join(refdir,reference,"*.fna"))]
+        log.info("JOB_STATUS:: Writing MLST genes...")
+        singles = [str(x) for x in getgenematrix.getmat(orgdb,rna=True,bh=True)[2][0] if x in genelist]
+        getgenes.writeallgenes(orgdb,singles,[],outdir=mlstdir,outgroups=None,pct=0.5,writeaa=False,rename=True)
+
+        log.info("JOB_STATUS:: Adding MLST genes to alignments...")
+        addallalign([os.path.join(mlstdir,x+".fna") for x in singles], os.path.join(refdir,reference), aligndir, cpu=cpu,fast=fast)
+
+        log.info("JOB_STATUS:: Trimming all alignments...")
+        processmlst(aligndir,trimdir,cpu=cpu,trim=True)
+        checkpoint = "w2-5"
+        log.info("JOB_CHECKPOINT::%s"%checkpoint)
+
+    treedir = os.path.realpath(os.path.join(resultdir,"trees"))
+    if not os.path.exists(treedir):
+        os.makedirs(treedir)
+
+    #Add to prebuilt trees
+    if checkpoint == "w2-5":
+        log.info("JOB_STATUS:: Adding to reference gene trees...")
+        inlist = [os.path.join(trimdir,x) for x in os.listdir(trimdir)]
+        addalltrees(inlist,os.path.join(refdir,reference),treedir,cpu=cpu)
+        checkpoint = "w2-6"
+        log.info("JOB_CHECKPOINT::%s" % checkpoint)
+
+    if checkpoint == "w2-6":
+        log.info("JOB_STATUS:: Running coalescent tree phylogeny")
+        #Combine all trees using ASTRAL
+        flist = glob.glob(os.path.join(treedir,"RAxML_labelledTree.*.tree"))
+        #reformat newick trees for astral
+        for pbt in flist:
+            with open(pbt,"r") as ifil, open(pbt+".newick","w") as ofil:
+                x = ifil.next()
+                ofil.write(re.sub("\[I\d+?\]|\"|'|QUERY___","",x))
+        flist = glob.glob(os.path.join(treedir,"*.newick"))
+
+        alltrees = catTrees(flist,os.path.join(treedir,"alltrees.tree"))
+        coltree = os.path.join(treedir,"summaryTree.tree")
+        runAstral(resultdir,alltrees,coltree)
+
+        checkpoint = "w2-F"
+        log.info("JOB_CHECKPOINT::%s" % checkpoint)
+
+    finishedtree=""
+    if checkpoint == "w2-F":
+        finaltree = os.path.join(resultdir,"final.tree")
+        if os.path.exists(os.path.join(treedir,"summaryTree.tree")):
+            finishedtree = os.path.join(treedir,"summaryTree.tree")
+        #Copy final tree to root dir
+        if finishedtree:
+            fmat = 2
+            log.debug("Saving final tree... %s"%fmat)
+            if not ete3helper.rerootTree(finishedtree,finaltree,fmat=fmat):
+                shutil.copy(finishedtree,finaltree)
+        else:
+            log.error("Could not find final tree. Tree building failed")
+
+
+def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,
+             model="GTR",bs=0,kf=False,maxmlst=100,maxorg=50,filtMLST=True,refdir="",fast=False):
     #Setup working directory
     if not os.path.exists(os.path.join(os.path.realpath(resultdir),"queryseqs")):
         os.makedirs(os.path.join(os.path.realpath(resultdir),"queryseqs")) #query sequence folder
@@ -564,10 +800,10 @@ def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,
     log.info('JOB_PARAMS::{"resultdir":"%s","skip":"%s","workflow":%s,"concat":"%s","model":"%s"}'%(resultdir,skip,workflow,concat,model))
     if workflow == 1:
         log.info("WORKFLOW::1")
-        return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=kf,maxmlst=maxmlst,maxorg=maxorg,filtMLST=filtMLST)
+        return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=kf,maxmlst=maxmlst,maxorg=maxorg,filtMLST=filtMLST,fast=fast)
     elif workflow == 2:
         log.info("WORKFLOW::2")
-        return startwf2(indir,resultdir,checkpoint=checkpoint,model=model,bs=bs,kf=kf,maxmlst=maxmlst)
+        return startwf2(indir,resultdir,refdir=refdir,checkpoint=checkpoint,model=model,bs=bs,kf=kf,maxmlst=maxmlst,cpu=cpu,fast=fast)
     else:
         log.error("Improper workflow specified: %s"%workflow)
         return False
@@ -579,14 +815,20 @@ if __name__ == '__main__':
     parser.add_argument("resultdir", help="Directory to store all results")
     parser.add_argument("-skip","--skip", help="Flag to skip manual intervention of organism selection. Ex: 'skip2.skip3' skips organism and mlst selection (default for cmdline execution)",default="skip2.skip3")
     parser.add_argument("-ref","--refdb", help="Reference database of orgs",default="")
+    parser.add_argument("-rd","--refdirectory", help="Reference directory of pre-built trees and alignments",default="")
     parser.add_argument("-bs","--bootstrap", help="Bootstrap replicates (default: None)",default="")
     parser.add_argument("-cat","--concat", help="Use concatenated supermatrix to build tree",action="store_true",default=False)
     parser.add_argument("-kf","--keepfiles", help="Do not delete intermediate files after completion",action="store_true",default=False)
     parser.add_argument("-fm","--filtmlst", help="Filter mlst genes by starting tree congruance",action="store_true",default=False)
+    parser.add_argument("-fa","--fastalign", help="Align using FFt-2 mode (faster)",action="store_true",default=False)
     parser.add_argument("-m","--model", help="Use specific model for iqtree parameter (default: GTR)",default="GTR")
     parser.add_argument("-ch","--checkpoint", help="Explicitly start at checkpoint",default=False)
     parser.add_argument("-c","--cpu", help="Number of cpu cores to use",type=int, default=1)
+    parser.add_argument("-wf","--workflow", help="Workflow to use 1 or 2",choices=(1,2),type=int, default=1)
     parser.add_argument("-mm","--maxmlst", help="Maximum number of MLST genes to use (default:100)",type=int, default=100)
     parser.add_argument("-mo","--maxorg", help="Maximum number of organisms to use (default:50)",type=int, default=50)
     args = parser.parse_args()
-    startjob(args.indir,args.resultdir,args.skip,refdb=args.refdb,cpu=args.cpu,concat=args.concat,model=args.model,checkpoint=args.checkpoint,bs=args.bootstrap,kf=args.keepfiles,maxmlst=args.maxmlst,filtMLST=args.filtmlst)
+    startjob(args.indir,args.resultdir,args.skip,refdb=args.refdb,cpu=args.cpu,
+             concat=args.concat,model=args.model,checkpoint=args.checkpoint,
+             bs=args.bootstrap,kf=args.keepfiles,maxmlst=args.maxmlst,
+             filtMLST=args.filtmlst,refdir=args.refdirectory,workflow=args.workflow,fast=args.fastalign)

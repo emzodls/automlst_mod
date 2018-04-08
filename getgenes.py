@@ -18,7 +18,7 @@ import os, argparse, setlog, json, pickle, sqlite3 as sql
 
 log = setlog.init(toconsole=True,level="info")
 
-def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False,genelimit=10000,outgroups=None,pct=0.5):
+def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False,genelimit=10000,outgroups=None,pct=0.5,writeaa=True,rename=False):
     outdir = os.path.realpath(outdir)
     if type(glist) is not list and os.path.exists(str(glist)):
         with open(glist,"r") as fil:
@@ -76,11 +76,14 @@ def writeallgenes(db,glist,ignore,outdir=".",tax="",allgenes=False,genelimit=100
                     # if taxonomy[row[0]]["strain"] not in orgname:
                     #     orgname += "[%s]" % taxonomy[row[0]]["strain"]
                     # orgname = orgname.replace(" ","_")
-
-                nafil.write(">%s|%s %s\n%s\n" % (orgname, row[1], row[2], row[3]))
-
-                if table == "HMMhits":
-                    aafil.write(">%s|%s %s\n%s\n" % (orgname, row[1], row[2], row[4]))
+                if rename:
+                    nafil.write(">%s\n%s\n" % (orgname, row[3]))
+                    if table == "HMMhits":
+                        aafil.write(">%s\n%s\n" % (orgname, row[4]))
+                else:
+                    nafil.write(">%s|%s %s\n%s\n" % (orgname, row[1], row[2], row[3]))
+                    if table == "HMMhits":
+                        aafil.write(">%s|%s %s\n%s\n" % (orgname, row[1], row[2], row[4]))
 
         #Cleanup empty files
         for x in os.listdir(outdir):
@@ -93,10 +96,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Extract genes from sequence database""")
     parser.add_argument("input", help="Input sequence database")
     parser.add_argument("-a", "--allgenes", help="Extract every gene in database (default: FALSE)",action="store_true",default=False)
+    parser.add_argument("-waa", "--writeaa", help="Also write .faa file",action="store_true",default=False)
     parser.add_argument("-l","--listfile", help="List file of genes to extract (plaintxt)",default="")
     parser.add_argument("-gl","--genelimit", help="Only print top X genes from list file (default = 10000)",type=int,default=10000)
     parser.add_argument("-i","--ignorefile", help="List file of organisms to ignore (plaintxt)",default="")
     parser.add_argument("-t","--tax", help="Use taxonomy db for organism names",default="")
     parser.add_argument("-od","--outdir", help="List file of genes to extract (default current dir)",default="./")
     args = parser.parse_args()
-    writeallgenes(args.input,args.listfile,args.ignorefile,args.outdir,args.tax,args.allgenes,args.genelimit)
+    writeallgenes(args.input,args.listfile,args.ignorefile,args.outdir,args.tax,args.allgenes,args.genelimit,writeaa=args.writeaa)
