@@ -9,12 +9,22 @@
         </ul>
 </div>
 <div class="container" style="padding-top:25px;">
+    <ul class="nav nav-tabs">
+        <li class="active" id="fasttab"><a data-toggle="tab" href="#workflow2" onclick="$('#workflow').val('2');toggledesc('2')">Placement mode</a> </li> <!-- active class is lost after scrolling -->
+        <li id="mtab"><a data-toggle="tab" href="#workflow1" onclick="$('#workflow').val('1');toggledesc('1')">Basic mode</a> </li>
+    </ul>
     <form action="startjob" method="post" enctype="multipart/form-data" name="sequpload" id="sequpload">
-    <h2 class="h4alike">Sequences</h2>
+        <div id="wf2desc">
+            <h5><b>Placement Mode</b>: Automatically add your sequences to  reference gene trees and compute coalescent species tree (fastest)</h5>
+        </div>
+        <div id="wf1desc" class="hidden">
+            <h5><b>Basic Mode</b>: Automatically find related sequences and build alignments and species tree de novo</h5>
+        </div>
+            <hr>
 
         <div class="form-group row">
             <div class="col-md-10">
-            <label for="upfiles">Accession numbers and uploaded files</label>
+            <label for="upfiles">Uploaded genomes</label>
             <select multiple class="form-control selectablein" id="upfiles" name="upfiles" size="10"></select>
             </div>
             <div class="col-md-2">
@@ -71,33 +81,36 @@
         </div>
         <div class="form-group row">
             <label class="control-label col-md-2" for="jobname">Advanced</label>
-                <div class="checkbox col-md-10">
-                            <div class="checkbox">
+                    <div class="checkbox col-md-10">
+                            <div class="checkbox wf1opt hidden">
                                 <label><input type="checkbox" value="skip2" id="skip2" name="skip2" checked="true">Select default nearest organisms (skip Step 2)</label>
                             </div>
-                            <div class="checkbox">
+                            <div class="checkbox wf1opt hidden">
                                 <label><input type="checkbox" value="skip3" id="skip3" name="skip3" checked="true">Select default <abbr title="multilocus species tree">MLST</abbr> genes (skip Step 3)</label>
                             </div>
 
-                            <div class="checkbox">
+                            <div class="checkbox wf1opt hidden">
                                 <label data-toggle="tooltip" data-placement="right" title="For interpretation of scores see About section."><input type="checkbox" value="1000" id="boots" name="boots">Perform IQ-TREE Ultrafast Bootstrap analysis (1000 replicates)</label>
                             </div>
-                            <div class="checkbox">
+                            <div class="checkbox wf1opt hidden">
                                 <label data-toggle="tooltip" data-placement="right" title="For information on ModelFinder see"><input type="checkbox" value="MFP" id="modelfinder" name="modelfinder">Run ModelFinder</label>
                             </div>
+                            <div class="checkbox wf1opt hidden">
+                                <label data-toggle="tooltip" data-placement="right" title="Additional screening of MLST genes to remove genes with greatest topology differences (see about section)"><input type="checkbox" value="True" id="filtmlst" name="filtmlst" checked="checked">Filter inconsistant MLST genes</label>
+                            </div>
                             <div class="checkbox">
-                                <label data-toggle="tooltip" data-placement="right" title="Additional screening of MLST genes to remove genes with greatest topology differences (see about section)"><input type="checkbox" value="True" id="filtmlst" name="filtmlst">Filter inconsistant MLST genes</label>
+                                <label data-toggle="tooltip" data-placement="right" title="Rapid alignment mode (MAFFT FFT-NS-2)"><input type="checkbox" value="True" checked="checked" id="fastalign" name="fastalign">Fast alignment mode (MAFFT FFT-NS-2)</label>
                             </div>
                             <div class="checkbox">
                                 <label data-toggle="tooltip" data-placement="right" title="By selecting this you consent to our use of cookies. For more information see the Help page"><input type="checkbox" value="keeplink" id="keeplink" name="keeplink">Save link in cookies (viewable on results page under "last results")</label>
                             </div>
-                            <div class="radio">
+                            <div class="radio wf1opt hidden">
                                 <label><input type="radio" name="optradio" value="concatenated" checked="checked">Concatenated alignment</label>
                             </div>
-                            <div class="radio">
+                            <div class="radio wf1opt hidden">
                                 <label><input type="radio" name="optradio" value="coalescent">Coalescent tree</label>
                             </div>
-                </div>
+                    </div>
         </div>
 
 <!-- if file fails/ID not found, unhide warning -->
@@ -114,7 +127,7 @@
 
         <button type="button" class="btn btn-primary disabled" style="width:300px" id="submitjob" onclick="$('#seqfile1').val([]);$('#ncbiacc1').val('');selectAndSend('#sequpload');">Submit Job &raquo;</button>
         <input type="hidden" id="filesrc" name="filesrc" value="">
-        <input type="hidden" id="workflow" name="workflow" value="1">
+        <input type="hidden" id="workflow" name="workflow" value="2">
     </form>
     <hr>
     <div style="margin-top:10px">
@@ -142,6 +155,14 @@ $(document).ready(function(){
         }, 20000);
     });
 
+function toggledesc(descid){
+    $("#wf1desc").addClass("hidden");
+    $(".wf1opt").addClass("hidden");
+    $("#wf2desc").addClass("hidden");
+    $(".wf2opt").addClass("hidden");
+    $("#wf"+descid+"desc").removeClass("hidden");
+    $(".wf"+descid+"opt").removeClass("hidden");
+}
 
 </script>
 {% endblock %}

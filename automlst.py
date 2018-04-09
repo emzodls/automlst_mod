@@ -304,7 +304,7 @@ def screenmlst(mlstdir,aligndir,cpu=1,mingenes=50):
 
 def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
              skip="",refdb="",hmmdb="",rnadb="",maxmlst=100,model="GTR",bs=0,
-             kf=False,maxorg=50,filtMLST=True,fast=False):
+             kf=False,maxorg=50,filtMLST=True,fast=False,minmlst=10):
     """WORKFLOW 1: Build phylogeny from scratch"""
     if not checkpoint:
         checkpoint = "w1-0"
@@ -446,7 +446,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
                 del temp
         else:
             genemat,orgs,mlstpriority = getgenematrix.getmat(orgdb,pct=0.5,pct2=1.0,bh=True,rna=True,savefil=genematjson,prifile=mlstpriority,dndsfile=dndsfile,ignoreorgs=allquery)
-        mlstselection, delorgs, concat = getmlstselection(resultdir,mlstpriority,maxmlst,ignoreorgs=ignoreorgs,concat=concat)
+        mlstselection, delorgs, concat = getmlstselection(resultdir,mlstpriority,maxmlst,ignoreorgs=ignoreorgs,concat=concat,minmlst=minmlst)
         if "skip3" in skip.lower() or os.path.exists(os.path.join(resultdir,"usergenes.json")):
             #Export selected genes to mlst folder
             log.info("JOB_STATUS:: Writing MLST genes...")
@@ -535,6 +535,7 @@ def startwf1(indir,resultdir,checkpoint=False,concat=False,mashmxdist=0.5,cpu=1,
 def raxmlEPA(outdir,inalgn,reftree):
     #Run raxml EPA
     cmd="raxmlHPC-SSE3 -f v -m GTRGAMMA -p 12345 -w %s -t %s -s %s -n %s"%(outdir,reftree,inalgn,os.path.split(reftree)[-1])
+    log.debug("Starting: %s"%cmd)
     try:
         with open(os.devnull,"w") as devnull:
             subprocess.call(cmd.split(),stdout=devnull)
@@ -734,6 +735,7 @@ def startwf2(indir,resultdir,refdir="",checkpoint=False,reference="",model="GTR"
         log.info("JOB_CHECKPOINT::%s" % checkpoint)
 
     if checkpoint == "w2-6":
+        log.info("JOB_PROGRESS::85/100")
         log.info("JOB_STATUS:: Running coalescent tree phylogeny")
         #Combine all trees using ASTRAL
         flist = glob.glob(os.path.join(treedir,"RAxML_labelledTree.*.tree"))
@@ -767,7 +769,7 @@ def startwf2(indir,resultdir,refdir="",checkpoint=False,reference="",model="GTR"
 
 
 def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,concat=False,
-             model="GTR",bs=0,kf=False,maxmlst=100,maxorg=50,filtMLST=True,refdir="",fast=False):
+             model="GTR",bs=0,kf=False,maxmlst=100,maxorg=50,filtMLST=True,refdir="",fast=False,minmlst=10):
     #Setup working directory
     if not os.path.exists(os.path.join(os.path.realpath(resultdir),"queryseqs")):
         os.makedirs(os.path.join(os.path.realpath(resultdir),"queryseqs")) #query sequence folder
@@ -800,10 +802,19 @@ def startjob(indir,resultdir,skip="",checkpoint=False,workflow=1,refdb="",cpu=1,
     log.info('JOB_PARAMS::{"resultdir":"%s","skip":"%s","workflow":%s,"concat":"%s","model":"%s"}'%(resultdir,skip,workflow,concat,model))
     if workflow == 1:
         log.info("WORKFLOW::1")
-        return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,model=model,bs=bs,kf=kf,maxmlst=maxmlst,maxorg=maxorg,filtMLST=filtMLST,fast=fast)
+        try:
+            return startwf1(indir,resultdir,checkpoint=checkpoint,skip=skip,refdb=refdb,cpu=cpu,concat=concat,
+                            model=model,bs=bs,kf=kf,maxmlst=maxmlst,maxorg=maxorg,filtMLST=filtMLST,fast=fast,minmlst=minmlst)
+        except Exception as e:
+            log.error("Unexpected failure: %s"%e)
+            raise
     elif workflow == 2:
         log.info("WORKFLOW::2")
-        return startwf2(indir,resultdir,refdir=refdir,checkpoint=checkpoint,model=model,bs=bs,kf=kf,maxmlst=maxmlst,cpu=cpu,fast=fast)
+        try:
+            return startwf2(indir,resultdir,refdir=refdir,checkpoint=checkpoint,model=model,bs=bs,kf=kf,maxmlst=maxmlst,cpu=cpu,fast=fast)
+        except Exception as e:
+            log.error("Unexpected failure: %s"%e)
+            raise
     else:
         log.error("Improper workflow specified: %s"%workflow)
         return False
@@ -826,9 +837,11 @@ if __name__ == '__main__':
     parser.add_argument("-c","--cpu", help="Number of cpu cores to use",type=int, default=1)
     parser.add_argument("-wf","--workflow", help="Workflow to use 1 or 2",choices=(1,2),type=int, default=1)
     parser.add_argument("-mm","--maxmlst", help="Maximum number of MLST genes to use (default:100)",type=int, default=100)
+    parser.add_argument("-mn","--minmlst", help="Minimum number of MLST genes to use (default:10)",type=int, default=10)
     parser.add_argument("-mo","--maxorg", help="Maximum number of organisms to use (default:50)",type=int, default=50)
     args = parser.parse_args()
     startjob(args.indir,args.resultdir,args.skip,refdb=args.refdb,cpu=args.cpu,
              concat=args.concat,model=args.model,checkpoint=args.checkpoint,
              bs=args.bootstrap,kf=args.keepfiles,maxmlst=args.maxmlst,
-             filtMLST=args.filtmlst,refdir=args.refdirectory,workflow=args.workflow,fast=args.fastalign)
+             filtMLST=args.filtmlst,refdir=args.refdirectory,workflow=args.workflow,
+             fast=args.fastalign,minmlst=args.minmlst)

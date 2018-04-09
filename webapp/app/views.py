@@ -58,13 +58,7 @@ def showstep(jobid,step):
         return redirect('/analyze')
 
     if step == "loading":
-        if jobinfo["workflow"] == "1" or jobinfo["workflow"] == 0:
-            if laststep == "step2" or laststep == "step3":
-                return render_template("startjob.html", jobid=jobid, jobname=jobname[1], laststep=laststep)
-            else:
-                return render_template("startjob.html", jobid=jobid,jobname=jobname[1])
-        else:
-            return render_template("startjob2.html", jobid=jobid,jobname=jobname[1])
+        return render_template("startjob.html", jobid=jobid, jobname=jobname[1], laststep=laststep)
     elif step == "step2":
         if jobinfo["checkpoint"].upper() == "W1-STEP2":
             return render_template("step2.html",jobid=jobid,jobname=jobname[1])
@@ -76,12 +70,12 @@ def showstep(jobid,step):
         else:
             return redirect('/results/'+jobid+'/loading')
     elif step == "report":
-        if jobinfo["checkpoint"].upper() == "W1-F" and not errmsgs:
+        if "-F" in jobinfo["checkpoint"].upper() and not errmsgs:
             if jobinfo["workflow"] == "1":
                 return render_template("report.html",jobid=jobid,jobname=jobname[1])
             else:
                 return render_template("report.html",jobid=jobid, jobname=jobname[1],workflow=2)
-        elif jobinfo["checkpoint"].upper() == "W1-F" and errmsgs: # currently means any errors at all prevent tree from being shown; separate checkpoint for fatal errors?
+        elif "-F" in jobinfo["checkpoint"].upper() and errmsgs: # currently means any errors at all prevent tree from being shown; separate checkpoint for fatal errors?
             return render_template("report.html",jobid=jobid,jobname=jobname[1], errmsgs = errmsgs)
         else:
             return redirect('/results/'+jobid+'/loading')
@@ -198,7 +192,7 @@ def startjob():
     jobdict = {"id": jobid, "workflow": request.form.get("workflow"), "genomes": request.form.getlist('upfiles'),
                "skip":request.form.get('skip2',"")+","+request.form.get('skip3',""), "reference": request.form.get('genusselect','NA'),
                "bootstr":request.form.get('boots',0), "filtmlst": request.form.get('filtmlst',''),
-               "mode":request.form.get('optradio',"concatenated"),"modelfind":request.form.get("modelfinder","GTR")}
+               "mode":request.form.get('optradio',"concatenated"),"modelfind":request.form.get("modelfinder","GTR"), "fastalign":request.form.get("fastalign","")}
 
     os.mkdir(os.path.join(app.config['RESULTS_FOLDER'],jobid))
     resp = make_response(redirect('/results/' + jobid + '/loading'))
@@ -362,7 +356,8 @@ def status(jobid):
     #elif jobstat["checkpoint"].upper() == "W1-3" and "skip3" in skips and workflow == "1":
         #jobstat["skip"] = "c2"
         #return jsonify(jobstat)
-    elif jobstat["checkpoint"].upper() == "W1-F" and workflow == "1":
+    # elif jobstat["checkpoint"].upper() == "W1-F" or jobstat["checkpoint"].upper() == "W2-F":
+    elif "-F" in jobstat["checkpoint"].upper():
         #redirdict = {"redirect":"report"}
         #return jsonify(redirdict)
         jobstat["redirect"] = "report"

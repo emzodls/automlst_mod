@@ -99,7 +99,10 @@ def checkAniClade(treefil,anidict,shrink=False,unrooted=False):
         #     mcount -= 1
 
     #return results #total_monophyl/total_groupsize, total_groupsize/treesize, numgroups, numperfect
-    return (float(sum(scoredict.values()))/groupsize, float(groupsize)/treesize, len(groupdict.keys()), len([k for k,v in groupdict.items() if len(v)==scoredict[k]]) )
+    if groupsize and treesize:
+        return (float(sum(scoredict.values()))/groupsize, float(groupsize)/treesize, len(groupdict.keys()), len([k for k,v in groupdict.items() if len(v)==scoredict[k]]) )
+    else:
+        return False
 
 def checkAll(treefiles,aniJson,outfile,shrink=False,unrooted=False):
     """Run checkAniClade for every ANI group in json file"""
@@ -126,8 +129,12 @@ def checkAll(treefiles,aniJson,outfile,shrink=False,unrooted=False):
             results = []
             for i in range(len(info)):
                 print "Starting tree: %s"%treefil
-                results.append( checkAniClade(treefil, {k:v[i] for k,v in aniJson.items()}, shrink=shrink) )
-
+                result = checkAniClade(treefil, {k:v[i] for k,v in aniJson.items()}, shrink=shrink)
+                if result:
+                    results.append(result)
+                else:
+                    print "No multi isolate groups found for %s at ani index %s"%(treefil,i)
+                    results.append(["N/A"]*4)
             #write results
             ofil.write("%s\t%s\t%s\t%s\t%s\n"% (treefil,
                                                 "\t".join([str(x[0]) for x in results]),

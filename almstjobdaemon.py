@@ -164,9 +164,11 @@ class AmlstDaemon(Daemon):
                         if mode != "concatenated":
                             concat = False
                         filtMLST = jobargs.get("filtmlst","")
+                        fastalign = jobargs.get("fastalign","")
 
                         #Get other params
                         refdb = self.config.get("REFDB",False)
+                        refdir = self.config.get("REF_FOLDER",False)
                         keepfiles = self.config.get("KEEPFILES",False)
                         cpu = int(self.config.get("MCPU",1))
 
@@ -178,7 +180,7 @@ class AmlstDaemon(Daemon):
 
                         ## Do the job
                         exitstatus = automlst.startjob(genomes,resultdir,skip=skip,checkpoint=False,workflow=workflow,refdb=refdb,cpu=cpu,concat=concat,
-                                                       model=model,bs=bs,kf=keepfiles,filtMLST=filtMLST)
+                                                       model=model,bs=bs,kf=keepfiles,filtMLST=filtMLST,fast=fastalign,refdir=refdir)
 
                         self.runningjob = False
                         self.redis.lrem("AMLSTRQ",jobid)
