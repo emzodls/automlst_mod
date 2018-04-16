@@ -35,7 +35,7 @@ def runmafft(finput,output,thread=1,maxit=300,localpair=False,options="",rename=
                     ofil.write(line)
         finput = finput+".renamed"
     if fast:
-        cmd = "mafft --quiet --thread %d %s %s"%(thread,options,finput)
+        cmd = "mafft --quiet --thread %d --treeout %s %s"%(thread,options,finput)
     else:
         cmd = "mafft --quiet --thread %d --localpair --treeout --maxiterate %d %s %s"%(thread,maxit,options,finput)
     cmd = cmd.split()
@@ -728,6 +728,7 @@ def startwf2(indir,resultdir,refdir="",checkpoint=False,reference="",model="GTR"
 
     #Add to prebuilt trees
     if checkpoint == "w2-5":
+        log.info("JOB_PROGRESS::55/100")
         log.info("JOB_STATUS:: Adding to reference gene trees...")
         inlist = [os.path.join(trimdir,x) for x in os.listdir(trimdir)]
         addalltrees(inlist,os.path.join(refdir,reference),treedir,cpu=cpu)
