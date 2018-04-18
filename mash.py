@@ -33,6 +33,7 @@ def writefilelist(indir,outdir):
     return False
 
 def parse(mashresult,taxdb="",maxdist=0.5,TStol=0.05):
+    seenRefs = {}
     if not taxdb or not os.path.exists(taxdb):
         taxdb = os.path.join(os.path.dirname(os.path.realpath(__file__)),"taxonomy.pkl")
     with open(taxdb,"r") as fil:
@@ -48,10 +49,18 @@ def parse(mashresult,taxdb="",maxdist=0.5,TStol=0.05):
                 if qorg not in recs:
                     recs[qorg] = []
                 refid = tabs[0].split(".")[0]
-                lookup = taxonomy[refid]
-                refseq = True if lookup["refseq_category"] else False
-                typestrain = True if lookup["ts_category"] else False
-                recs[qorg].append([refid,lookup["organism_name"],dist,pval,lookup["genus_taxid"],lookup["genus_name"],
+                data = seenRefs.get(refid)
+                if data:
+                    if dist < data['dist']:
+                        data['dist'] = dist
+                        data['pval'] = pval
+                else:
+                    seenRefs[refid] = {'dist':dist,'pval':pval}
+        for refid,dataDict in seenRefs.iteritems():
+            lookup = taxonomy[refid]
+            refseq = True if lookup["refseq_category"] else False
+            typestrain = True if lookup["ts_category"] else False
+            recs[qorg].append([refid,lookup["organism_name"],dataDict['dist'],dataDict['pval'],lookup["genus_taxid"],lookup["genus_name"],
                                 lookup["family_id"],lookup["family_name"],lookup["order_id"],lookup["order_name"],
                                 lookup["phylum_id"],lookup["phylum_name"],lookup["taxid"],lookup.get("strain","N/A"),refseq,typestrain])
         for qorg in recs:
