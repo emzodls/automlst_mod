@@ -41,7 +41,7 @@ def parse(mashresult,taxdb="",maxdist=0.5,TStol=0.05):
     with open(mashresult+".temp","r") as fil:
         recs = {}
         for line in fil:
-            tabs = line.strip().split("\t")
+            tabs = line.strip().split()
             dist = float(tabs[2])
             pval = float(tabs[3])
             if dist <= maxdist:
@@ -49,14 +49,14 @@ def parse(mashresult,taxdb="",maxdist=0.5,TStol=0.05):
                 if qorg not in recs:
                     recs[qorg] = []
                 refid = tabs[0].split(".")[0]
-                data = seenRefs.get(refid)
+                data = seenRefs.get((refid,qorg))
                 if data:
                     if dist < data['dist']:
                         data['dist'] = dist
                         data['pval'] = pval
                 else:
-                    seenRefs[refid] = {'dist':dist,'pval':pval}
-        for refid,dataDict in seenRefs.iteritems():
+                    seenRefs[(refid,qorg)] = {'dist':dist,'pval':pval}
+        for (refid,qorg),dataDict in seenRefs.iteritems():
             lookup = taxonomy[refid]
             refseq = True if lookup["refseq_category"] else False
             typestrain = True if lookup["ts_category"] else False
@@ -72,7 +72,7 @@ def parse(mashresult,taxdb="",maxdist=0.5,TStol=0.05):
         for qorg,reclist in recs.items():
             for rec in reclist:
                 fil.write("%s\t%s\t%s\t%.4f\t%.4f\t%.4f\t%s\t%s\t%s\n"%(qorg,rec[0],rec[1].replace(" ","_"),rec[2],1.0-rec[2],rec[3],rec[5],rec[9],rec[-1]))
-        os.remove(mashresult+".temp")
+        #os.remove(mashresult+".temp")
     return recs
 
 lastid = 0
@@ -158,6 +158,7 @@ def getnearestrefs(recs,NOlimit=25):
         orglimit = 1
     for reclist in recs.values():
         #impose requirement that all recs must be of the same genus
+        print(reclist)
         gid = reclist[0][4]
         orgs = [r[0] for r in reclist if r[4]==gid and r[0] not in list(toprefids)]
         toprefids.update(orgs[:orglimit])
@@ -182,6 +183,7 @@ def getdistances(indir,outdir,reffile="",cpu=1,limit=5000,outputfile="",TStol=0.
         status = True
     if status:
         recs = parse(outputfile,maxdist=maxdist,TStol=TStol)
+        log.info('{}'.format(recs))
         topids = getnearestrefs(recs,NOlimit=NOlimit)
         refrecs, orglist = getrefrecs(recs,topids)
 

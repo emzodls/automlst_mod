@@ -14,7 +14,7 @@
 # License: You should have received a copy of the GNU General Public License v3 with ARTS
 # A copy of the GPLv3 can also be found at: <http://www.gnu.org/licenses/>.
 
-import argparse, sys, os, time, setlog, sqlalchemy as sql
+import argparse, sys, os, time,gzip, setlog, sqlalchemy as sql
 from sqlalchemy import exc
 
 global log
@@ -139,6 +139,66 @@ def runlist(finput,ofil,transonly=False,orgname=False,inc=False):
                     return xrow
                 #Read each file and collect sequences
                 with open(fname,"r") as ifil:
+                    reci=-1
+                    for line in ifil:
+                        if line[0]==">":
+                            if temp: #add last temp
+                                recs.append(addamino(temp,reci))
+                            reci+=1
+                            line=line.replace('"','').replace("'","")
+                            idx=line.index(" ")
+                            gn = line[1:idx]
+                            source = line[1:idx].split("|")[-1]
+                            ds = line[idx+1:].strip()
+                            if "_PLASMID_" in ds:
+                                source+="_PLASMID"
+                            locs = (0,0,0)
+                            if "|loc|" in ds:
+                                idx = ds.index("|loc|")+5
+                                locs = [int(x) for x in ds[idx:].split()[:3]]
+                            acc = "none"
+                            if "|ACC=" in ds:
+                                idx = ds.index("|ACC=")+5
+                                acc = ds[idx:].split()[0]
+                            temp = [org,gn,ds,source,locs[0],locs[1],locs[2],acc,addedtime,""]
+                        elif temp:
+                            temp[-1]+=line.strip().upper()
+                    if temp:
+                        recs.append(addamino(temp,reci))
+
+            elif ext.lower()==".gz":
+                #test if .faa exists for .fna pair and get seqs in dictionary
+                if len(fp):
+                    fp+="/"
+                if os.path.isfile(fp+org+".faa"):
+                    with open(fp+org+".faa","r") as faafil:
+                        aminod=[]
+                        reci=-1
+                        for line in faafil:
+                            if line[0]==">":
+                                idx=line.index(" ")
+                                gn = line[1:idx]
+                                # if gn not in aminod:
+                                #     aminod[gn]=""
+                                reci+=1
+                                aminod.append([gn,""])
+                            else:
+                                aminod[reci][1]+=line.strip()
+
+                def addamino(xrow,i,transtab=1):
+                    if not transonly and aminod and aminod[i][0] == xrow[1]:
+                        xrow.append(aminod[i][1])
+                    else:
+                        from Bio.Seq import Seq
+                        from Bio import Data
+                        try:
+                            aseq=Seq(xrow[-1]).translate(to_stop=True,table=transtab)
+                            xrow.append(str(aseq))
+                        except Data.CodonTable.TranslationError, e:
+                            log.error("Unable to get amino acid translation for reccord: %s,%s"%e)
+                    return xrow
+                #Read each file and collect sequences
+                with gzip.open(fname,"r") as ifil:
                     reci=-1
                     for line in ifil:
                         if line[0]==">":
